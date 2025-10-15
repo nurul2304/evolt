@@ -11,7 +11,7 @@ const isMenuOpen = ref(false);
     <header class="w-full bg-white shadow-md relative z-30">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
         <Link :href="route('dashboard')" class="text-2xl font-semibold text-[#00C853]">
-          E-<span class="text-gray-900 font-bold">VOLT</span>
+          E-<span class="text-gray-900 font-bsemiold">VOLT</span>
         </Link>
         
         <nav class="hidden md:flex space-x-8 text-gray-700 font-medium">

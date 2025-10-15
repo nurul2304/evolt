@@ -13,6 +13,65 @@ const formState = ref({
   time: '',
 });
 
+// --- START: Custom dropdown data & helpers (added) ---
+const brandOptions = ['Hyundai', 'Wuling', 'Tesla', 'BYD', 'Kia'];
+const typeOptions = ['SUV', 'City Car', 'Hatchback', 'Sedan', 'MPV'];
+const domicileOptions = [
+  'Batam Center', 'Nagoya', 'Harbour Bay', 'Sekupang', 'Batu Aji',
+  'Lubuk Baja', 'Tiban', 'Kabil', 'Batu Ampar', 'Galang', 'Bulang'
+];
+const stationOptions = [
+  'SPKLU Mega Mall','SPKLU Grand Batam Mall','SPKLU Nagoya Hill','SPKLU Harbour Bay',
+  'SPKLU Batam Center','SPKLU Batam City Square','SPKLU Kepri Mall','SPKLU Batam View','SPKLU Nagoya City'
+];
+
+const isBrandOpen = ref(false);
+const isTypeOpen = ref(false);
+const isDomicileOpen = ref(false);
+const isStationOpen = ref(false);
+
+const closeAllCustomDropdowns = () => {
+  isBrandOpen.value = false;
+  isTypeOpen.value = false;
+  isDomicileOpen.value = false;
+  isStationOpen.value = false;
+};
+
+const openOnly = (which) => {
+  // Toggle the requested dropdown; close the others
+  if (which === 'brand') {
+    isBrandOpen.value = !isBrandOpen.value;
+    isTypeOpen.value = false;
+    isDomicileOpen.value = false;
+    isStationOpen.value = false;
+  } else if (which === 'type') {
+    isTypeOpen.value = !isTypeOpen.value;
+    isBrandOpen.value = false;
+    isDomicileOpen.value = false;
+    isStationOpen.value = false;
+  } else if (which === 'domicile') {
+    isDomicileOpen.value = !isDomicileOpen.value;
+    isBrandOpen.value = false;
+    isTypeOpen.value = false;
+    isStationOpen.value = false;
+  } else if (which === 'station') {
+    isStationOpen.value = !isStationOpen.value;
+    isBrandOpen.value = false;
+    isTypeOpen.value = false;
+    isDomicileOpen.value = false;
+  }
+
+  // keep date/time closed when toggling custom dropdowns
+  isDateDropdownOpen.value = false;
+  isTimeDropdownOpen.value = false;
+};
+
+const selectOption = (field, value) => {
+  formState.value[field] = value;
+  closeAllCustomDropdowns();
+};
+// --- END: Custom dropdown data & helpers ---
+
 // --- DATE & TIME PICKER LOGIC ---
 const today = new Date();
 today.setHours(0, 0, 0, 0);
@@ -148,6 +207,20 @@ const closePickersOnOutsideClick = (event) => {
     if (isTimeDropdownOpen.value && !event.target.closest('#time-picker-trigger') && !event.target.closest('.time-picker-content')) {
         isTimeDropdownOpen.value = false;
     }
+
+    // close custom dropdowns when clicking outside
+    if (isBrandOpen.value && !event.target.closest('#brand-trigger') && !event.target.closest('.brand-dropdown-content')) {
+        isBrandOpen.value = false;
+    }
+    if (isTypeOpen.value && !event.target.closest('#type-trigger') && !event.target.closest('.type-dropdown-content')) {
+        isTypeOpen.value = false;
+    }
+    if (isDomicileOpen.value && !event.target.closest('#domicile-trigger') && !event.target.closest('.domicile-dropdown-content')) {
+        isDomicileOpen.value = false;
+    }
+    if (isStationOpen.value && !event.target.closest('#station-trigger') && !event.target.closest('.station-dropdown-content')) {
+        isStationOpen.value = false;
+    }
 };
 
 onMounted(() => {
@@ -162,7 +235,6 @@ onBeforeUnmount(() => {
     // Bersihkan listener saat komponen akan dihancurkan
     document.body.removeEventListener('click', closePickersOnOutsideClick);
 });
-
 </script>
 
 <template>
@@ -171,7 +243,7 @@ onBeforeUnmount(() => {
 
     <main class="flex-grow relative z-0"> 
       
-      <section class="bg-[#DAE200] pt-16 pb-64 relative overflow-visible">
+      <section class="bg-[#B6F500] pt-16 pb-64 relative overflow-visible">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div class="flex flex-col lg:flex-row items-center justify-between">
             
@@ -211,24 +283,55 @@ onBeforeUnmount(() => {
             
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
               
-              <div>
+              <!-- BRAND: custom dropdown (replaces select) -->
+              <div class="relative">
                 <label for="brand" class="block text-sm font-medium text-gray-700 mb-2">Merk Mobil</label>
-                <select id="brand" v-model="formState.brand" class="w-full p-3 border border-gray-300 rounded-xl focus:ring-lime-500 focus:border-lime-500">
-                  <option value="">Pilih Merk Mobil</option>
-                  <option value="Hyundai">Hyundai</option>
-                  <option value="Wuling">Wuling</option>
-                </select>
+                <div id="brand-trigger"
+                     @click.stop="openOnly('brand')"
+                     class="w-full p-3 border border-gray-300 rounded-xl cursor-pointer flex justify-between items-center bg-white transition duration-150"
+                     :class="{'ring-2 ring-lime-500 border-lime-500 shadow-md': isBrandOpen}"
+                >
+                  <span class="text-gray-800">{{ formState.brand || 'Pilih Merk Mobil' }}</span>
+                  <svg class="w-5 h-5 text-gray-500 transform" :class="{'rotate-180': isBrandOpen}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </div>
+
+                <div v-if="isBrandOpen" @click.stop class="brand-dropdown-content absolute top-full mt-2 w-full bg-white rounded-xl shadow-2xl border border-gray-100 z-30 left-0 max-h-48 overflow-y-auto">
+                  <div class="py-2">
+                    <div v-for="opt in brandOptions" :key="opt"
+                         @click="selectOption('brand', opt)"
+                         class="px-4 py-2 hover:bg-lime-50 cursor-pointer transition-colors duration-150"
+                         :class="{'bg-lime-50 font-semibold text-lime-800': formState.brand === opt}">
+                      {{ opt }}
+                    </div>
+                  </div>
+                </div>
               </div>
-              
-              <div>
+
+              <!-- TYPE: custom dropdown (replaces select) -->
+              <div class="relative">
                 <label for="type" class="block text-sm font-medium text-gray-700 mb-2">Tipe Mobil</label>
-                <select id="type" v-model="formState.type" class="w-full p-3 border border-gray-300 rounded-xl focus:ring-lime-500 focus:border-lime-500">
-                  <option value="">Pilih Tipe Mobil</option>
-                  <option value="SUV">SUV</option>
-                  <option value="City Car">City Car</option>
-                </select>
+                <div id="type-trigger"
+                     @click.stop="openOnly('type')"
+                     class="w-full p-3 border border-gray-300 rounded-xl cursor-pointer flex justify-between items-center bg-white transition duration-150"
+                     :class="{'ring-2 ring-lime-500 border-lime-500 shadow-md': isTypeOpen}"
+                >
+                  <span class="text-gray-800">{{ formState.type || 'Pilih Tipe Mobil' }}</span>
+                  <svg class="w-5 h-5 text-gray-500 transform" :class="{'rotate-180': isTypeOpen}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </div>
+
+                <div v-if="isTypeOpen" @click.stop class="type-dropdown-content absolute top-full mt-2 w-full bg-white rounded-xl shadow-2xl border border-gray-100 z-30 left-0 max-h-48 overflow-y-auto">
+                  <div class="py-2">
+                    <div v-for="opt in typeOptions" :key="opt"
+                         @click="selectOption('type', opt)"
+                         class="px-4 py-2 hover:bg-lime-50 cursor-pointer transition-colors duration-150"
+                         :class="{'bg-lime-50 font-semibold text-lime-800': formState.type === opt}">
+                      {{ opt }}
+                    </div>
+                  </div>
+                </div>
               </div>
-              
+
+              <!-- DATE picker (leave unchanged) -->
               <div class="relative">
                 <label for="date-picker-trigger" class="block text-sm font-medium text-gray-700 mb-2">Tanggal</label>
                 <div 
@@ -261,25 +364,56 @@ onBeforeUnmount(() => {
                   </div>
                 </div>
               </div>
-              
-              <div>
+
+              <!-- DOMICILE: custom dropdown (replaces select) -->
+              <div class="relative">
                 <label for="domicile" class="block text-sm font-medium text-gray-700 mb-2">Domisili</label>
-                <select id="domicile" v-model="formState.domicile" class="w-full p-3 border border-gray-300 rounded-xl focus:ring-lime-500 focus:border-lime-500">
-                  <option value="">Pilih Domisili</option>
-                  <option value="Batam Center">Batam Center</option>
-                  <option value="Nagoya">Nagoya</option>
-                </select>
+                <div id="domicile-trigger"
+                     @click.stop="openOnly('domicile')"
+                     class="w-full p-3 border border-gray-300 rounded-xl cursor-pointer flex justify-between items-center bg-white transition duration-150"
+                     :class="{'ring-2 ring-lime-500 border-lime-500 shadow-md': isDomicileOpen}"
+                >
+                  <span class="text-gray-800">{{ formState.domicile || 'Pilih Domisili' }}</span>
+                  <svg class="w-5 h-5 text-gray-500 transform" :class="{'rotate-180': isDomicileOpen}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </div>
+
+                <div v-if="isDomicileOpen" @click.stop class="domicile-dropdown-content absolute top-full mt-2 w-full bg-white rounded-xl shadow-2xl border border-gray-100 z-30 left-0 max-h-48 overflow-y-auto">
+                  <div class="py-2">
+                    <div v-for="opt in domicileOptions" :key="opt"
+                         @click="selectOption('domicile', opt)"
+                         class="px-4 py-2 hover:bg-lime-50 cursor-pointer transition-colors duration-150"
+                         :class="{'bg-lime-50 font-semibold text-lime-800': formState.domicile === opt}">
+                      {{ opt }}
+                    </div>
+                  </div>
+                </div>
               </div>
 
-              <div>
+              <!-- STATION: custom dropdown (replaces select) -->
+              <div class="relative">
                 <label for="station" class="block text-sm font-medium text-gray-700 mb-2">Stasiun Charger</label>
-                <select id="station" v-model="formState.station" class="w-full p-3 border border-gray-300 rounded-xl focus:ring-lime-500 focus:border-lime-500">
-                  <option value="">Pilih Stasiun</option>
-                  <option value="SPKLU Mega Mall">SPKLU Mega Mall</option>
-                  <option value="SPKLU Grand Batam Mall">SPKLU Grand Batam Mall</option>
-                </select>
+                <div id="station-trigger"
+                     @click.stop="openOnly('station')"
+                     class="w-full p-3 border border-gray-300 rounded-xl cursor-pointer flex justify-between items-center bg-white transition duration-150"
+                     :class="{'ring-2 ring-lime-500 border-lime-500 shadow-md': isStationOpen}"
+                >
+                  <span class="text-gray-800">{{ formState.station || 'Pilih Stasiun' }}</span>
+                  <svg class="w-5 h-5 text-gray-500 transform" :class="{'rotate-180': isStationOpen}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </div>
+
+                <div v-if="isStationOpen" @click.stop class="station-dropdown-content absolute top-full mt-2 w-full bg-white rounded-xl shadow-2xl border border-gray-100 z-30 left-0 max-h-48 overflow-y-auto">
+                  <div class="py-2">
+                    <div v-for="opt in stationOptions" :key="opt"
+                         @click="selectOption('station', opt)"
+                         class="px-4 py-2 hover:bg-lime-50 cursor-pointer transition-colors duration-150"
+                         :class="{'bg-lime-50 font-semibold text-lime-800': formState.station === opt}">
+                      {{ opt }}
+                    </div>
+                  </div>
+                </div>
               </div>
 
+              <!-- TIME picker (leave unchanged) -->
               <div class="relative">
                 <label for="time-picker-trigger" class="block text-sm font-medium text-gray-700 mb-2">Jam</label>
                 <div 
@@ -308,9 +442,9 @@ onBeforeUnmount(() => {
             </div>
             
             <div class="text-end mt-6">
-                <button type="submit" class="bg-[#00C853] text-white font-semibold px-8 py-3 rounded-lg shadow-lg hover:bg-[#00A142] transition duration-300 focus:outline-none focus:ring-4 focus:ring-lime-300">
-                  Cari Jadwal
-                </button>
+                <a href="/map-results" class="inline-block bg-[#00C853] text-white font-semibold px-8 py-3 rounded-lg shadow-lg hover:bg-[#00A142] transition duration-300 focus:outline-none focus:ring-4 focus:ring-lime-300">
+                 Cari Jadwal
+                </a>
             </div>
           </form>
         </div>
@@ -342,7 +476,7 @@ onBeforeUnmount(() => {
                 <i class="fas fa-credit-card text-xl sm:text-2xl"></i>
               </div>
               <p class="text-sm sm:text-lg font-semibold text-gray-800">Metode Bayar</p>
-              <span class="text-xs sm:text-sm text-gray-600">Beragam pilihan pembayaran</span>
+              <span class="text-xs sm:text-sm text-gray-600">Pembayaran melalui Qris</span>
             </div>
 
             <div class="flex flex-col items-center p-4 sm:p-6 bg-white rounded-2xl shadow-lg transition duration-300 hover:shadow-xl hover:-translate-y-1 transform">

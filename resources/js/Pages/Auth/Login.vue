@@ -1,100 +1,88 @@
+<template>
+  <div class="login-page">
+    <main class="login-container">
+      <div class="logo">
+        <span class="green">E</span><span class="dark">-VOLT</span>
+      </div>
+      <h1 class="welcome-title">Welcome back to the E-Volt Community</h1>
+
+      <div class="social-login">
+        <button class="social-btn">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google">
+          <span>Log in with Google</span>
+        </button>
+        <button class="social-btn">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Octicons-mark-github.svg" alt="Github">
+          <span>Log in with Github</span>
+        </button>
+      </div>
+
+      <!-- Menampilkan error jika ada -->
+      <div v-if="form.errors.email" class="error-message">
+          {{ form.errors.email }}
+      </div>
+
+      <form class="login-form" @submit.prevent="handleLogin">
+        <div class="input-group">
+          <!-- Ganti 'username' menjadi 'email' agar sesuai dengan standar Laravel -->
+          <label for="email">Email or Username</label>
+          <input type="text" id="email" name="email" v-model="form.email" required>
+        </div>
+
+        <div class="input-group">
+          <label for="password">Password</label>
+          <div class="password-wrapper">
+            <input :type="isPasswordVisible ? 'text' : 'password'" id="password" name="password" v-model="form.password" required>
+            <button type="button" id="togglePassword" @click="isPasswordVisible = !isPasswordVisible">
+                <svg v-if="!isPasswordVisible" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" /></svg>
+                <svg v-else xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.243 4.243L6.228 6.228" /></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="form-options">
+          <div class="remember-me">
+            <input type="checkbox" id="remember" name="remember" v-model="form.remember">
+            <label for="remember">Remember me</label>
+          </div>
+          <!-- Tombol dinonaktifkan saat form sedang diproses -->
+          <button type="submit" class="login-btn" :disabled="form.processing">LOG IN</button>
+        </div>
+      </form>
+
+      <div class="signup-link">
+        No Account yet? <a href="#">SIGN UP</a>
+      </div>
+    </main>
+  </div>
+</template>
+
 <script setup>
-import Checkbox from '@/Components/Checkbox.vue';
-import GuestLayout from '@/Layouts/GuestLayout.vue';
-import InputError from '@/Components/InputError.vue';
-import InputLabel from '@/Components/InputLabel.vue';
-import PrimaryButton from '@/Components/PrimaryButton.vue';
-import TextInput from '@/Components/TextInput.vue';
-import { Head, Link, useForm } from '@inertiajs/vue3';
+import { ref } from 'vue';
+import { useForm } from '@inertiajs/vue3'; // 1. Import useForm
 
-defineProps({
-    canResetPassword: {
-        type: Boolean,
-    },
-    status: {
-        type: String,
-    },
-});
-
+// 2. Ganti state management biasa dengan useForm
 const form = useForm({
-    email: '',
-    password: '',
-    remember: false,
+  email: 'johndadev', // Ganti 'username' menjadi 'email'
+  password: 'password',     // Isi dengan password yang valid, misal: 'password'
+  remember: true,
 });
 
-const submit = () => {
-    form.post(route('login'), {
-        onFinish: () => form.reset('password'),
-    });
+const isPasswordVisible = ref(false);
+
+// 3. Buat fungsi handleLogin untuk mengirim form
+const handleLogin = () => {
+  // Kirim data ke rute '/login' di Laravel
+  form.post('/login', {
+    // Setelah selesai, kosongkan field password
+    onFinish: () => form.reset('password'),
+  });
 };
 </script>
 
-<template>
-    <GuestLayout>
-        <Head title="Log in" />
+<style scoped>
+/* CSS Anda tidak perlu diubah, saya ringkas di sini agar tidak terlalu panjang */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+.login-page{font-family:'Poppins',sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1rem;background-image:url(https://i.imgur.com/G323a2A.jpg);background-size:cover;background-position:center;background-color:#f0f4f8}.login-container{width:100%;max-width:460px;background-color:#fff;border-radius:24px;box-shadow:0 10px 40px rgba(0,0,0,.1);padding:2.5rem;text-align:center}.logo{font-size:2rem;font-weight:700;margin-bottom:.5rem}.logo .green{color:#84cc16}.logo .dark{color:#4b5563}.welcome-title{font-size:1.25rem;font-weight:600;color:#1f2937;margin-bottom:1.5rem}.social-login{display:flex;gap:1rem;margin-bottom:1.5rem}.social-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:.5rem;padding:.75rem;border:1px solid #d1d5db;border-radius:8px;background-color:#fff;color:#374151;font-size:.9rem;font-weight:500;cursor:pointer;transition:background-color .2s ease,border-color .2s ease}.social-btn:hover{background-color:#f9fafb;border-color:#9ca3af}.social-btn img{width:20px;height:20px}.login-form{text-align:left}.input-group{margin-bottom:1rem}.input-group label{display:block;font-size:.875rem;font-weight:500;color:#374151;margin-bottom:.5rem}.input-group input{width:100%;padding:.8rem 1rem;font-size:.95rem;border:1px solid #d1d5db;border-radius:8px;outline:none;transition:border-color .2s,box-shadow .2s;font-family:'Poppins',sans-serif}.input-group input:focus{border-color:#84cc16;box-shadow:0 0 0 3px rgba(132,204,22,.2)}.password-wrapper{position:relative}#togglePassword{position:absolute;top:50%;right:1rem;transform:translateY(-50%);background:0 0;border:none;cursor:pointer;color:#6b7280;padding:0;display:flex;align-items:center}#togglePassword svg{width:20px;height:20px}.form-options{display:flex;justify-content:space-between;align-items:center;margin-top:1.5rem;margin-bottom:1.5rem}.remember-me{display:flex;align-items:center;gap:.5rem}.remember-me label{font-size:.9rem;color:#4b5563;margin-bottom:0;cursor:pointer}.remember-me input[type=checkbox]{width:18px;height:18px;accent-color:#84cc16;cursor:pointer}.login-btn{background-color:#d9ef54;color:#1f2937;font-weight:700;font-size:.95rem;border:none;border-radius:8px;padding:.8rem 2rem;cursor:pointer;transition:background-color .2s ease;font-family:'Poppins',sans-serif}.login-btn:hover{background-color:#cde441}.signup-link{font-size:.9rem;color:#6b7280;margin-top:1rem}.signup-link a{color:#84cc16;font-weight:600;text-decoration:none;transition:text-decoration .2s}.signup-link a:hover{text-decoration:underline}.error-message{background-color: #f8d7da;color: #721c24;border: 1px solid #f5c6cb;padding: .75rem 1.25rem;margin-bottom: 1rem;border-radius: .25rem;text-align: left;}
+</style>
 
-        <div v-if="status" class="mb-4 text-sm font-medium text-green-600">
-            {{ status }}
-        </div>
-
-        <form @submit.prevent="submit">
-            <div>
-                <InputLabel for="email" value="Email" />
-
-                <TextInput
-                    id="email"
-                    type="email"
-                    class="mt-1 block w-full"
-                    v-model="form.email"
-                    required
-                    autofocus
-                    autocomplete="username"
-                />
-
-                <InputError class="mt-2" :message="form.errors.email" />
-            </div>
-
-            <div class="mt-4">
-                <InputLabel for="password" value="Password" />
-
-                <TextInput
-                    id="password"
-                    type="password"
-                    class="mt-1 block w-full"
-                    v-model="form.password"
-                    required
-                    autocomplete="current-password"
-                />
-
-                <InputError class="mt-2" :message="form.errors.password" />
-            </div>
-
-            <div class="mt-4 block">
-                <label class="flex items-center">
-                    <Checkbox name="remember" v-model:checked="form.remember" />
-                    <span class="ms-2 text-sm text-gray-600"
-                        >Remember me</span
-                    >
-                </label>
-            </div>
-
-            <div class="mt-4 flex items-center justify-end">
-                <Link
-                    v-if="canResetPassword"
-                    :href="route('password.request')"
-                    class="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                >
-                    Forgot your password?
-                </Link>
-
-                <PrimaryButton
-                    class="ms-4"
-                    :class="{ 'opacity-25': form.processing }"
-                    :disabled="form.processing"
-                >
-                    Log in
-                </PrimaryButton>
-            </div>
-        </form>
-    </GuestLayout>
-</template>

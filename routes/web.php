@@ -6,6 +6,12 @@ use Inertia\Inertia;
 
 // --- ROUTE BARU UNTUK LANDING PAGE (Welcome/Landing) ---
 // Ganti atau timpa rute '/' lama dengan yang ini.
+Route::get('/SignUp', function () {
+    return Inertia::render('SignUp');
+});
+Route::get('/Login', function () {
+    return Inertia::render('Login');
+});
 Route::get('/', function () {
     // Memanggil komponen Vue di resources/js/Pages/LandingPage.vue
     return Inertia::render('LandingPage'); 
@@ -27,14 +33,12 @@ Route::get('/map-results', function () {
 Route::get('/profile', function () {
     return Inertia::render('Profile');
 });
-Route::get('/register', function () {
-    return Inertia::render('Register');
-});
 
 // --- ROUTE LAINNYA ---
+// Middleware ('auth') DIHAPUS SEMENTARA untuk development frontend
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+})->name('dashboard');
 
 
 require __DIR__.'/auth.php';
