@@ -105,14 +105,11 @@ const handleLogout = () => {
 <template>
 <div class="min-h-screen bg-gray-50 font-inter flex flex-col text-gray-700">
     
-    <!-- AppNavbar -->
     <AppNavbar /> 
 
-    <!-- Konten Utama (Sidebar + Main Content) -->
-    <main class="flex-1 max-w-7xl mx-auto w-full p-6 space-x-8 flex">
+    <main class="flex-1 max-w-7xl mx-auto w-full p-4 sm:p-6 lg:p-8 flex flex-col lg:flex-row lg:space-x-8">
         
-        <!-- Sidebar Navigation -->
-        <aside class="w-64 bg-white shadow-lg rounded-xl p-5 flex flex-col h-fit sticky top-6">
+        <aside class="w-full mb-6 lg:w-64 bg-white shadow-lg rounded-xl p-5 flex flex-col lg:h-fit lg:sticky lg:top-8">
             <div class="mb-6 leading-tight">
                 <div class="text-lg font-bold text-gray-900">{{ user.name }}</div>
                 <div class="text-sm text-gray-500">{{ user.email }}</div>
@@ -141,51 +138,42 @@ const handleLogout = () => {
             </nav>
         </aside>
 
-        <!-- Main Content (Detail Akun) -->
-        <section class="flex-1 bg-white shadow-xl rounded-xl p-8">
+        <section class="flex-1 bg-white shadow-xl rounded-xl p-5 sm:p-8">
             
-            <!-- Content Header -->
             <div class="mb-8" v-if="activeMenu === 'account'">
-                <h1 class="text-2xl font-bold text-gray-900">Detail Akun</h1>
+                <h1 class="text-xl sm:text-2xl font-bold text-gray-900">Detail Akun</h1>
                 <p class="text-gray-500 text-sm mt-1">Kelola informasi akun dan data personal Anda.</p>
             </div>
 
-            <!-- TAB CONTENT CONTAINER -->
             <div v-if="activeMenu === 'account'">
                 
-                <!-- Tab Headers & Button -->
                 <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center pb-4 mb-6 border-b border-gray-200">
-                    <div class="flex flex-wrap gap-4 items-center">
-                        <!-- Tabs -->
+                    <div class="flex flex-wrap gap-2 sm:gap-4 items-center mb-4 sm:mb-0">
                         <button 
                             @click="activeTab = 'informasi_akun'"
-                            :class="['flex items-center gap-2 py-2 px-4 font-semibold rounded-lg transition duration-150',
+                            :class="['flex items-center gap-2 py-2 px-3 sm:px-4 text-sm font-semibold rounded-lg transition duration-150',
                                     activeTab === 'informasi_akun' ? getColorClass('accent') : 'text-gray-500 hover:bg-gray-100']">
                             Informasi Akun
                         </button>
                         <button 
                             @click="activeTab = 'informasi_personal'"
-                            :class="['flex items-center gap-2 py-2 px-4 font-semibold rounded-lg transition duration-150',
+                            :class="['flex items-center gap-2 py-2 px-3 sm:px-4 text-sm font-semibold rounded-lg transition duration-150',
                                     activeTab === 'informasi_personal' ? getColorClass('accent') : 'text-gray-500 hover:bg-gray-100']">
                             Informasi Personal
                         </button>
                     </div>
 
-                    <!-- UBAH KATA SANDI Button (Sesuai Gambar) -->
                     <button type="submit" @click.prevent="submitProfile" 
-                            :class="['mt-4 sm:mt-0 px-6 py-2.5 text-sm font-bold rounded-lg transition duration-150 ease-in-out shadow-md', getColorClass('accent')]">
+                            :class="['w-full sm:w-auto px-6 py-2.5 text-sm font-bold rounded-lg transition duration-150 ease-in-out shadow-md', getColorClass('accent')]">
                         {{ activeTab === 'informasi_akun' ? 'SIMPAN PERUBAHAN' : 'UBAH KATA SANDI' }}
                     </button>
                 </div>
 
-                <!-- Tabbed Form Content -->
                 <form @submit.prevent="submitProfile" id="profile-form" class="space-y-6">
 
-                    <!-- Tab Content: Informasi Akun (Demografis & Identitas) -->
                     <div v-if="activeTab === 'informasi_akun'">
-                        <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+                        <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
                             
-                            <!-- Nama Lengkap -->
                             <div class="col-span-1">
                                 <label class="flex items-center text-sm font-medium text-gray-700 mb-1">
                                     <IconUserSmall class="w-4 h-4 mr-1 text-green-600" /> Nama Lengkap
@@ -193,7 +181,6 @@ const handleLogout = () => {
                                 <input type="text" v-model="accountForm.name" class="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-1  focus:ring-lime-500 focus:border-lime-500 transition duration-150" />
                             </div>
                             
-                            <!-- Jenis Kelamin -->
                             <div class="col-span-1">
                                 <label class="flex items-center text-sm font-medium text-gray-700 mb-1">
                                     <IconUserSmall class="w-4 h-4 mr-1 text-purple-600" /> Jenis Kelamin
@@ -204,7 +191,6 @@ const handleLogout = () => {
                                 </select>
                             </div>
                             
-                            <!-- Tanggal Lahir -->
                             <div class="col-span-1">
                                 <label class="flex items-center text-sm font-medium text-gray-700 mb-1">
                                     <IconCalendar class="w-4 h-4 mr-1 text-purple-600" /> Tanggal Lahir
@@ -212,7 +198,6 @@ const handleLogout = () => {
                                 <input type="text" v-model="accountForm.birthDate" placeholder="DD/MM/YYYY" class="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-1  focus:ring-lime-500 focus:border-lime-500  transition duration-150" />
                             </div>
                             
-                            <!-- Jenis ID -->
                             <div class="col-span-1">
                                 <label class="flex items-center text-sm font-medium text-gray-700 mb-1">
                                     <IconIdCard class="w-4 h-4 mr-1 text-purple-600" /> Jenis ID
@@ -224,7 +209,6 @@ const handleLogout = () => {
                                 </select>
                             </div>
 
-                            <!-- Nomor Identitas -->
                             <div class="col-span-1">
                                 <label class="flex items-center text-sm font-medium text-gray-700 mb-1">
                                     <IconIdCard class="w-4 h-4 mr-1 text-purple-600" /> Nomor Identitas
@@ -232,7 +216,6 @@ const handleLogout = () => {
                                 <input type="text" v-model="accountForm.idNumber" class="w-full border border-gray-300 rounded-lg p-3  focus:ring-lime-500 focus:border-lime-500  transition duration-150" />
                             </div>
                             
-                            <!-- Kota Asal -->
                             <div class="col-span-1">
                                 <label class="flex items-center text-sm font-medium text-gray-700 mb-1">
                                     <IconMapPin class="w-4 h-4 mr-1 text-purple-600" /> Kota Asal
@@ -245,7 +228,6 @@ const handleLogout = () => {
                             </div>
                         </div>
 
-                        <!-- Privasi & Keamanan Data (Kotak Kuning/Purple) -->
                         <div :class="['mt-12 p-6 rounded-lg shadow-inner', 'bg-yellow-50 border border-yellow-200 text-yellow-800']">
                             <div class="flex items-start gap-3">
                                 <IconLockOpen class="w-6 h-6 text-yellow-700 flex-shrink-0 mt-1"/>
@@ -259,18 +241,16 @@ const handleLogout = () => {
                         </div>
                     </div>
 
-                    <!-- Tab Content: Informasi Personal (Kontak & Verifikasi) -->
                     <div v-else-if="activeTab === 'informasi_personal'" class="space-y-6">
 
-                        <!-- Alamat Email -->
-                        <div class="border-l-4 border-purple-400 pl-4 py-2">
+                        <div class="border-l-4 border-[#DAE200] pl-4 py-2">
                             <label class="flex items-center text-sm font-bold text-gray-700 mb-2">
-                                <IconMail class="w-4 h-4 mr-1 text-purple-600" /> Alamat Email
+                                <IconMail class="w-4 h-4 mr-1 text-green-600" /> Alamat Email
                             </label>
-                            <div class="flex items-center justify-between bg-white p-3 rounded-lg border border-gray-300">
-                                <input type="email" v-model="personalForm.email" class="font-medium w-full border-0 focus:ring-0 p-0" :disabled="personalForm.isEmailVerified"/>
+                            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between bg-white p-3 rounded-lg border border-gray-300">
+                                <input type="email" v-model="personalForm.email" class="font-medium w-full border-0 focus:ring-0 p-0 mb-2 sm:mb-0" :disabled="personalForm.isEmailVerified"/>
                                 <span v-if="personalForm.isEmailVerified" 
-                                    :class="['text-xs font-semibold flex items-center gap-1 text-green-600 bg-green-50 px-2 py-0.5 rounded-full']">
+                                    :class="['text-xs font-semibold flex items-center gap-1 text-green-600 bg-green-50 px-2 py-0.5 rounded-full flex-shrink-0']">
                                     <IconCheckCircle class="w-3 h-3"/> Verified
                                 </span>
                             </div>
@@ -279,19 +259,16 @@ const handleLogout = () => {
                             </p>
                         </div>
                         
-                         <!-- Nomor Handphone -->
-                        <div class="border-l-4 border-purple-400 pl-4 py-2">
+                         <div class="border-l-4 border-[#DAE200] pl-4 py-2">
                             <label class="flex items-center text-sm font-bold text-gray-700 mb-2">
                                 <IconPhone class="w-4 h-4 mr-1 text-purple-600" /> Nomor Handphone
                             </label>
-                            <div class="flex items-center justify-between bg-white rounded-lg border border-gray-300 pr-3">
-                                <!-- Input -->
+                            <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between bg-white rounded-lg border border-gray-300 pr-0 sm:pr-3">
                                 <input type="text" v-model="personalForm.phone" class="font-medium w-full border-0 focus:ring-0 p-3"/>
                                 
-                                <div class="flex items-center gap-3">
-                                    <!-- Status Verifikasi -->
+                                <div class="flex items-center justify-between sm:justify-start gap-3 p-3 sm:p-0 border-t sm:border-t-0 border-gray-100">
                                     <span v-if="personalForm.isPhoneVerified"
-                                        :class="['text-xs font-semibold flex items-center gap-1 text-green-600 bg-green-50 px-2 py-0.5 rounded-full']">
+                                        :class="['text-xs font-semibold flex items-center gap-1 text-green-600 bg-green-50 px-2 py-0.5 rounded-full flex-shrink-0']">
                                         <IconCheckCircle class="w-3 h-3"/> Verified
                                     </span>
                                     <button type="button" 
@@ -305,12 +282,11 @@ const handleLogout = () => {
                             </p>
                         </div>
 
-                        <!-- Akun Anda Terlindungi Alert -->
-                        <div class="mt-8 bg-purple-50 border border-purple-200 rounded-xl p-5 flex items-start gap-4">
+                        <div class="mt-8 bg-purple-50 border border-yellow-200 rounded-xl p-5 flex items-start gap-4">
                             <IconLockOpen class="w-6 h-6 text-purple-700 flex-shrink-0 mt-1"/>
                             <div>
-                                <h3 class="font-bold text-purple-800">Akun Anda Terlindungi</h3>
-                                <p class="text-sm text-purple-700 mt-1">
+                                <h3 class="font-bold text-yellow-800">Akun Anda Terlindungi</h3>
+                                <p class="text-sm text-yellow-700 mt-1">
                                     Kedua metode verifikasi aktif. Kami merekomendasikan untuk mengubah kata sandi secara berkala 
                                     dan mengaktifkan autentikasi dua faktor untuk keamanan maksimal.
                                 </p>
@@ -324,7 +300,6 @@ const handleLogout = () => {
         </section>
     </main>
     
-    <!-- AppFooter -->
     <AppFooter />
 </div>
 </template>
