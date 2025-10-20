@@ -1,8 +1,9 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 
 import AppNavbar from '@/Components/AppNavbar.vue';
 import AppFooter from '@/Components/AppFooter.vue';
+import PrintStrukPembayaran from '@/Pages/PrintStrukPembayaran.vue';
 
 // -----------------------------------------------------------------------------------
 
@@ -10,6 +11,7 @@ const showSearchModal = ref(false);
 const showConfirmationModal = ref(false);
 const showQrisPaymentModal = ref(false); // Modal baru untuk pembayaran QRIS
 const showReceiptModal = ref(false);    // Modal untuk struk akhir
+const showPrintModal = ref(false);     // Modal/page untuk tampilan print struk
 const selectedStation = ref(null);
 
 const formState = ref({
@@ -20,6 +22,57 @@ const formState = ref({
     station: 'SPKLU Mega Mall', 
     time: '12:00',
 });
+
+// Reuse LandingPage custom dropdown data/logic to provide smooth, scrollable dropdowns
+const brandOptions = ['Nissan','Toyota','Wuling','Hyundai','Tesla','BYD','Kia'];
+const typeOptions = ['SUV', 'City Car', 'Hatchback', 'Sedan', 'MPV'];
+const domicileOptions = ['Batam Center','Nagoya','Harbour Bay','Sekupang','Batu Aji','Lubuk Baja','Tiban','Kabil','Batu Ampar'];
+const stationOptions = ['SPKLU Mega Mall','SPKLU Grand Batam Mall','SPKLU Nagoya Hill','SPKLU Harbour Bay','SPKLU Batam Center','SPKLU Batam City Square','SPKLU Kepri Mall','SPKLU Batam View','SPKLU Nagoya City'];
+
+const isBrandOpen = ref(false);
+const isTypeOpen = ref(false);
+const isDomicileOpen = ref(false);
+const isStationOpen = ref(false);
+
+const closeAllCustomDropdowns = () => {
+    isBrandOpen.value = false;
+    isTypeOpen.value = false;
+    isDomicileOpen.value = false;
+    isStationOpen.value = false;
+};
+
+const openOnly = (which) => {
+    if (which === 'brand') {
+        isBrandOpen.value = !isBrandOpen.value;
+        isTypeOpen.value = false;
+        isDomicileOpen.value = false;
+        isStationOpen.value = false;
+    } else if (which === 'type') {
+        isTypeOpen.value = !isTypeOpen.value;
+        isBrandOpen.value = false;
+        isDomicileOpen.value = false;
+        isStationOpen.value = false;
+    } else if (which === 'domicile') {
+        isDomicileOpen.value = !isDomicileOpen.value;
+        isBrandOpen.value = false;
+        isTypeOpen.value = false;
+        isStationOpen.value = false;
+    } else if (which === 'station') {
+        isStationOpen.value = !isStationOpen.value;
+        isBrandOpen.value = false;
+        isTypeOpen.value = false;
+        isDomicileOpen.value = false;
+    }
+
+    // keep date/time closed when toggling custom dropdowns
+    isDateDropdownOpen.value = false;
+    isTimeDropdownOpen.value = false;
+};
+
+const selectOption = (field, value) => {
+    formState.value[field] = value;
+    closeAllCustomDropdowns();
+};
 
 const openModal = () => {
     showSearchModal.value = true;
@@ -35,14 +88,208 @@ const submitSearch = () => {
 };
 
 const stations = ref([
-    // Sesuaikan format bookingTime agar lebih sesuai
-    { id: 1, name: 'Plaza Senayan', location: 'Jl. Asia Afrika, Jakarta Pusat', chargerType: 'DC Fast', power: '150 kW', status: 'Tersedia', bookingTime: '2025-10-22 12:12', duration: '60 menit', price: 420000, serviceFee: 15000, isBookable: true, bookingNumber: 'BK72936476' },
-    { id: 2, name: 'Grand Indonesia', location: 'Jl. MH Thamrin, Jakarta Pusat', chargerType: 'AC Standard', power: '22 kW', status: 'Tersedia', bookingTime: '2025-10-22 12:12', duration: '60 menit', price: 44000, serviceFee: 10000, isBookable: true, bookingNumber: 'BK72936477' },
-    { id: 3, name: 'Mall Alam Sutera', location: 'Jl. Alam Sutera, Tangerang', chargerType: 'DC Fast', power: '100 kW', status: 'Penuh', bookingTime: '2025-10-22 14:00', duration: '30 menit', price: 210000, serviceFee: 15000, isBookable: false, bookingNumber: 'BK72936478' },
-    { id: 4, name: 'SPKLU Bandara', location: 'Jl. Pajajaran, Bogor', chargerType: 'Tipe 2', power: '50 kW', status: 'Tersedia', bookingTime: '2025-10-22 10:00', duration: '90 menit', price: 630000, serviceFee: 20000, isBookable: true, bookingNumber: 'BK72936479' },
-    { id: 5, name: 'SPKLU Batam', location: 'Jl. Sudirman, Batam', chargerType: 'AC Standard', power: '11 kW', status: 'Tersedia', bookingTime: '2025-10-22 10:00', duration: '90 menit', price: 22000, serviceFee: 10000, isBookable: true, bookingNumber: 'BK72936480' },
-    { id: 6, name: 'Nagoya Hill', location: 'Jl. Teuku Umar, Batam', chargerType: 'DC Fast', power: '80 kW', status: 'Penuh', bookingTime: '2025-10-22 10:00', duration: '90 menit', price: 560000, serviceFee: 20000, isBookable: false, bookingNumber: 'BK72936481' },
+    { id: 1, name: 'SPKLU Nagoya Hill', location: 'Nagoya Hill, Batam', chargerType: 'DC Fast', power: '80 kW', status: 'Tersedia', bookingTime: '2025-10-22 12:00', duration: '60 menit', price: 50000, serviceFee: 10000, isBookable: true, bookingNumber: 'BK1001', lat: 1.1324, lng: 104.0383 },
+    { id: 2, name: 'SPKLU Mega Mall Batam', location: 'Mega Mall, Batam Center', chargerType: 'AC Standard', power: '22 kW', status: 'Tersedia', bookingTime: '2025-10-22 12:30', duration: '60 menit', price: 40000, serviceFee: 8000, isBookable: true, bookingNumber: 'BK1002', lat: 1.1225, lng: 104.0417 },
+    { id: 3, name: 'SPKLU Harbour Bay', location: 'Harbour Bay, Batam', chargerType: 'DC Fast', power: '100 kW', status: 'Penuh', bookingTime: '2025-10-22 14:00', duration: '30 menit', price: 120000, serviceFee: 15000, isBookable: false, bookingNumber: 'BK1003', lat: 1.1145, lng: 104.0522 },
+    { id: 4, name: 'SPKLU Batam Center', location: 'Batam Center', chargerType: 'Tipe 2', power: '50 kW', status: 'Tersedia', bookingTime: '2025-10-22 10:00', duration: '90 menit', price: 60000, serviceFee: 12000, isBookable: true, bookingNumber: 'BK1004', lat: 1.1278, lng: 104.0302 },
+    { id: 5, name: 'SPKLU Batam City Square', location: 'Batam City Square', chargerType: 'AC Standard', power: '11 kW', status: 'Penuh', bookingTime: '2025-10-22 10:00', duration: '90 menit', price: 30000, serviceFee: 8000, isBookable: false, bookingNumber: 'BK1005', lat: 1.1210, lng: 104.0335 },
+    { id: 6, name: 'SPKLU Kepri Mall', location: 'Kepri Mall', chargerType: 'AC Standard', power: '22 kW', status: 'Tersedia', bookingTime: '2025-10-22 11:00', duration: '60 menit', price: 45000, serviceFee: 9000, isBookable: true, bookingNumber: 'BK1006', lat: 1.1122, lng: 104.0450 },
+    { id: 7, name: 'SPKLU Batam View', location: 'Batam View', chargerType: 'DC Fast', power: '80 kW', status: 'Tersedia', bookingTime: '2025-10-22 13:00', duration: '45 menit', price: 90000, serviceFee: 10000, isBookable: true, bookingNumber: 'BK1007', lat: 1.1390, lng: 104.0480 },
+    // SPKLU Kabil removed per request
+    { id: 9, name: 'SPKLU Tiban', location: 'Tiban', chargerType: 'DC Fast', power: '50 kW', status: 'Penuh', bookingTime: '2025-10-22 15:00', duration: '30 menit', price: 80000, serviceFee: 10000, isBookable: false, bookingNumber: 'BK1009', lat: 1.0956, lng: 104.0103 },
+    { id: 10, name: 'SPKLU Sekupang', location: 'Sekupang', chargerType: 'AC Standard', power: '22 kW', status: 'Tersedia', bookingTime: '2025-10-22 08:00', duration: '60 menit', price: 35000, serviceFee: 7000, isBookable: true, bookingNumber: 'BK1010', lat: 1.0552, lng: 103.9824 },
+    { id: 11, name: 'SPKLU Batu Ampar', location: 'Batu Ampar', chargerType: 'AC Standard', power: '11 kW', status: 'Tersedia', bookingTime: '2025-10-22 10:30', duration: '90 menit', price: 30000, serviceFee: 7000, isBookable: true, bookingNumber: 'BK1011', lat: 1.0873, lng: 104.0128 },
+    { id: 12, name: 'SPKLU Nagoya City', location: 'Nagoya City', chargerType: 'DC Fast', power: '80 kW', status: 'Tersedia', bookingTime: '2025-10-22 12:45', duration: '60 menit', price: 100000, serviceFee: 12000, isBookable: true, bookingNumber: 'BK1012', lat: 1.1290, lng: 104.0405 },
+    { id: 13, name: 'SPKLU Batam Harbor', location: 'Batam Harbor', chargerType: 'DC Fast', power: '100 kW', status: 'Penuh', bookingTime: '2025-10-22 14:30', duration: '30 menit', price: 150000, serviceFee: 15000, isBookable: false, bookingNumber: 'BK1013', lat: 1.1067, lng: 104.0622 },
+    { id: 14, name: 'SPKLU Gajah Mada', location: 'Gajah Mada, Batam', chargerType: 'AC Standard', power: '22 kW', status: 'Tersedia', bookingTime: '2025-10-22 09:30', duration: '60 menit', price: 40000, serviceFee: 8000, isBookable: true, bookingNumber: 'BK1014', lat: 1.1255, lng: 104.0280 },
+    { id: 15, name: 'SPKLU Waterfront City', location: 'Waterfront City', chargerType: 'AC Standard', power: '22 kW', status: 'Tersedia', bookingTime: '2025-10-22 11:15', duration: '60 menit', price: 45000, serviceFee: 9000, isBookable: true, bookingNumber: 'BK1015', lat: 1.1312, lng: 104.0588 },
 ]);
+
+const availableStations = computed(() => stations.value.filter(s => s.status === 'Tersedia'));
+
+let map = null;
+
+const loadLeaflet = () => {
+    return new Promise((resolve, reject) => {
+        if (window.L) return resolve(window.L);
+
+        // load CSS
+        if (!document.querySelector('link[data-leaflet]')) {
+            const link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+            link.setAttribute('data-leaflet', '1');
+            document.head.appendChild(link);
+        }
+
+        // load script
+        if (!document.querySelector('script[data-leaflet]')) {
+            const script = document.createElement('script');
+            script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+            script.async = true;
+            script.setAttribute('data-leaflet', '1');
+            script.onload = () => resolve(window.L);
+            script.onerror = reject;
+            document.body.appendChild(script);
+        } else {
+            // script already present but window.L may not be ready yet
+            const check = () => {
+                if (window.L) resolve(window.L);
+                else setTimeout(check, 50);
+            };
+            check();
+        }
+    });
+};
+
+// Date & Time picker helpers (copied from LandingPage for consistent UX)
+const today = new Date();
+today.setHours(0,0,0,0);
+const monthNames = ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
+const dayNames = ["Min","Sen","Sel","Rab","Kam","Jum","Sab"];
+
+const isDateDropdownOpen = ref(false);
+const selectedDate = ref(new Date(today));
+const calendarDisplayDate = ref(new Date(today));
+
+const isTimeDropdownOpen = ref(false);
+const selectedTime = ref(formState.value.time || '');
+
+const formatDate = (date) => `${date.getDate()} ${monthNames[date.getMonth()]} ${date.getFullYear()}`;
+const datePickerText = computed(() => selectedDate.value ? formatDate(selectedDate.value) : 'Pilih Tanggal');
+
+const calendarDays = computed(() => {
+    const year = calendarDisplayDate.value.getFullYear();
+    const month = calendarDisplayDate.value.getMonth();
+    const firstDayIndex = new Date(year, month, 1).getDay();
+    const lastDate = new Date(year, month+1, 0).getDate();
+    let days = [];
+    for (let i=0;i<firstDayIndex;i++) days.push({ number: null, classes: 'text-gray-300' });
+    for (let i=1;i<=lastDate;i++){
+        const currentDate = new Date(year, month, i);
+        const isSelected = selectedDate.value && currentDate.toDateString() === selectedDate.value.toDateString();
+        const isDisabled = currentDate < today;
+        let classes = 'day-number w-8 h-8 flex items-center justify-center rounded-full text-sm font-medium transition duration-100';
+        if (isDisabled) classes += ' text-gray-400 cursor-not-allowed';
+        else if (isSelected) classes += ' bg-lime-600 text-white shadow-md';
+        else classes += ' text-gray-800 hover:bg-lime-100 cursor-pointer';
+        days.push({ number: i, date: currentDate, classes, isDisabled });
+    }
+    return days;
+});
+
+const prevMonth = () => { const d = new Date(calendarDisplayDate.value); d.setMonth(d.getMonth()-1); calendarDisplayDate.value = d; };
+const nextMonth = () => { const d = new Date(calendarDisplayDate.value); d.setMonth(d.getMonth()+1); calendarDisplayDate.value = d; };
+
+const selectDay = (day) => {
+    if (!day.isDisabled){
+        selectedDate.value = day.date;
+        formState.value.date = day.date.toISOString().split('T')[0];
+        selectedTime.value = '';
+        formState.value.time = '';
+        isDateDropdownOpen.value = false;
+    }
+};
+
+const timeSlots = computed(() => {
+    const slots = [];
+    const now = new Date();
+    const isToday = selectedDate.value.toDateString() === new Date(now).toDateString();
+    for (let h=0; h<24; h++){
+        for (let m=0;m<60;m+=30){
+            const timeString = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+            let isDisabled = false;
+            if (isToday){
+                if (h < now.getHours() || (h === now.getHours() && m < now.getMinutes())) isDisabled = true;
+            }
+            slots.push({ time: timeString, isDisabled });
+        }
+    }
+    return slots;
+});
+
+const selectTime = (slot) => {
+    if (!slot.isDisabled){
+        selectedTime.value = slot.time;
+        formState.value.time = slot.time;
+        isTimeDropdownOpen.value = false;
+    }
+};
+
+// Close pickers when clicking outside (improves mobile behavior)
+const closePickersOnOutsideClick = (event) => {
+    if (isDateDropdownOpen.value && !event.target.closest('#date-picker-trigger') && !event.target.closest('.date-picker-content')) {
+        isDateDropdownOpen.value = false;
+    }
+    if (isTimeDropdownOpen.value && !event.target.closest('#time-picker-trigger') && !event.target.closest('.time-picker-content')) {
+        isTimeDropdownOpen.value = false;
+    }
+    if (isBrandOpen.value && !event.target.closest('#brand-trigger') && !event.target.closest('.brand-dropdown-content')) {
+        isBrandOpen.value = false;
+    }
+    if (isTypeOpen.value && !event.target.closest('#type-trigger') && !event.target.closest('.type-dropdown-content')) {
+        isTypeOpen.value = false;
+    }
+    if (isDomicileOpen.value && !event.target.closest('#domicile-trigger') && !event.target.closest('.domicile-dropdown-content')) {
+        isDomicileOpen.value = false;
+    }
+    if (isStationOpen.value && !event.target.closest('#station-trigger') && !event.target.closest('.station-dropdown-content')) {
+        isStationOpen.value = false;
+    }
+};
+
+onMounted(() => {
+    document.body.addEventListener('click', closePickersOnOutsideClick);
+});
+
+onBeforeUnmount(() => {
+    document.body.removeEventListener('click', closePickersOnOutsideClick);
+});
+
+onMounted(async () => {
+    try {
+        const L = await loadLeaflet();
+
+        // initialize map centered on Batam
+        map = L.map('map').setView([1.126, 104.030], 12);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        // create a Google-like SVG pin (green)
+        const pinSvg = encodeURIComponent(`
+            <svg width="32" height="48" viewBox="0 0 24 36" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 0C7 0 3.5 3.5 3.5 8.5 3.5 15.5 12 25.5 12 25.5s8.5-10 8.5-17C20.5 3.5 17 0 12 0z" fill="#00C853"/>
+              <circle cx="12" cy="8.5" r="3.5" fill="white"/>
+            </svg>
+        `);
+        const iconUrl = `data:image/svg+xml;charset=UTF-8,${pinSvg}`;
+
+        const customIcon = L.icon({
+            iconUrl,
+            iconSize: [28, 42],
+            iconAnchor: [14, 42],
+            popupAnchor: [0, -38]
+        });
+
+        // add markers for available stations with coordinates using custom icon
+        stations.value.filter(s => s.status === 'Tersedia' && s.lat && s.lng).forEach(s => {
+            const marker = L.marker([s.lat, s.lng], { icon: customIcon }).addTo(map);
+            marker.bindPopup(`<div class="font-medium">${s.name}</div><div class="text-sm text-gray-600">${s.location}</div><div class="text-sm text-gray-500">Status: ${s.status}</div>`);
+        });
+    } catch (err) {
+        console.error('Failed to load Leaflet:', err);
+    }
+});
+
+onBeforeUnmount(() => {
+    if (map) {
+        map.remove();
+        map = null;
+    }
+});
 
 const formatRupiah = (amount) => {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0, }).format(amount);
@@ -94,6 +341,20 @@ const closeReceiptModal = () => {
     selectedStation.value = null; // Reset data stasiun
 };
 
+// buka tampilan PrintStrukPembayaran dari tombol "Unduh Struk"
+const openPrintStruk = () => {
+    // tutup modal struk jika masih terbuka, lalu navigasi ke halaman print struk
+    showReceiptModal.value = false;
+    // navigasi ke halaman PrintStrukPembayaran dengan data station dan total
+    window.location.href = `/print-struk?station=${encodeURIComponent(JSON.stringify(selectedStation.value))}&total=${encodeURIComponent(calculateTotalFormatted.value)}`;
+};
+
+// Fungsi untuk menutup modal print struk
+const closePrintStruk = () => {
+    showPrintModal.value = false;
+    selectedStation.value = null;
+};
+
 // Fungsi untuk membuat QR code di struk (placeholder)
 const generateQrisQrCode = () => {
     // Dalam implementasi nyata, ini akan menjadi library QR code dengan data QRIS
@@ -134,20 +395,30 @@ const formatBookingDate = (dateTime) => {
                     </div>
                 </div>
 
-                <div class="relative w-full mb-8 rounded-xl shadow-lg overflow-hidden border border-gray-200" style="height: 450px; background-color: #f0f0f0;">
-                    <div class="absolute inset-0 flex items-center justify-center bg-gray-100/50">
-                        <div class="text-center">
-                            <h3 class="text-xl font-medium text-gray-800 mb-2">Leaflet.js Map Placeholder</h3>
-                            <p class="text-gray-600">Implementasi peta sesungguhnya (menggunakan Leaflet.js) akan dilakukan di sini.</p>
+                <div class="relative w-full mb-8 rounded-xl shadow-lg overflow-hidden border border-gray-200" style="height: 450px; background-color: #e9f5ff;">
+                    <!-- Dummy map background -->
+                    <div class="absolute inset-0 bg-[url('/images/map-grid.png')] bg-cover bg-center opacity-40"></div>
+
+                    <!-- Map content -->
+                    <div class="absolute inset-0">
+                        <div class="w-full h-full relative">
+                            <!-- Center label -->
+                            <div class="absolute left-1/2 top-4 transform -translate-x-1/2 text-center">
+                                <h3 class="text-lg font-medium text-gray-800">Peta Sementara (Dummy)</h3>
+                                <p class="text-sm text-gray-600">Markers are sample locations — interaksi akan dilakukan di implementasi nyata.</p>
+                            </div>
+
+                            <!-- Leaflet map will render here -->
+                            <div id="map" class="w-full h-full"></div>
                         </div>
                     </div>
                 </div>
 
                 <h2 class="text-2xl font-medium text-gray-800 mb-6">Stasiun Charging Tersedia</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <div v-for="station in stations" :key="station.id"
+                    <div v-for="station in availableStations" :key="station.id"
                          class="bg-white p-6 rounded-xl shadow-lg border border-gray-100 transition duration-300 hover:shadow-xl relative"
-                         :class="{ 'border-[#00C853] ring-1 ring-[#00C853]': selectedStation && selectedStation.id === station.id && showQrisPaymentModal || showReceiptModal }">
+                         :class="{ 'border-[#00C853] ring-1 ring-[#00C853]': selectedStation && selectedStation.id === station.id && (showQrisPaymentModal || showReceiptModal) }">
                         
                         <div :class="[
                             'absolute top-0 right-0 m-4 px-4 py-1 rounded-lg text-sm font-medium z-10',
@@ -157,19 +428,26 @@ const formatBookingDate = (dateTime) => {
                         </div>
                         
                         <h2 class="text-xl font-semibold text-gray-900 mb-1">{{ station.name }}</h2>
-                        <div class="flex items-center text-sm text-gray-500 mb-4">
-                            <i class="fas fa-map-marker-alt mr-2"></i>
-                            {{ station.location }}
-                        </div>
+                            <div class="flex items-center text-sm text-gray-500 mb-4">
+                                <i class="fas fa-map-marker-alt mr-2"></i>
+                                {{ station.location }}
+                            </div>
 
                         <div class="space-y-2 mb-6 text-sm">
-                            <div class="flex justify-between items-center bg-[#F7FFE4] p-3 rounded-lg text-gray-700">
-                                <span class="font-medium text-gray-900 flex items-center"><i class="fas fa-bolt mr-2 text-yellow-600"></i>Jenis Charger:</span>
-                                <span class="text-right font-medium">{{ station.chargerType }} &bull; {{ station.power }}</span>
+                            <!-- Use a two-column grid so labels align flush-left with the pricing section -->
+                            <div class="grid grid-cols-2 gap-4 items-center text-gray-700">
+                                <div class="flex items-center font-medium text-gray-900">
+                                    <i class="fas fa-bolt mr-2 text-yellow-600"></i>
+                                    <span>Jenis Charger:</span>
+                                </div>
+                                <div class="text-left font-medium">{{ station.chargerType }} &bull; {{ station.power }}</div>
                             </div>
-                            <div class="flex justify-between items-center text-gray-700">
-                                <span class="font-medium text-gray-900 flex items-center"><i class="fas fa-clock mr-2 text-blue-600"></i>Waktu Booking:</span>
-                                <span class="text-right">{{ formatBookingDate(station.bookingTime) }} ({{ station.duration }})</span>
+                            <div class="grid grid-cols-2 gap-4 items-center text-gray-700">
+                                <div class="flex items-center font-medium text-gray-900">
+                                    <i class="fas fa-clock mr-2 text-blue-600"></i>
+                                    <span>Waktu Booking:</span>
+                                </div>
+                                <div class="text-left">{{ formatBookingDate(station.bookingTime) }} ({{ station.duration }})</div>
                             </div>
                         </div>
 
@@ -182,8 +460,8 @@ const formatBookingDate = (dateTime) => {
                                 <span>Biaya Layanan:</span>
                                 <span class="font-medium">{{ formatRupiah(station.serviceFee) }}</span>
                             </div>
-                            <div class="flex justify-between font-medium text-lg p-2 rounded-lg" style="background-color: #e6ffb3;">
-                                <span>Total Harga:</span>
+                            <div class="flex justify-between items-center font-semibold text-lg p-3 rounded-lg shadow-sm" style="background: linear-gradient(180deg,#f7ffe6,#e6ffb3);">
+                                <span class="text-gray-900">Total Harga:</span>
                                 <span class="text-gray-900">{{ formatRupiah(calculateTotal(station.price, station.serviceFee)) }}</span>
                             </div>
                         </div>
@@ -193,11 +471,12 @@ const formatBookingDate = (dateTime) => {
                                 @click="reserveStation(station.id)"
                                 :disabled="!station.isBookable"
                                 :class="[
-                                    'w-full py-3 rounded-xl text-white font-medium transition duration-200 shadow-md flex items-center justify-center space-x-2',
-                                    station.isBookable ? 'bg-[#00C853] hover:bg-[#00A142]' : 'bg-gray-400 cursor-not-allowed'
+                                    'w-full py-3 rounded-xl text-white font-semibold transition duration-200 shadow-md flex items-center justify-center space-x-2',
+                                    station.isBookable ? 'bg-[#00C853] hover:bg-[#00A142]' : 'bg-gray-300 text-gray-600 cursor-not-allowed'
                                 ]"
                             >
-                                <i class="fas fa-dollar-sign"></i> <span>Pesan Tiket</span>
+                                <i class="fas fa-ticket-alt mr-2"></i>
+                                <span>Pesan Tiket</span>
                             </button>
                         </div>
                     </div>
@@ -209,53 +488,169 @@ const formatBookingDate = (dateTime) => {
         <AppFooter />
         
         <Transition name="fade">
-            <div v-if="showSearchModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" @click.self="closeModal">
+            <div v-if="showSearchModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[99999] p-4" @click.self="closeModal">
                 <div class="bg-white rounded-xl p-8 shadow-2xl w-full max-w-2xl transform transition-all duration-300">
                     <h3 class="text-2xl font-medium text-gray-900 mb-6">Cari Jadwal Pengecasan</h3>
                     
                     <form @submit.prevent="submitSearch" class="space-y-5">
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div>
+                            <!-- BRAND: custom dropdown -->
+                            <div class="relative">
                                 <label for="brand" class="block text-sm font-medium text-gray-700 mb-1">Merk Mobil</label>
-                                <select id="brand" v-model="formState.brand" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-lime-600 focus:border-lime-600 appearance-none bg-white">
-                                    <option value="Nissan">Nissan</option>
-                                    <option value="Toyota">Toyota</option>
-                                    <option value="Wuling">Wuling</option>
-                                </select>
+                                <div id="brand-trigger"
+                                     @click.stop="openOnly('brand')"
+                                     class="w-full p-3 border border-gray-300 rounded-xl cursor-pointer flex justify-between items-center bg-white transition duration-150"
+                                     :class="{'ring-2 ring-lime-500 border-lime-500 shadow-md': isBrandOpen}"
+                                >
+                                    <span class="text-gray-800">{{ formState.brand || 'Pilih Merk Mobil' }}</span>
+                                    <svg class="w-5 h-5 text-gray-500 transform" :class="{'rotate-180': isBrandOpen}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                </div>
+
+                                <div v-if="isBrandOpen" @click.stop class="brand-dropdown-content absolute top-full mt-2 w-full bg-white rounded-xl shadow-2xl border border-gray-100 z-30 left-0 max-h-48 overflow-y-auto">
+                                    <div class="py-2">
+                                        <div v-for="opt in brandOptions" :key="opt"
+                                             @click="selectOption('brand', opt)"
+                                             class="px-4 py-2 hover:bg-lime-50 cursor-pointer transition-colors duration-150"
+                                             :class="{'bg-lime-50 font-semibold text-lime-800': formState.brand === opt}">
+                                            {{ opt }}
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            <div>
+
+                            <!-- TYPE: custom dropdown -->
+                            <div class="relative">
                                 <label for="type" class="block text-sm font-medium text-gray-700 mb-1">Tipe Mobil</label>
-                                <select id="type" v-model="formState.type" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-lime-600 focus:border-lime-600 appearance-none bg-white">
-                                    <option value="SUV">SUV</option>
-                                    <option value="City Car">City Car</option>
-                                </select>
+                                <div id="type-trigger"
+                                     @click.stop="openOnly('type')"
+                                     class="w-full p-3 border border-gray-300 rounded-xl cursor-pointer flex justify-between items-center bg-white transition duration-150"
+                                     :class="{'ring-2 ring-lime-500 border-lime-500 shadow-md': isTypeOpen}"
+                                >
+                                    <span class="text-gray-800">{{ formState.type || 'Pilih Tipe Mobil' }}</span>
+                                    <svg class="w-5 h-5 text-gray-500 transform" :class="{'rotate-180': isTypeOpen}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                </div>
+
+                                <div v-if="isTypeOpen" @click.stop class="type-dropdown-content absolute top-full mt-2 w-full bg-white rounded-xl shadow-2xl border border-gray-100 z-30 left-0 max-h-48 overflow-y-auto">
+                                    <div class="py-2">
+                                        <div v-for="opt in typeOptions" :key="opt"
+                                             @click="selectOption('type', opt)"
+                                             class="px-4 py-2 hover:bg-lime-50 cursor-pointer transition-colors duration-150"
+                                             :class="{'bg-lime-50 font-semibold text-lime-800': formState.type === opt}">
+                                            {{ opt }}
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            <div>
-                                <label for="date" class="block text-sm font-medium text-gray-700 mb-1">Tanggal</label>
-                                <input type="date" id="date" v-model="formState.date"
-                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-lime-600 focus:border-lime-600">
+
+                            <!-- DATE picker (same as LandingPage) -->
+                            <div class="relative">
+                                <label for="date-picker-trigger" class="block text-sm font-medium text-gray-700 mb-1">Tanggal</label>
+                                <div
+                                  id="date-picker-trigger"
+                                  @click.stop="isDateDropdownOpen = !isDateDropdownOpen; isTimeDropdownOpen = false"
+                                  class="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-lime-500 focus:border-lime-500 cursor-pointer flex justify-between items-center bg-white transition duration-150"
+                                  :class="{'ring-2 ring-lime-500 border-lime-500 shadow-md': isDateDropdownOpen}"
+                                >
+                                  <span class="text-gray-800">{{ datePickerText }}</span>
+                                  <svg class="w-5 h-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"></path></svg>
+                                </div>
+
+                                <div v-if="isDateDropdownOpen" @click.stop
+                                     class="date-picker-content absolute top-full mt-2 w-full sm:w-72 p-4 bg-white rounded-xl shadow-2xl border border-gray-100 z-30 left-0 sm:right-0 sm:transform sm:-translate-x-1/4">
+                                  <div class="flex justify-between items-center mb-4">
+                                    <button type="button" @click="prevMonth" class="p-2 rounded-full hover:bg-gray-100">
+                                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                                    </button>
+                                    <span class="font-semibold text-gray-900">{{ monthNames[calendarDisplayDate.getMonth()] }} {{ calendarDisplayDate.getFullYear() }}</span>
+                                    <button type="button" @click="nextMonth" class="p-2 rounded-full hover:bg-gray-100">
+                                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                                    </button>
+                                  </div>
+
+                                  <div class="grid grid-cols-7 text-center gap-1">
+                                    <div v-for="day in dayNames" :key="day" class="text-xs font-semibold text-gray-500">{{ day }}</div>
+                                    <div v-for="(day, index) in calendarDays" :key="index" :class="day.classes" @click="selectDay(day)">
+                                      {{ day.number }}
+                                    </div>
+                                  </div>
+                                </div>
                             </div>
                         </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div>
+                            <!-- DOMICILE: custom dropdown -->
+                            <div class="relative">
                                 <label for="domicile" class="block text-sm font-medium text-gray-700 mb-1">Domisili</label>
-                                <select id="domicile" v-model="formState.domicile" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-lime-600 focus:border-lime-600 appearance-none bg-white">
-                                    <option value="Batam Center">Batam Center</option>
-                                    <option value="Nagoya">Nagoya</option>
-                                </select>
+                                <div id="domicile-trigger"
+                                     @click.stop="openOnly('domicile')"
+                                     class="w-full p-3 border border-gray-300 rounded-xl cursor-pointer flex justify-between items-center bg-white transition duration-150"
+                                     :class="{'ring-2 ring-lime-500 border-lime-500 shadow-md': isDomicileOpen}"
+                                >
+                                    <span class="text-gray-800">{{ formState.domicile || 'Pilih Domisili' }}</span>
+                                    <svg class="w-5 h-5 text-gray-500 transform" :class="{'rotate-180': isDomicileOpen}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                </div>
+
+                                <div v-if="isDomicileOpen" @click.stop class="domicile-dropdown-content absolute top-full mt-2 w-full bg-white rounded-xl shadow-2xl border border-gray-100 z-30 left-0 max-h-48 overflow-y-auto">
+                                    <div class="py-2">
+                                        <div v-for="opt in domicileOptions" :key="opt"
+                                             @click="selectOption('domicile', opt)"
+                                             class="px-4 py-2 hover:bg-lime-50 cursor-pointer transition-colors duration-150"
+                                             :class="{'bg-lime-50 font-semibold text-lime-800': formState.domicile === opt}">
+                                            {{ opt }}
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            <div>
+
+                            <!-- STATION: custom dropdown -->
+                            <div class="relative">
                                 <label for="station" class="block text-sm font-medium text-gray-700 mb-1">Stasiun Charger</label>
-                                <select id="station" v-model="formState.station" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-lime-600 focus:border-lime-600 appearance-none bg-white">
-                                    <option value="SPKLU Mega Mall">SPKLU Mega Mall</option>
-                                    <option value="SPKLU Grand Batam Mall">SPKLU Grand Batam Mall</option>
-                                </select>
+                                <div id="station-trigger"
+                                     @click.stop="openOnly('station')"
+                                     class="w-full p-3 border border-gray-300 rounded-xl cursor-pointer flex justify-between items-center bg-white transition duration-150"
+                                     :class="{'ring-2 ring-lime-500 border-lime-500 shadow-md': isStationOpen}"
+                                >
+                                    <span class="text-gray-800">{{ formState.station || 'Pilih Stasiun' }}</span>
+                                    <svg class="w-5 h-5 text-gray-500 transform" :class="{'rotate-180': isStationOpen}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                </div>
+
+                                <div v-if="isStationOpen" @click.stop class="station-dropdown-content absolute top-full mt-2 w-full bg-white rounded-xl shadow-2xl border border-gray-100 z-30 left-0 max-h-48 overflow-y-auto">
+                                    <div class="py-2">
+                                        <div v-for="opt in stationOptions" :key="opt"
+                                             @click="selectOption('station', opt)"
+                                             class="px-4 py-2 hover:bg-lime-50 cursor-pointer transition-colors duration-150"
+                                             :class="{'bg-lime-50 font-semibold text-lime-800': formState.station === opt}">
+                                            {{ opt }}
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            <div>
-                                <label for="time" class="block text-sm font-medium text-gray-700 mb-1">Jam</label>
-                                <input type="time" id="time" v-model="formState.time"
-                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-lime-600 focus:border-lime-600">
+
+                            <!-- TIME picker (same as LandingPage) -->
+                            <div class="relative">
+                                <label for="time-picker-trigger" class="block text-sm font-medium text-gray-700 mb-1">Jam</label>
+                                <div
+                                  id="time-picker-trigger"
+                                  @click.stop="isTimeDropdownOpen = !isTimeDropdownOpen; isDateDropdownOpen = false"
+                                  class="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-lime-500 focus:border-lime-500 cursor-pointer flex justify-between items-center bg-white transition duration-150"
+                                  :class="{'ring-2 ring-lime-500 border-lime-500 shadow-md': isTimeDropdownOpen}"
+                                >
+                                  <span class="text-gray-800">{{ selectedTime || 'Pilih Jam' }}</span>
+                                  <svg class="w-5 h-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l3 3a1 1 0 001.414-1.414L10 10.586V6z" clip-rule="evenodd"></path></svg>
+                                </div>
+
+                                <div v-if="isTimeDropdownOpen" @click.stop
+                                     class="time-picker-content absolute top-full mt-2 w-full max-h-48 overflow-y-auto bg-white rounded-xl shadow-2xl border border-gray-100 z-30 left-0">
+                                  <div v-for="slot in timeSlots" :key="slot.time"
+                                       :class="{
+                                         'p-2 hover:bg-lime-100 cursor-pointer transition duration-100': !slot.isDisabled,
+                                         'text-gray-400 cursor-not-allowed bg-gray-50': slot.isDisabled,
+                                         'bg-lime-50 text-lime-800 font-semibold': slot.time === selectedTime
+                                       }"
+                                       @click="selectTime(slot)">
+                                    {{ slot.time }}
+                                  </div>
+                                </div>
                             </div>
                         </div>
                         
@@ -274,7 +669,7 @@ const formatBookingDate = (dateTime) => {
         </Transition>
 
         <Transition name="fade">
-            <div v-if="showConfirmationModal && selectedStation" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" @click.self="cancelProcess">
+            <div v-if="showConfirmationModal && selectedStation" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[99999] p-4" @click.self="cancelProcess">
                 <div class="bg-white rounded-lg p-6 shadow-2xl w-full max-w-lg transform transition-all duration-300">
                     <h3 class="text-xl font-medium text-gray-900 mb-6">Anda yakin ingin memesan tiket ini?</h3>
                     
@@ -313,7 +708,7 @@ const formatBookingDate = (dateTime) => {
         </Transition>
 
         <Transition name="fade">
-            <div v-if="showQrisPaymentModal && selectedStation" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" @click.self="cancelProcess">
+            <div v-if="showQrisPaymentModal && selectedStation" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[99999] p-4" @click.self="cancelProcess">
                 <div class="bg-white rounded-lg p-4 shadow-2xl w-full max-w-2xl transform transition-all duration-300">
                     <div class="flex justify-between items-center pb-2">
                         <div class="flex items-center bg-[#FFFBEB] text-[#9A6A01] px-3 py-1 rounded-full text-sm font-medium">
@@ -327,10 +722,8 @@ const formatBookingDate = (dateTime) => {
                     <h3 class="text-xl font-semibold text-gray-900 mb-4 text-center">Pembayaran QRIS</h3>
                     
                     <div class="flex flex-col md:flex-row gap-4 items-center">
-                        <div class="w-full md:w-1/2 p-4 rounded-xl flex flex-col items-center" style="background-color: #f7ffe4; border: 1px solid #e6ffb3;">
-                            <div class="w-48 h-48 bg-[#00C853] flex items-center justify-center rounded-lg shadow-inner">
-                                <span class="text-white font-semibold text-lg">QRIS CODE</span>
-                            </div>
+                        <div class="w-full md:w-1/2 p-4 rounded-xl flex flex-col items-center">
+                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=192x192&data=QRIS%20Payment%20Dummy" alt="QRIS Payment Code" class="w-48 h-48 rounded-lg shadow-inner">
                             <p class="text-center text-sm text-gray-600 mt-3">Scan QR code dengan aplikasi pembayaran Anda</p>
                         </div>
                         
@@ -351,7 +744,7 @@ const formatBookingDate = (dateTime) => {
                                 <div class="flex items-center">
                                     <i class="fas fa-clock text-gray-500 mr-3"></i>
                                     <p class="text-sm text-gray-600">{{ formatBookingDate(selectedStation.bookingTime) }} ({{ selectedStation.duration }})</p>
-                                    <p class="text-sm text-gray-600"></p> </div>
+                                </div>
                                 <div class="flex items-center">
                                     <i class="fas fa-bolt text-yellow-600 mr-3"></i>
                                     <p class="text-sm text-gray-600">Jenis Charger: **{{ selectedStation.chargerType }}** &bull; **{{ selectedStation.power }}**</p>
@@ -378,7 +771,7 @@ const formatBookingDate = (dateTime) => {
         </Transition>
 
         <Transition name="fade">
-            <div v-if="showReceiptModal && selectedStation" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" @click.self="closeReceiptModal">
+            <div v-if="showReceiptModal && selectedStation" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[99999] p-4" @click.self="closeReceiptModal">
                 <div class="bg-white rounded-xl p-4 shadow-2xl w-full max-w-xl transform transition-all duration-300">
                     
                     <div class="flex justify-between items-center pb-2">
@@ -393,10 +786,8 @@ const formatBookingDate = (dateTime) => {
                     <h3 class="text-xl font-medium text-gray-900 mb-4 text-center">Struk Pembayaran</h3>
                     
                     <div class="flex flex-col md:flex-row gap-4 items-center">
-                        <div class="w-full md:w-1/2 p-4 rounded-xl flex flex-col items-center" style="background-color: #f7ffe4; border: 1px solid #e6ffb3;">
-                            <div class="w-48 h-48 bg-[#00C853] flex items-center justify-center rounded-lg shadow-inner">
-                                <span class="text-white font-medium text-lg">QR CHARGING</span>
-                            </div>
+                        <div class="w-full md:w-1/2 p-4 rounded-xl flex flex-col items-center">
+                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=192x192&data=QR%20Charging%20Dummy" alt="QR Charging Code" class="w-48 h-48 rounded-lg shadow-inner">
                             <p class="text-center text-sm text-gray-600 mt-3">Scan QR code ini saat tiba di lokasi charging</p>
                         </div>
 
@@ -417,7 +808,7 @@ const formatBookingDate = (dateTime) => {
                                 <div class="flex items-center">
                                     <i class="fas fa-clock text-gray-500 mr-3"></i>
                                     <p class="text-sm text-gray-600">{{ formatBookingDate(selectedStation.bookingTime) }} ({{ selectedStation.duration }})</p>
-                                    <p class="text-sm text-gray-600"></p> </div>
+                                </div>
                                 <div class="flex items-center">
                                     <i class="fas fa-bolt text-yellow-600 mr-3"></i>
                                     <p class="text-sm text-gray-600">Jenis Charger: **{{ selectedStation.chargerType }}** &bull; **{{ selectedStation.power }}**</p>
@@ -434,7 +825,7 @@ const formatBookingDate = (dateTime) => {
                     </div>
 
                     <div class="pt-6">
-                        <button class="w-full py-3 bg-[#00C853] text-white font-medium rounded-xl hover:bg-[#00A142] transition duration-300 shadow-md flex items-center justify-center space-x-2">
+                        <button @click="openPrintStruk" class="w-full py-3 bg-[#00C853] text-white font-medium rounded-xl hover:bg-[#00A142] transition duration-300 shadow-md flex items-center justify-center space-x-2">
                             <i class="fas fa-download"></i> <span>Unduh Struk</span>
                         </button>
                         <div class="bg-[#FFFBEB] text-[#9A6A01] p-3 rounded-lg text-sm text-center mt-3 font-medium">

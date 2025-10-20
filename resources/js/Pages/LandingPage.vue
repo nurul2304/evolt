@@ -450,49 +450,10 @@ onBeforeUnmount(() => {
         </div>
       </section>
       
-      <!-- Cards App -->
-      <section class="pt-48 pb-24 bg-gray-100 md:-translate-y-1/6">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 text-center"> 
-            
-            <div class="flex flex-col items-center p-4 sm:p-6 bg-white rounded-2xl shadow-lg transition duration-300 hover:shadow-xl hover:-translate-y-1 transform">
-              <div class="p-4 bg-indigo-100 text-indigo-600 rounded-full mb-2 sm:mb-4">
-                <i class="fas fa-mobile-alt text-xl sm:text-2xl"></i> 
-              </div>
-              <p class="text-sm sm:text-lg font-semibold text-gray-800">Aplikasi Mobile</p>
-              <span class="text-xs sm:text-sm text-gray-600">Kemudahan di genggaman Anda</span>
-            </div>
-            
-            <div class="flex flex-col items-center p-4 sm:p-6 bg-white rounded-2xl shadow-lg transition duration-300 hover:shadow-xl hover:-translate-y-1 transform">
-              <div class="p-4 bg-teal-100 text-teal-600 rounded-full mb-2 sm:mb-4">
-                <i class="fas fa-map-marker-alt text-xl sm:text-2xl"></i>
-              </div>
-              <p class="text-sm sm:text-lg font-semibold text-gray-800">Cari Cepat</p>
-              <span class="text-xs sm:text-sm text-gray-600">Akurasi lokasi realtime</span>
-            </div>
 
-            <div class="flex flex-col items-center p-4 sm:p-6 bg-white rounded-2xl shadow-lg transition duration-300 hover:shadow-xl hover:-translate-y-1 transform">
-              <div class="p-4 bg-blue-100 text-blue-600 rounded-full mb-2 sm:mb-4">
-                <i class="fas fa-credit-card text-xl sm:text-2xl"></i>
-              </div>
-              <p class="text-sm sm:text-lg font-semibold text-gray-800">Metode Bayar</p>
-              <span class="text-xs sm:text-sm text-gray-600">Pembayaran melalui Qris</span>
-            </div>
-
-            <div class="flex flex-col items-center p-4 sm:p-6 bg-white rounded-2xl shadow-lg transition duration-300 hover:shadow-xl hover:-translate-y-1 transform">
-              <div class="p-4 bg-red-100 text-red-600 rounded-full mb-2 sm:mb-4">
-                <i class="fas fa-heartbeat text-xl sm:text-2xl"></i>
-              </div>
-              <p class="text-sm sm:text-lg font-semibold text-gray-800">Monitor Status</p>
-              <span class="text-xs sm:text-sm text-gray-600">Lihat status charger langsung</span>
-            </div>
-
-          </div>
-        </div>
-      </section>
 
       <!-- Step -->
-      <section class="pt-36 pb-24 bg-gray-50 md:mt-[-8rem]">
+      <section class="pt-56 pb-24 bg-gray-50 md:mt-[-8rem]">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div class="flex flex-col lg:flex-row items-center gap-12">
             <div class="lg:w-1/2">
@@ -504,7 +465,7 @@ onBeforeUnmount(() => {
                 **Lorem ipsum** is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries.
               </p>
             </div>
-            <div class="lg:w-1/2 flex justify-center relative">
+            <div class="lg:w-1/2 flex justify-center relative mt-12">
               <img src="https://placehold.co/400x500/f0f9ff/000?text=App+Screenshot" alt="Mobile App" class="w-full max-w-sm rounded-3xl shadow-2xl rotate-3" loading="lazy">
               <div class="absolute inset-0 bg-indigo-50 opacity-40 rounded-full filter blur-3xl z-0 -rotate-12"></div>
             </div>

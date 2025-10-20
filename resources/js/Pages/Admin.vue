@@ -30,7 +30,7 @@ const getColorClass = (type) => {
     switch (type) {
         // Updated accent color to purple for consistency with the image (Ubah Kata Sandi button/tabs)
         case 'accent': return 'bg-[#00C853] hover:bg-[#00A142] text-white';
-        case 'light-accent-bg': return 'bg-[#00C853] border-l-4 border-l-green-400 text-purple-800'; 
+        case 'light-accent-bg': return 'bg-[#00C853] border-l-4 border-l-green-400 text-purple-800';
         case 'tab-active-bg': return 'bg-[#00C853] text-dark';
         case 'icon-active': return 'text-dark';
         case 'icon-inactive': return 'text-gray-500';
@@ -40,15 +40,15 @@ const getColorClass = (type) => {
 
 // --- DUMMY DATA ---
 const user = reactive({
-    name: 'pbl',
-    email: 'pbl504@gmail.com',
+    name: 'Admin',
+    email: 'admin@evcharge.com',
 });
 
 // Data untuk 'Informasi Akun' (Demografis/Fisik)
 const accountForm = reactive({
     name: user.name,
     gender: 'Laki-laki',
-    birthDate: '23/09/1997', 
+    birthDate: '23/09/1997',
     idType: 'KTP',
     idNumber: '8098765421216789',
     city: 'Kota Batam',
@@ -63,19 +63,17 @@ const personalForm = reactive({
 });
 
 // Default sidebar menu aktif
-const activeMenu = ref('account'); 
+const activeMenu = ref('account');
 
 // Default inner tab aktif (hanya berlaku saat activeMenu === 'account')
-const activeTab = ref('informasi_akun'); 
+const activeTab = ref('informasi_akun');
 
-// Menu Items untuk Sidebar Navigation
+// Menu Items untuk Sidebar Navigation (Updated for Admin)
 const menuItems = computed(() => [
     { id: 'account', label: 'Akun', icon: IconUser, route: '#account' },
-    { id: 'orders', label: 'Pesanan saya', icon: IconTicket, route: '/orders' },
-    { id: 'news', label: 'Berita', icon: IconNews, route: '/news' },
-    { id: 'promo', label: 'Promo', icon: IconTag, route: '/promos' },
-    { id: 'cancellation', label: 'Daftar Pembatalan Tiket', icon: IconClock, route: '/cancellation' },
-    { id: 'password', label: 'Ubah Kata Sandi', icon: IconKey, route: '/change-password' },
+    { id: 'orders', label: 'Daftar Pesanan', icon: IconTicket, route: '/admin/orders' },
+    { id: 'partners', label: 'List Partner', icon: IconTag, route: '/admin/partners' },
+    { id: 'reports', label: 'Laporan', icon: IconNews, route: '/admin/reports' },
     { id: 'logout', label: 'Keluar', icon: IconLogout, route: '/logout' },
 ]);
 
@@ -98,26 +96,23 @@ const submitProfile = () => {
 const handleLogout = () => {
     console.log('User logging out...');
     alert('Anda telah keluar (Simulasi)');
-    // router.visit('/logout'); 
+    // router.visit('/logout');
 };
 
-// Placeholder data for other menu content
+// Placeholder data for admin menus
 const orders = ref([
-    { id: 1, title: 'Pesanan - Pengisian di Station A', date: '2025-10-10', status: 'Selesai' },
-    { id: 2, title: 'Pesanan - Pengisian di Station B', date: '2025-10-12', status: 'Dalam Proses' },
+    { id: 1, title: 'Pesanan - Pengisian di Station A', date: '2025-10-10', status: 'Selesai', user: 'User1' },
+    { id: 2, title: 'Pesanan - Pengisian di Station B', date: '2025-10-12', status: 'Dalam Proses', user: 'User2' },
 ]);
 
-const newsList = ref([
-    { id: 1, title: 'Rilis Fitur Baru: Reservasi Stasiun', excerpt: 'Sekarang Anda bisa reservasi stasiun pengisian terdekat.' },
-    { id: 2, title: 'Promo Musim Panas', excerpt: 'Diskon sampai 30% untuk pengisian di jam non-peak.' },
+const partners = ref([
+    { id: 1, name: 'Partner A', location: 'Batam', status: 'Active' },
+    { id: 2, name: 'Partner B', location: 'Jakarta', status: 'Inactive' },
 ]);
 
-const promos = ref([
-    { id: 1, code: 'HALOEV', desc: 'Diskon 10% untuk pengguna baru' },
-]);
-
-const cancellations = ref([
-    { id: 1, order: 'Pesanan #2', reason: 'Perubahan jadwal', date: '2025-09-20' },
+const reports = ref([
+    { id: 1, title: 'Laporan Bulanan', date: '2025-10-01', type: 'Revenue' },
+    { id: 2, title: 'Laporan Pengguna', date: '2025-10-05', type: 'User Activity' },
 ]);
 
 // Simple password change state (simulasi)
@@ -141,13 +136,13 @@ const changePassword = () => {
 
 <template>
 <div class="min-h-screen bg-gray-50 font-inter flex flex-col text-gray-700">
-    
+
     <!-- AppNavbar -->
-    <AppNavbar /> 
+    <AppNavbar />
 
     <!-- Konten Utama (Sidebar + Main Content) -->
     <main class="flex-1 max-w-7xl mx-auto w-full p-6 flex flex-col md:flex-row md:space-x-8 space-y-6 md:space-y-0">
-        
+
         <!-- Sidebar Navigation -->
     <aside class="w-full md:w-64 bg-white shadow-lg rounded-xl p-5 flex flex-col h-fit md:sticky md:top-6">
             <div class="mb-6 leading-tight">
@@ -168,10 +163,9 @@ const changePassword = () => {
                             item.id === 'logout' ? 'text-red-500 hover:bg-red-50' : ''
                         ]"
                     >
-                        <component :is="item.icon" class="w-5 h-5 mr-3" 
-                            :class="[item.id === activeMenu ? 'text-purple-600' : 'text-gray-500', 
-                                    item.id === 'logout' ? 'text-red-500' : '']" 
-                        />
+                        <component :is="item.icon" class="w-5 h-5 mr-3"
+                            :class="[item.id === activeMenu ? 'text-purple-600' : 'text-gray-500',
+                                    item.id === 'logout' ? 'text-red-500' : '']" />
                         <span class="truncate">{{ item.label }}</span>
                     </button>
                 </template>
@@ -180,7 +174,7 @@ const changePassword = () => {
 
         <!-- Main Content (Detail Akun) -->
         <section class="flex-1 bg-white shadow-xl rounded-xl p-8">
-            
+
             <!-- Content Header -->
             <div class="mb-8" v-if="activeMenu === 'account'">
                 <h1 class="text-2xl font-bold text-gray-900">Detail Akun</h1>
@@ -189,18 +183,18 @@ const changePassword = () => {
 
             <!-- TAB CONTENT CONTAINER -->
             <div v-if="activeMenu === 'account'">
-                
+
                 <!-- Tab Headers & Button -->
                 <div class="flex flex-col md:flex-row md:justify-between md:items-center pb-4 mb-6 border-b border-gray-200">
                     <div class="flex flex-wrap gap-4 items-center">
                         <!-- Tabs -->
-                        <button 
+                        <button
                             @click="activeTab = 'informasi_akun'"
                             :class="['flex items-center justify-center w-full md:w-auto gap-2 py-2 px-4 font-semibold rounded-lg transition duration-150',
                                     activeTab === 'informasi_akun' ? getColorClass('accent') : 'text-gray-500 hover:bg-gray-100']">
                             Informasi Akun
                         </button>
-                        <button 
+                        <button
                             @click="activeTab = 'informasi_personal'"
                             :class="['flex items-center justify-center w-full md:w-auto gap-2 py-2 px-4 font-semibold rounded-lg transition duration-150',
                                     activeTab === 'informasi_personal' ? getColorClass('accent') : 'text-gray-500 hover:bg-gray-100']">
@@ -209,7 +203,7 @@ const changePassword = () => {
                     </div>
 
                     <!-- UBAH KATA SANDI Button (Sesuai Gambar) -->
-                    <button type="submit" @click.prevent="submitProfile" 
+                    <button type="submit" @click.prevent="submitProfile"
                             :class="['mt-4 md:mt-0 w-full md:w-auto px-6 py-2.5 text-sm font-bold rounded-lg transition duration-150 ease-in-out shadow-md', getColorClass('accent')]">
                         {{ activeTab === 'informasi_akun' ? 'SIMPAN PERUBAHAN' : 'UBAH KATA SANDI' }}
                     </button>
@@ -221,7 +215,7 @@ const changePassword = () => {
                     <!-- Tab Content: Informasi Akun (Demografis & Identitas) -->
                     <div v-if="activeTab === 'informasi_akun'">
                         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                            
+
                             <!-- Nama Lengkap -->
                             <div class="col-span-1">
                                 <label class="flex items-center text-sm font-medium text-gray-700 mb-1">
@@ -229,7 +223,7 @@ const changePassword = () => {
                                 </label>
                                 <input type="text" v-model="accountForm.name" class="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-1  focus:ring-lime-500 focus:border-lime-500 transition duration-150" />
                             </div>
-                            
+
                             <!-- Jenis Kelamin -->
                             <div class="col-span-1">
                                 <label class="flex items-center text-sm font-medium text-gray-700 mb-1">
@@ -240,7 +234,7 @@ const changePassword = () => {
                                     <option>Perempuan</option>
                                 </select>
                             </div>
-                            
+
                             <!-- Tanggal Lahir -->
                             <div class="col-span-1">
                                 <label class="flex items-center text-sm font-medium text-gray-700 mb-1">
@@ -248,7 +242,7 @@ const changePassword = () => {
                                 </label>
                                 <input type="text" v-model="accountForm.birthDate" placeholder="DD/MM/YYYY" class="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-1  focus:ring-lime-500 focus:border-lime-500  transition duration-150" />
                             </div>
-                            
+
                             <!-- Jenis ID -->
                             <div class="col-span-1">
                                 <label class="flex items-center text-sm font-medium text-gray-700 mb-1">
@@ -268,7 +262,7 @@ const changePassword = () => {
                                 </label>
                                 <input type="text" v-model="accountForm.idNumber" class="w-full border border-gray-300 rounded-lg p-3  focus:ring-lime-500 focus:border-lime-500  transition duration-150" />
                             </div>
-                            
+
                             <!-- Kota Asal -->
                             <div class="col-span-1">
                                 <label class="flex items-center text-sm font-medium text-gray-700 mb-1">
@@ -306,7 +300,7 @@ const changePassword = () => {
                             </label>
                             <div class="flex items-center justify-between bg-white p-3 rounded-lg border border-gray-300">
                                 <input type="email" v-model="personalForm.email" class="font-medium w-full border-0 focus:ring-0 p-0" :disabled="personalForm.isEmailVerified"/>
-                                <span v-if="personalForm.isEmailVerified" 
+                                <span v-if="personalForm.isEmailVerified"
                                     :class="['text-xs font-semibold flex items-center gap-1 text-green-600 bg-green-50 px-2 py-0.5 rounded-full']">
                                     <IconCheckCircle class="w-3 h-3"/> Verified
                                 </span>
@@ -315,7 +309,7 @@ const changePassword = () => {
                                 * Email Anda telah diverifikasi dan aktif untuk menerima notifikasi.
                             </p>
                         </div>
-                        
+
                          <!-- Nomor Handphone -->
                         <div class="border-l-4 border-green-400 pl-4 py-2">
                             <label class="flex items-center text-sm font-bold text-gray-700 mb-2">
@@ -324,14 +318,14 @@ const changePassword = () => {
                             <div class="flex items-center justify-between bg-white rounded-lg border border-gray-300 pr-3">
                                 <!-- Input -->
                                 <input type="text" v-model="personalForm.phone" class="font-medium w-full border-0 focus:ring-0 p-3"/>
-                                
+
                                 <div class="flex items-center gap-3">
                                     <!-- Status Verifikasi -->
                                     <span v-if="personalForm.isPhoneVerified"
                                         :class="['text-xs font-semibold flex items-center gap-1 text-green-600 bg-green-50 px-2 py-0.5 rounded-full']">
                                         <IconCheckCircle class="w-3 h-3"/> Verified
                                     </span>
-                                    <button type="button" 
+                                    <button type="button"
                                             class="px-4 py-2 bg-green-50 text-dark text-sm font-semibold rounded-lg hover:bg-purple-100 transition duration-150">
                                         Ubah Nomor
                                     </button>
@@ -354,86 +348,53 @@ const changePassword = () => {
                             </div>
                         </div>
                     </div>
-                    
+
                 </form>
             </div>
             <!-- Other Menu Contents -->
             <div v-else>
-                <!-- Pesanan saya -->
+                <!-- Daftar Pesanan -->
                 <div v-if="activeMenu === 'orders'">
-                    <h2 class="text-xl font-bold mb-4">Pesanan Saya</h2>
+                    <h2 class="text-xl font-bold mb-4">Daftar Pesanan</h2>
                     <div class="space-y-3">
                         <div v-for="o in orders" :key="o.id" class="p-4 border rounded-lg flex justify-between items-center">
                             <div>
                                 <div class="font-semibold">{{ o.title }}</div>
-                                <div class="text-xs text-gray-500">{{ o.date }}</div>
+                                <div class="text-xs text-gray-500">{{ o.date }} - {{ o.user }}</div>
                             </div>
                             <div class="text-sm font-semibold" :class="o.status === 'Selesai' ? 'text-green-600' : 'text-yellow-600'">{{ o.status }}</div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Berita -->
-                <div v-else-if="activeMenu === 'news'">
-                    <h2 class="text-xl font-bold mb-4">Berita & Update</h2>
+                <!-- List Partner -->
+                <div v-else-if="activeMenu === 'partners'">
+                    <h2 class="text-xl font-bold mb-4">List Partner</h2>
                     <div class="space-y-3">
-                        <div v-for="n in newsList" :key="n.id" class="p-4 border rounded-lg">
-                            <div class="font-semibold">{{ n.title }}</div>
-                            <div class="text-sm text-gray-600">{{ n.excerpt }}</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Promo -->
-                <div v-else-if="activeMenu === 'promo'">
-                    <h2 class="text-xl font-bold mb-4">Promo Aktif</h2>
-                    <div class="space-y-3">
-                        <div v-for="p in promos" :key="p.id" class="p-4 border rounded-lg flex justify-between items-center">
+                        <div v-for="p in partners" :key="p.id" class="p-4 border rounded-lg flex justify-between items-center">
                             <div>
-                                <div class="font-semibold">{{ p.code }}</div>
-                                <div class="text-sm text-gray-600">{{ p.desc }}</div>
+                                <div class="font-semibold">{{ p.name }}</div>
+                                <div class="text-sm text-gray-600">{{ p.location }}</div>
                             </div>
-                            <button class="px-3 py-1 bg-green-50 text-green-700 rounded">Salin Kode</button>
+                            <div class="text-sm font-semibold" :class="p.status === 'Active' ? 'text-green-600' : 'text-red-600'">{{ p.status }}</div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Daftar Pembatalan Tiket -->
-                <div v-else-if="activeMenu === 'cancellation'">
-                    <h2 class="text-xl font-bold mb-4">Daftar Pembatalan Tiket</h2>
+                <!-- Laporan -->
+                <div v-else-if="activeMenu === 'reports'">
+                    <h2 class="text-xl font-bold mb-4">Laporan</h2>
                     <div class="space-y-3">
-                        <div v-for="c in cancellations" :key="c.id" class="p-4 border rounded-lg">
-                            <div class="font-semibold">{{ c.order }}</div>
-                            <div class="text-sm text-gray-600">Alasan: {{ c.reason }} — {{ c.date }}</div>
+                        <div v-for="r in reports" :key="r.id" class="p-4 border rounded-lg">
+                            <div class="font-semibold">{{ r.title }}</div>
+                            <div class="text-sm text-gray-600">{{ r.date }} - {{ r.type }}</div>
                         </div>
                     </div>
-                </div>
-
-                <!-- Ubah Kata Sandi -->
-                <div v-else-if="activeMenu === 'password'">
-                    <h2 class="text-xl font-bold mb-4">Ubah Kata Sandi</h2>
-                    <form @submit.prevent="changePassword" class="space-y-4 max-w-md">
-                        <div>
-                            <label class="text-sm font-medium text-gray-700">Kata Sandi Saat Ini</label>
-                            <input type="password" v-model="passwordForm.current" class="w-full border p-3 rounded mt-1" />
-                        </div>
-                        <div>
-                            <label class="text-sm font-medium text-gray-700">Kata Sandi Baru</label>
-                            <input type="password" v-model="passwordForm.password" class="w-full border p-3 rounded mt-1" />
-                        </div>
-                        <div>
-                            <label class="text-sm font-medium text-gray-700">Konfirmasi Kata Sandi</label>
-                            <input type="password" v-model="passwordForm.confirm" class="w-full border p-3 rounded mt-1" />
-                        </div>
-                        <div>
-                            <button type="submit" class="px-4 py-2 rounded bg-[#00C853] text-white font-semibold">Ubah Kata Sandi</button>
-                        </div>
-                    </form>
                 </div>
             </div>
         </section>
     </main>
-    
+
     <!-- AppFooter -->
     <AppFooter />
 </div>

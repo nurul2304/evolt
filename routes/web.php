@@ -8,37 +8,53 @@ use Inertia\Inertia;
 // Ganti atau timpa rute '/' lama dengan yang ini.
 Route::get('/SignUp', function () {
     return Inertia::render('SignUp');
-});
+    });
 Route::get('/Login', function () {
     return Inertia::render('Login');
-});
+    });
 Route::get('/', function () {
     // Memanggil komponen Vue di resources/js/Pages/LandingPage.vue
-    return Inertia::render('LandingPage'); 
-})->name('welcome'); // Tambahkan nama rute 'welcome' agar bisa dipanggil di navbar Vue
+    return Inertia::render('LandingPage');
+    })->name('welcome'); // Tambahkan nama rute 'welcome' agar bisa dipanggil di navbar Vue
 
 // --- Rute Dummy untuk Navigasi ---
 Route::get('/about', function () {
-    return Inertia::render('AboutUs'); 
-})->name('about');
+    return Inertia::render('AboutUs');
+    })->name('about');
 Route::get('/services', function () {
     return Inertia::render('LandingPage');
-})->name('services');
+    })->name('services');
 Route::get('/blog', function () {
     return Inertia::render('LandingPage');
-})->name('blog');
+    })->name('blog');
 Route::get('/map-results', function () {
     return Inertia::render('MapResults');
-});
+    });
 Route::get('/profile', function () {
     return Inertia::render('Profile');
-});
+    })->name('profile');
+Route::get('/admin', function () {
+    return Inertia::render('Admin');
+    })->name('admin');
+Route::get('/admin-panel', function () {
+    return Inertia::render('AdminPanel');
+    })->name('admin-panel');
 
 // --- ROUTE LAINNYA ---
 // Middleware ('auth') DIHAPUS SEMENTARA untuk development frontend
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
-})->name('dashboard');
+    })->name('dashboard');
+
+// Route untuk halaman cetak struk (PrintStrukPembayaran.vue)
+Route::get('/print-struk', function () {
+    $station = request('station');
+    $total = request('total');
+    return Inertia::render('PrintStrukPembayaran', [
+        'station' => $station,
+        'total' => $total
+    ]);
+})->name('print.struk');
 
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';
