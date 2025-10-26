@@ -39,6 +39,9 @@ Route::get('/admin', function () {
 Route::get('/admin-panel', function () {
     return Inertia::render('AdminPanel');
     })->name('admin-panel');
+Route::get('/operator', function () {
+    return Inertia::render('Operator');
+    })->name('operator');
 
 // --- ROUTE LAINNYA ---
 // Middleware ('auth') DIHAPUS SEMENTARA untuk development frontend
@@ -49,12 +52,12 @@ Route::get('/dashboard', function () {
 // Route untuk halaman cetak struk (PrintStrukPembayaran.vue)
 Route::get('/print-struk', function () {
     $station = request('station');
-    $total = request('total');
+    $total   = request('total');
     return Inertia::render('PrintStrukPembayaran', [
         'station' => $station,
-        'total' => $total
+        'total'   => $total
     ]);
-})->name('print.struk');
+    })->name('print.struk');
 
 
 require __DIR__ . '/auth.php';

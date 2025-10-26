@@ -1,5 +1,6 @@
 <script setup>
 import { ref, reactive, computed } from 'vue';
+import { router } from '@inertiajs/vue3';
 
 import AppNavbar from '@/Components/AppNavbar.vue';
 import AppFooter from '@/Components/AppFooter.vue';
@@ -110,9 +111,92 @@ const partners = ref([
     { id: 2, name: 'Partner B', location: 'Jakarta', status: 'Inactive' },
 ]);
 
-const reports = ref([
-    { id: 1, title: 'Laporan Bulanan', date: '2025-10-01', type: 'Revenue' },
-    { id: 2, title: 'Laporan Pengguna', date: '2025-10-05', type: 'User Activity' },
+// Dummy data for operator reports
+const operatorReports = ref([
+  {
+    id: 1,
+    stationName: 'EV Station Batam Centre',
+    week: 'Minggu 1 (Januari)',
+    totalSessions: 150,
+    revenue: 'Rp 2,500,000',
+    status: 'Dikirim',
+  },
+  {
+    id: 2,
+    stationName: 'EV Station Nagoya',
+    week: 'Minggu 1 (Januari)',
+    totalSessions: 120,
+    revenue: 'Rp 1,800,000',
+    status: 'Dikirim',
+  },
+  {
+    id: 3,
+    stationName: 'EV Station Sekupang',
+    week: 'Minggu 1 (Januari)',
+    totalSessions: 80,
+    revenue: 'Rp 1,200,000',
+    status: 'Pending',
+  },
+  {
+    id: 4,
+    stationName: 'EV Station Tanjung Uncang',
+    week: 'Minggu 1 (Januari)',
+    totalSessions: 95,
+    revenue: 'Rp 1,500,000',
+    status: 'Dikirim',
+  },
+  {
+    id: 5,
+    stationName: 'EV Station Batu Aji',
+    week: 'Minggu 1 (Januari)',
+    totalSessions: 110,
+    revenue: 'Rp 1,700,000',
+    status: 'Dikirim',
+  },
+]);
+
+// Dummy data for user reports
+const userReports = ref([
+  {
+    id: 1,
+    userName: 'Ahmad Rahman',
+    email: 'ahmad.rahman@example.com',
+    totalCharges: 25,
+    lastDate: '2024-01-15',
+    status: 'Aktif',
+  },
+  {
+    id: 2,
+    userName: 'Siti Nurhaliza',
+    email: 'siti.nurhaliza@example.com',
+    totalCharges: 18,
+    lastDate: '2024-01-14',
+    status: 'Aktif',
+  },
+  {
+    id: 3,
+    userName: 'Budi Santoso',
+    email: 'budi.santoso@example.com',
+    totalCharges: 32,
+    lastDate: '2024-01-13',
+    status: 'Aktif',
+  },
+  {
+    id: 4,
+    userName: 'Maya Sari',
+    email: 'maya.sari@example.com',
+    totalCharges: 15,
+    lastDate: '2024-01-12',
+    status: 'Tidak Aktif',
+  },
+  {
+    id: 5,
+    userName: 'Rizki Pratama',
+    email: 'rizki.pratama@example.com',
+    totalCharges: 28,
+    lastDate: '2024-01-11',
+    status: 'Aktif',
+  },
 ]);
 
 // Simple password change state (simulasi)
@@ -384,10 +468,79 @@ const changePassword = () => {
                 <!-- Laporan -->
                 <div v-else-if="activeMenu === 'reports'">
                     <h2 class="text-xl font-bold mb-4">Laporan</h2>
-                    <div class="space-y-3">
-                        <div v-for="r in reports" :key="r.id" class="p-4 border rounded-lg">
-                            <div class="font-semibold">{{ r.title }}</div>
-                            <div class="text-sm text-gray-600">{{ r.date }} - {{ r.type }}</div>
+                    <div class="space-y-6">
+                        <!-- Operator Reports -->
+                        <div>
+                            <div class="flex flex-col md:flex-row md:justify-between md:items-center pb-4 mb-6 border-b border-gray-200">
+                                <h3 class="text-lg font-semibold">Laporan Operator</h3>
+                                <button @click="router.visit('/admin-panel')" :class="['mt-4 md:mt-0 w-full md:w-auto px-6 py-2.5 text-sm font-bold rounded-lg transition duration-150 ease-in-out shadow-md', getColorClass('accent')]">
+                                    LIHAT DETAIL
+                                </button>
+                            </div>
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full bg-white border border-gray-300 rounded-lg">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Stasiun</th>
+                                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Minggu</th>
+                                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Sesi</th>
+                                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pendapatan</th>
+                                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-200">
+                                        <tr v-for="report in operatorReports" :key="report.id" class="hover:bg-gray-50">
+                                            <td class="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900">{{ report.stationName }}</td>
+                                            <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">{{ report.week }}</td>
+                                            <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">{{ report.totalSessions }}</td>
+                                            <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">{{ report.revenue }}</td>
+                                            <td class="px-4 py-2 whitespace-nowrap">
+                                                <span :class="['px-2 inline-flex text-xs leading-5 font-semibold rounded-full',
+                                                    report.status === 'Dikirim' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800']">
+                                                    {{ report.status }}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- User Reports -->
+                        <div>
+                            <div class="flex flex-col md:flex-row md:justify-between md:items-center pb-4 mb-6 border-b border-gray-200">
+                                <h3 class="text-lg font-semibold">Laporan Pengguna</h3>
+                                <button @click="router.visit('/admin-panel')" :class="['mt-4 md:mt-0 w-full md:w-auto px-6 py-2.5 text-sm font-bold rounded-lg transition duration-150 ease-in-out shadow-md', getColorClass('accent')]">
+                                    LIHAT DETAIL
+                                </button>
+                            </div>
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full bg-white border border-gray-300 rounded-lg">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Pengguna</th>
+                                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Pengisian</th>
+                                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal Terakhir</th>
+                                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-200">
+                                        <tr v-for="report in userReports" :key="report.id" class="hover:bg-gray-50">
+                                            <td class="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900">{{ report.userName }}</td>
+                                            <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">{{ report.email }}</td>
+                                            <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">{{ report.totalCharges }}</td>
+                                            <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-500">{{ report.lastDate }}</td>
+                                            <td class="px-4 py-2 whitespace-nowrap">
+                                                <span :class="['px-2 inline-flex text-xs leading-5 font-semibold rounded-full',
+                                                    report.status === 'Aktif' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800']">
+                                                    {{ report.status }}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -2,6 +2,7 @@
 import { ref, onMounted, onBeforeUnmount } from 'vue';
 import AppNavbar from '@/Components/AppNavbar.vue';
 import AppFooter from '@/Components/AppFooter.vue';
+import Modal from '@/Components/Modal.vue';
 
 // Data statis untuk tabel "Daftar Stasiun" untuk mencocokkan desain
 const stations = ref([
@@ -13,6 +14,7 @@ const stations = ref([
     hours: '24/7',
     lat: 1.0833,
     lng: 104.0333,
+    city: 'Batam',
   },
   {
     id: 2,
@@ -22,6 +24,7 @@ const stations = ref([
     hours: '06:00-22:00',
     lat: 1.1200,
     lng: 104.0500,
+    city: 'Batam',
   },
   {
     id: 3,
@@ -31,6 +34,7 @@ const stations = ref([
     hours: '08:00-20:00',
     lat: 1.1000,
     lng: 103.9500,
+    city: 'Batam',
   },
   {
     id: 4,
@@ -40,6 +44,7 @@ const stations = ref([
     hours: '24/7',
     lat: 1.1300,
     lng: 104.0600,
+    city: 'Batam',
   },
   {
     id: 5,
@@ -49,6 +54,7 @@ const stations = ref([
     hours: '06:00-22:00',
     lat: 1.0500,
     lng: 104.0200,
+    city: 'Batam',
   },
   {
     id: 6,
@@ -58,6 +64,7 @@ const stations = ref([
     hours: '08:00-20:00',
     lat: 1.0900,
     lng: 104.0400,
+    city: 'Batam',
   },
   {
     id: 7,
@@ -67,6 +74,7 @@ const stations = ref([
     hours: '24/7',
     lat: 1.1100,
     lng: 104.0300,
+    city: 'Batam',
   },
   {
     id: 8,
@@ -76,6 +84,7 @@ const stations = ref([
     hours: '06:00-22:00',
     lat: 1.0700,
     lng: 104.0100,
+    city: 'Batam',
   },
   {
     id: 9,
@@ -85,6 +94,7 @@ const stations = ref([
     hours: '08:00-20:00',
     lat: 1.1400,
     lng: 104.0700,
+    city: 'Batam',
   },
   {
     id: 10,
@@ -94,6 +104,231 @@ const stations = ref([
     hours: '24/7',
     lat: 1.1600,
     lng: 104.0800,
+    city: 'Batam',
+  },
+]);
+
+// Dummy data for operator reports
+const operatorReports = ref([
+  {
+    id: 1,
+    stationName: 'EV Station Batam Centre',
+    week: 'Minggu 1 (Januari)',
+    totalSessions: 150,
+    revenue: 'Rp 2,500,000',
+    status: 'Dikirim',
+  },
+  {
+    id: 2,
+    stationName: 'EV Station Nagoya',
+    week: 'Minggu 1 (Januari)',
+    totalSessions: 120,
+    revenue: 'Rp 1,800,000',
+    status: 'Dikirim',
+  },
+  {
+    id: 3,
+    stationName: 'EV Station Sekupang',
+    week: 'Minggu 1 (Januari)',
+    totalSessions: 80,
+    revenue: 'Rp 1,200,000',
+    status: 'Pending',
+  },
+  {
+    id: 4,
+    stationName: 'EV Station Tanjung Uncang',
+    week: 'Minggu 1 (Januari)',
+    totalSessions: 95,
+    revenue: 'Rp 1,500,000',
+    status: 'Dikirim',
+  },
+  {
+    id: 5,
+    stationName: 'EV Station Batu Aji',
+    week: 'Minggu 1 (Januari)',
+    totalSessions: 110,
+    revenue: 'Rp 1,700,000',
+    status: 'Dikirim',
+  },
+  {
+    id: 6,
+    stationName: 'EV Station Lubuk Baja',
+    week: 'Minggu 1 (Januari)',
+    totalSessions: 90,
+    revenue: 'Rp 1,350,000',
+    status: 'Dikirim',
+  },
+  {
+    id: 7,
+    stationName: 'EV Station Baloi',
+    week: 'Minggu 1 (Januari)',
+    totalSessions: 75,
+    revenue: 'Rp 1,125,000',
+    status: 'Pending',
+  },
+  {
+    id: 8,
+    stationName: 'EV Station Kabil',
+    week: 'Minggu 1 (Januari)',
+    totalSessions: 85,
+    revenue: 'Rp 1,275,000',
+    status: 'Dikirim',
+  },
+  {
+    id: 9,
+    stationName: 'EV Station Sagulung',
+    week: 'Minggu 1 (Januari)',
+    totalSessions: 65,
+    revenue: 'Rp 975,000',
+    status: 'Dikirim',
+  },
+  {
+    id: 10,
+    stationName: 'EV Station Nongsa',
+    week: 'Minggu 1 (Januari)',
+    totalSessions: 100,
+    revenue: 'Rp 1,500,000',
+    status: 'Pending',
+  },
+  {
+    id: 11,
+    stationName: 'EV Station Batam Centre',
+    week: 'Minggu 2 (Januari)',
+    totalSessions: 160,
+    revenue: 'Rp 2,400,000',
+    status: 'Dikirim',
+  },
+  {
+    id: 12,
+    stationName: 'EV Station Nagoya',
+    week: 'Minggu 2 (Januari)',
+    totalSessions: 130,
+    revenue: 'Rp 1,950,000',
+    status: 'Dikirim',
+  },
+  {
+    id: 13,
+    stationName: 'EV Station Sekupang',
+    week: 'Minggu 2 (Januari)',
+    totalSessions: 85,
+    revenue: 'Rp 1,275,000',
+    status: 'Pending',
+  },
+  {
+    id: 14,
+    stationName: 'EV Station Tanjung Uncang',
+    week: 'Minggu 2 (Januari)',
+    totalSessions: 105,
+    revenue: 'Rp 1,575,000',
+    status: 'Dikirim',
+  },
+  {
+    id: 15,
+    stationName: 'EV Station Batu Aji',
+    week: 'Minggu 2 (Januari)',
+    totalSessions: 115,
+    revenue: 'Rp 1,725,000',
+    status: 'Dikirim',
+  },
+]);
+
+// Dummy data for user reports
+const userReports = ref([
+  {
+    id: 1,
+    userName: 'Ahmad Rahman',
+    email: 'ahmad.rahman@example.com',
+    totalCharges: 25,
+    lastDate: '2024-01-15',
+    status: 'Aktif',
+  },
+  {
+    id: 2,
+    userName: 'Siti Nurhaliza',
+    email: 'siti.nurhaliza@example.com',
+    totalCharges: 18,
+    lastDate: '2024-01-14',
+    status: 'Aktif',
+  },
+  {
+    id: 3,
+    userName: 'Budi Santoso',
+    email: 'budi.santoso@example.com',
+    totalCharges: 32,
+    lastDate: '2024-01-13',
+    status: 'Aktif',
+  },
+  {
+    id: 4,
+    userName: 'Maya Sari',
+    email: 'maya.sari@example.com',
+    totalCharges: 15,
+    lastDate: '2024-01-12',
+    status: 'Tidak Aktif',
+  },
+  {
+    id: 5,
+    userName: 'Rizki Pratama',
+    email: 'rizki.pratama@example.com',
+    totalCharges: 28,
+    lastDate: '2024-01-11',
+    status: 'Aktif',
+  },
+  {
+    id: 6,
+    userName: 'Dewi Kartika',
+    email: 'dewi.kartika@example.com',
+    totalCharges: 22,
+    lastDate: '2024-01-10',
+    status: 'Aktif',
+  },
+  {
+    id: 7,
+    userName: 'Hendra Gunawan',
+    email: 'hendra.gunawan@example.com',
+    totalCharges: 19,
+    lastDate: '2024-01-09',
+    status: 'Aktif',
+  },
+  {
+    id: 8,
+    userName: 'Lina Sari',
+    email: 'lina.sari@example.com',
+    totalCharges: 35,
+    lastDate: '2024-01-08',
+    status: 'Aktif',
+  },
+  {
+    id: 9,
+    userName: 'Fajar Nugroho',
+    email: 'fajar.nugroho@example.com',
+    totalCharges: 12,
+    lastDate: '2024-01-07',
+    status: 'Tidak Aktif',
+  },
+  {
+    id: 10,
+    userName: 'Rina Amelia',
+    email: 'rina.amelia@example.com',
+    totalCharges: 27,
+    lastDate: '2024-01-06',
+    status: 'Aktif',
+  },
+  {
+    id: 11,
+    userName: 'Tono Widodo',
+    email: 'tono.widodo@example.com',
+    totalCharges: 30,
+    lastDate: '2024-01-05',
+    status: 'Aktif',
+  },
+  {
+    id: 12,
+    userName: 'Sari Indah',
+    email: 'sari.indah@example.com',
+    totalCharges: 16,
+    lastDate: '2024-01-04',
+    status: 'Aktif',
   },
 ]);
 
@@ -205,6 +440,76 @@ const createPinSvg = (color) => {
     </svg>
   `);
 };
+
+// Modal state
+const showModal = ref(false);
+
+// Form data for new station
+const newStation = ref({
+  name: '',
+  chargerType: '',
+  latitude: '',
+  longitude: '',
+  city: '',
+  email: '',
+});
+
+// Function to open modal
+const openAddStationModal = () => {
+  showModal.value = true;
+};
+
+// Function to close modal
+const closeModal = () => {
+  showModal.value = false;
+  // Reset form
+  newStation.value = {
+    name: '',
+    chargerType: '',
+    latitude: '',
+    longitude: '',
+    city: '',
+    email: '',
+  };
+};
+
+// Function to add new station (placeholder for now)
+const addStation = () => {
+  // Here you would typically send data to backend
+  console.log('Adding new station:', newStation.value);
+  // For now, just add to local array
+  const id = stations.value.length + 1;
+  const newStationData = {
+    id,
+    name: newStation.value.name,
+    coords: `${newStation.value.latitude}, ${newStation.value.longitude}`,
+    chargers: [newStation.value.chargerType],
+    hours: '24/7', // Default
+    lat: parseFloat(newStation.value.latitude),
+    lng: parseFloat(newStation.value.longitude),
+    city: newStation.value.city,
+  };
+  stations.value.push(newStationData);
+
+  // Add marker to map if map is loaded
+  if (map && newStationData.lat && newStationData.lng) {
+    const color = getMarkerColor(newStationData.chargers);
+    const pinSvg = createPinSvg(color);
+    const iconUrl = `data:image/svg+xml;charset=UTF-8,${pinSvg}`;
+
+    const customIcon = L.icon({
+      iconUrl,
+      iconSize: [28, 42],
+      iconAnchor: [14, 42],
+      popupAnchor: [0, -38]
+    });
+
+    const marker = L.marker([newStationData.lat, newStationData.lng], { icon: customIcon }).addTo(map);
+    marker.bindPopup(`<div class="font-medium">${newStationData.name}</div><div class="text-sm text-gray-600">${newStationData.coords}</div><div class="text-sm text-gray-500">Status: Aktif</div>`);
+  }
+
+  closeModal();
+};
 </script>
 
 <template>
@@ -292,7 +597,7 @@ const createPinSvg = (color) => {
             </div>
           </div>
           <!-- Placeholder Peta -->
-          <div class="mt-4 bg-lime-50 rounded-lg h-80 flex items-center justify-center relative border border-lime-200" style="background-image: linear-gradient(rgba(0,0,0,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,0.02) 1px, transparent 1px); background-size: 20px 20px;">
+          <div class="mt-4 bg-lime-50 rounded-lg h-80 flex items-center justify-center relative border-2 border-green-500" style="background-image: linear-gradient(rgba(0,0,0,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,0.02) 1px, transparent 1px); background-size: 20px 20px;">
             <div class="absolute inset-0">
               <div class="w-full h-full relative">
                 <!-- Center label -->
@@ -317,7 +622,7 @@ const createPinSvg = (color) => {
                 <p class="text-sm text-gray-500 mt-1">Kelola semua stasiun pengisian EV yang terdaftar</p>
               </div>
               <div class="mt-4 sm:mt-0">
-                <button type="button" class="inline-flex items-center bg-[#00C853] text-white font-semibold px-5 py-2.5 rounded-lg shadow-lg hover:bg-[#00A142] transition duration-300 focus:outline-none focus:ring-4 focus:ring-lime-300">
+                <button type="button" @click="openAddStationModal" class="inline-flex items-center bg-[#00C853] text-white font-semibold px-5 py-2.5 rounded-lg shadow-lg hover:bg-[#00A142] transition duration-300 focus:outline-none focus:ring-4 focus:ring-lime-300">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 -ml-1" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
                   </svg>
@@ -328,9 +633,9 @@ const createPinSvg = (color) => {
           </div>
 
           <!-- Tabel Stasiun -->
-          <div class="overflow-x-auto">
+          <div class="overflow-x-auto max-h-96 overflow-y-auto">
             <table class="min-w-full divide-y divide-gray-200">
-              <thead class="bg-gray-50">
+              <thead class="bg-gray-50 sticky top-0">
                 <tr>
                   <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Stasiun</th>
                   <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Koordinat</th>
@@ -385,8 +690,198 @@ const createPinSvg = (color) => {
           </div>
         </div>
 
+        <!-- Laporan Operator Mingguan -->
+        <div class="mt-8 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
+          <div class="p-6">
+            <div class="flex flex-col sm:flex-row justify-between sm:items-start">
+              <div class="flex-1">
+                <h3 class="text-lg font-semibold text-gray-900">Laporan Operator Mingguan</h3>
+                <p class="text-sm text-gray-500 mt-1">Laporan mingguan dari operator stasiun pengisian</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tabel Laporan Operator -->
+          <div class="overflow-x-auto max-h-96 overflow-y-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50 sticky top-0">
+                <tr>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Stasiun</th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Minggu</th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Sesi</th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pendapatan</th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200">
+                <tr v-for="report in operatorReports" :key="report.id" class="hover:bg-gray-50 transition-colors duration-150">
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm font-medium text-gray-900">{{ report.stationName }}</div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm text-gray-700">{{ report.week }}</div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm text-gray-700">{{ report.totalSessions }}</div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm text-gray-700">{{ report.revenue }}</div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="px-2.5 py-0.5 rounded-full text-xs font-medium"
+                          :class="report.status === 'Dikirim' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'">
+                      {{ report.status }}
+                    </span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Laporan Pengguna -->
+        <div class="mt-8 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
+          <div class="p-6">
+            <div class="flex flex-col sm:flex-row justify-between sm:items-start">
+              <div class="flex-1">
+                <h3 class="text-lg font-semibold text-gray-900">Laporan Pengguna</h3>
+                <p class="text-sm text-gray-500 mt-1">Laporan aktivitas pengisian pengguna</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tabel Laporan Pengguna -->
+          <div class="overflow-x-auto max-h-96 overflow-y-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50 sticky top-0">
+                <tr>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Pengguna</th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Pengisian</th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal Terakhir</th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200">
+                <tr v-for="report in userReports" :key="report.id" class="hover:bg-gray-50 transition-colors duration-150">
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm font-medium text-gray-900">{{ report.userName }}</div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm text-gray-700">{{ report.email }}</div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm text-gray-700">{{ report.totalCharges }}</div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm text-gray-700">{{ report.lastDate }}</div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="px-2.5 py-0.5 rounded-full text-xs font-medium"
+                          :class="report.status === 'Aktif' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'">
+                      {{ report.status }}
+                    </span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
       </div>
     </main>
+
+    <!-- Modal for adding new station -->
+    <Modal :show="showModal" @close="closeModal">
+      <div class="p-6">
+        <h3 class="text-lg font-medium text-gray-900 mb-4">Tambah Stasiun Baru</h3>
+        <form @submit.prevent="addStation" class="space-y-4">
+          <div>
+            <label for="name" class="block text-sm font-medium text-gray-700">Nama Stasiun</label>
+            <input
+              v-model="newStation.name"
+              type="text"
+              id="name"
+              class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-lime-500 focus:border-lime-500"
+              required
+            />
+          </div>
+          <div>
+            <label for="chargerType" class="block text-sm font-medium text-gray-700">Jenis Charger</label>
+            <select
+              v-model="newStation.chargerType"
+              id="chargerType"
+              class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-lime-500 focus:border-lime-500"
+              required
+            >
+              <option value="">Pilih Jenis Charger</option>
+              <option value="Regular">Regular</option>
+              <option value="Fast">Fast</option>
+              <option value="Ultra Fast">Ultra Fast</option>
+            </select>
+          </div>
+          <div>
+            <label for="city" class="block text-sm font-medium text-gray-700">Kota</label>
+            <input
+              v-model="newStation.city"
+              type="text"
+              id="city"
+              class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-lime-500 focus:border-lime-500"
+              required
+            />
+          </div>
+          <div>
+            <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+            <input
+              v-model="newStation.email"
+              type="email"
+              id="email"
+              class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-lime-500 focus:border-lime-500"
+              required
+            />
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label for="latitude" class="block text-sm font-medium text-gray-700">Latitude</label>
+              <input
+                v-model="newStation.latitude"
+                type="number"
+                step="0.0001"
+                id="latitude"
+                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-lime-500 focus:border-lime-500"
+                required
+              />
+            </div>
+            <div>
+              <label for="longitude" class="block text-sm font-medium text-gray-700">Longitude</label>
+              <input
+                v-model="newStation.longitude"
+                type="number"
+                step="0.0001"
+                id="longitude"
+                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-lime-500 focus:border-lime-500"
+                required
+              />
+            </div>
+          </div>
+          <div class="flex justify-end space-x-3">
+            <button
+              type="button"
+              @click="closeModal"
+              class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+            >
+              Batal
+            </button>
+            <button
+              type="submit"
+              class="px-4 py-2 bg-[#00C853] text-white rounded-md text-sm font-medium hover:bg-[#00A142]"
+            >
+              Tambah Stasiun
+            </button>
+          </div>
+        </form>
+      </div>
+    </Modal>
 
     <AppFooter />
   </div>
