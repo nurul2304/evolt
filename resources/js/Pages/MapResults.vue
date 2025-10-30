@@ -88,24 +88,32 @@ const submitSearch = () => {
 };
 
 const stations = ref([
-    { id: 1, name: 'SPKLU Nagoya Hill', location: 'Nagoya Hill, Batam', chargerType: 'DC Fast', power: '80 kW', status: 'Tersedia', bookingTime: '2025-10-22 12:00', duration: '60 menit', price: 50000, serviceFee: 10000, isBookable: true, bookingNumber: 'BK1001', lat: 1.1324, lng: 104.0383 },
-    { id: 2, name: 'SPKLU Mega Mall Batam', location: 'Mega Mall, Batam Center', chargerType: 'AC Standard', power: '22 kW', status: 'Tersedia', bookingTime: '2025-10-22 12:30', duration: '60 menit', price: 40000, serviceFee: 8000, isBookable: true, bookingNumber: 'BK1002', lat: 1.1225, lng: 104.0417 },
-    { id: 3, name: 'SPKLU Harbour Bay', location: 'Harbour Bay, Batam', chargerType: 'DC Fast', power: '100 kW', status: 'Penuh', bookingTime: '2025-10-22 14:00', duration: '30 menit', price: 120000, serviceFee: 15000, isBookable: false, bookingNumber: 'BK1003', lat: 1.1145, lng: 104.0522 },
-    { id: 4, name: 'SPKLU Batam Center', location: 'Batam Center', chargerType: 'Tipe 2', power: '50 kW', status: 'Tersedia', bookingTime: '2025-10-22 10:00', duration: '90 menit', price: 60000, serviceFee: 12000, isBookable: true, bookingNumber: 'BK1004', lat: 1.1278, lng: 104.0302 },
-    { id: 5, name: 'SPKLU Batam City Square', location: 'Batam City Square', chargerType: 'AC Standard', power: '11 kW', status: 'Penuh', bookingTime: '2025-10-22 10:00', duration: '90 menit', price: 30000, serviceFee: 8000, isBookable: false, bookingNumber: 'BK1005', lat: 1.1210, lng: 104.0335 },
-    { id: 6, name: 'SPKLU Kepri Mall', location: 'Kepri Mall', chargerType: 'AC Standard', power: '22 kW', status: 'Tersedia', bookingTime: '2025-10-22 11:00', duration: '60 menit', price: 45000, serviceFee: 9000, isBookable: true, bookingNumber: 'BK1006', lat: 1.1122, lng: 104.0450 },
-    { id: 7, name: 'SPKLU Batam View', location: 'Batam View', chargerType: 'DC Fast', power: '80 kW', status: 'Tersedia', bookingTime: '2025-10-22 13:00', duration: '45 menit', price: 90000, serviceFee: 10000, isBookable: true, bookingNumber: 'BK1007', lat: 1.1390, lng: 104.0480 },
+    { id: 1, name: 'SPKLU Nagoya Hill', location: 'Nagoya Hill, Batam', distance: '2.5km', chargers: ['Fast'], power: '80 kW', status: 'Tersedia', bookingTime: '2025-10-22 12:00', duration: '60 menit', price: 50000, serviceFee: 10000, isBookable: true, bookingNumber: 'BK1001', lat: 1.1324, lng: 104.0383 },
+    { id: 2, name: 'SPKLU Mega Mall Batam', location: 'Mega Mall, Batam Center', distance: '1.2km', chargers: ['Regular'], power: '22 kW', status: 'Tersedia', bookingTime: '2025-10-22 12:30', duration: '60 menit', price: 40000, serviceFee: 8000, isBookable: true, bookingNumber: 'BK1002', lat: 1.1225, lng: 104.0417 },
+    { id: 3, name: 'SPKLU Harbour Bay', location: 'Harbour Bay, Batam', distance: '3.8km', chargers: ['Fast', 'Ultra Fast'], power: '100 kW', status: 'Penuh', bookingTime: '2025-10-22 14:00', duration: '30 menit', price: 120000, serviceFee: 15000, isBookable: false, bookingNumber: 'BK1003', lat: 1.1145, lng: 104.0522 },
+    { id: 4, name: 'SPKLU Batam Center', location: 'Batam Center', distance: '0.5km', chargers: ['Regular'], power: '50 kW', status: 'Tersedia', bookingTime: '2025-10-22 10:00', duration: '90 menit', price: 60000, serviceFee: 12000, isBookable: true, bookingNumber: 'BK1004', lat: 1.1278, lng: 104.0302 },
+    { id: 5, name: 'SPKLU Batam City Square', location: 'Batam City Square', distance: '1.8km', chargers: ['Regular'], power: '11 kW', status: 'Penuh', bookingTime: '2025-10-22 10:00', duration: '90 menit', price: 30000, serviceFee: 8000, isBookable: false, bookingNumber: 'BK1005', lat: 1.1210, lng: 104.0335 },
+    { id: 6, name: 'SPKLU Kepri Mall', location: 'Kepri Mall', distance: '2.1km', chargers: ['Regular'], power: '22 kW', status: 'Tersedia', bookingTime: '2025-10-22 11:00', duration: '60 menit', price: 45000, serviceFee: 9000, isBookable: true, bookingNumber: 'BK1006', lat: 1.1122, lng: 104.0450 },
+    { id: 7, name: 'SPKLU Batam View', location: 'Batam View', distance: '4.0km', chargers: ['Ultra Fast'], power: '150 kW', status: 'Tersedia', bookingTime: '2025-10-22 13:00', duration: '45 menit', price: 90000, serviceFee: 10000, isBookable: true, bookingNumber: 'BK1007', lat: 1.1390, lng: 104.0480 },
     // SPKLU Kabil removed per request
-    { id: 9, name: 'SPKLU Tiban', location: 'Tiban', chargerType: 'DC Fast', power: '50 kW', status: 'Penuh', bookingTime: '2025-10-22 15:00', duration: '30 menit', price: 80000, serviceFee: 10000, isBookable: false, bookingNumber: 'BK1009', lat: 1.0956, lng: 104.0103 },
-    { id: 10, name: 'SPKLU Sekupang', location: 'Sekupang', chargerType: 'AC Standard', power: '22 kW', status: 'Tersedia', bookingTime: '2025-10-22 08:00', duration: '60 menit', price: 35000, serviceFee: 7000, isBookable: true, bookingNumber: 'BK1010', lat: 1.0552, lng: 103.9824 },
-    { id: 11, name: 'SPKLU Batu Ampar', location: 'Batu Ampar', chargerType: 'AC Standard', power: '11 kW', status: 'Tersedia', bookingTime: '2025-10-22 10:30', duration: '90 menit', price: 30000, serviceFee: 7000, isBookable: true, bookingNumber: 'BK1011', lat: 1.0873, lng: 104.0128 },
-    { id: 12, name: 'SPKLU Nagoya City', location: 'Nagoya City', chargerType: 'DC Fast', power: '80 kW', status: 'Tersedia', bookingTime: '2025-10-22 12:45', duration: '60 menit', price: 100000, serviceFee: 12000, isBookable: true, bookingNumber: 'BK1012', lat: 1.1290, lng: 104.0405 },
-    { id: 13, name: 'SPKLU Batam Harbor', location: 'Batam Harbor', chargerType: 'DC Fast', power: '100 kW', status: 'Penuh', bookingTime: '2025-10-22 14:30', duration: '30 menit', price: 150000, serviceFee: 15000, isBookable: false, bookingNumber: 'BK1013', lat: 1.1067, lng: 104.0622 },
-    { id: 14, name: 'SPKLU Gajah Mada', location: 'Gajah Mada, Batam', chargerType: 'AC Standard', power: '22 kW', status: 'Tersedia', bookingTime: '2025-10-22 09:30', duration: '60 menit', price: 40000, serviceFee: 8000, isBookable: true, bookingNumber: 'BK1014', lat: 1.1255, lng: 104.0280 },
-    { id: 15, name: 'SPKLU Waterfront City', location: 'Waterfront City', chargerType: 'AC Standard', power: '22 kW', status: 'Tersedia', bookingTime: '2025-10-22 11:15', duration: '60 menit', price: 45000, serviceFee: 9000, isBookable: true, bookingNumber: 'BK1015', lat: 1.1312, lng: 104.0588 },
+    { id: 9, name: 'SPKLU Tiban', location: 'Tiban', distance: '5.5km', chargers: ['Fast'], power: '50 kW', status: 'Penuh', bookingTime: '2025-10-22 15:00', duration: '30 menit', price: 80000, serviceFee: 10000, isBookable: false, bookingNumber: 'BK1009', lat: 1.0956, lng: 104.0103 },
+    { id: 10, name: 'SPKLU Sekupang', location: 'Sekupang', distance: '7.2km', chargers: ['Regular'], power: '22 kW', status: 'Tersedia', bookingTime: '2025-10-22 08:00', duration: '60 menit', price: 35000, serviceFee: 7000, isBookable: true, bookingNumber: 'BK1010', lat: 1.0552, lng: 103.9824 },
+    { id: 11, name: 'SPKLU Batu Ampar', location: 'Batu Ampar', distance: '6.0km', chargers: ['Regular'], power: '11 kW', status: 'Tersedia', bookingTime: '2025-10-22 10:30', duration: '90 menit', price: 30000, serviceFee: 7000, isBookable: true, bookingNumber: 'BK1011', lat: 1.0873, lng: 104.0128 },
+    { id: 12, name: 'SPKLU Nagoya City', location: 'Nagoya City', distance: '2.8km', chargers: ['Fast'], power: '80 kW', status: 'Tersedia', bookingTime: '2025-10-22 12:45', duration: '60 menit', price: 100000, serviceFee: 12000, isBookable: true, bookingNumber: 'BK1012', lat: 1.1290, lng: 104.0405 },
+    { id: 13, name: 'SPKLU Batam Harbor', location: 'Batam Harbor', distance: '4.5km', chargers: ['Fast'], power: '100 kW', status: 'Penuh', bookingTime: '2025-10-22 14:30', duration: '30 menit', price: 150000, serviceFee: 15000, isBookable: false, bookingNumber: 'BK1013', lat: 1.1067, lng: 104.0622 },
+    { id: 14, name: 'SPKLU Gajah Mada', location: 'Gajah Mada, Batam', distance: '1.5km', chargers: ['Regular'], power: '22 kW', status: 'Tersedia', bookingTime: '2025-10-22 09:30', duration: '60 menit', price: 40000, serviceFee: 8000, isBookable: true, bookingNumber: 'BK1014', lat: 1.1255, lng: 104.0280 },
+    { id: 15, name: 'SPKLU Waterfront City', location: 'Waterfront City', distance: '3.2km', chargers: ['Regular'], power: '22 kW', status: 'Tersedia', bookingTime: '2025-10-22 11:15', duration: '60 menit', price: 45000, serviceFee: 9000, isBookable: true, bookingNumber: 'BK1015', lat: 1.1312, lng: 104.0588 },
 ]);
 
 const availableStations = computed(() => stations.value.filter(s => s.status === 'Tersedia'));
+
+const nearestStations = computed(() => {
+    return stations.value.filter(s => s.status === 'Tersedia').slice().sort((a, b) => {
+        const distA = parseFloat(a.distance.replace('km', ''));
+        const distB = parseFloat(b.distance.replace('km', ''));
+        return distA - distB;
+    });
+});
 
 let map = null;
 
@@ -274,10 +282,21 @@ onMounted(async () => {
             popupAnchor: [0, -38]
         });
 
-        // add markers for available stations with coordinates using custom icon
+        // add markers for available stations with coordinates using dynamic colored icons
         stations.value.filter(s => s.status === 'Tersedia' && s.lat && s.lng).forEach(s => {
+            const color = getMarkerColor(s.chargers);
+            const pinSvg = createPinSvg(color);
+            const iconUrl = `data:image/svg+xml;charset=UTF-8,${pinSvg}`;
+
+            const customIcon = L.icon({
+                iconUrl,
+                iconSize: [28, 42],
+                iconAnchor: [14, 42],
+                popupAnchor: [0, -38]
+            });
+
             const marker = L.marker([s.lat, s.lng], { icon: customIcon }).addTo(map);
-            marker.bindPopup(`<div class="font-medium">${s.name}</div><div class="text-sm text-gray-600">${s.location}</div><div class="text-sm text-gray-500">Status: ${s.status}</div>`);
+            marker.bindPopup(`<div class="font-medium">${s.name}</div><div class="text-sm text-gray-600">${s.location}</div><div class="text-sm text-gray-500">Status: ${s.status}</div><div class="text-sm" style="color: ${getMarkerColor(s.chargers)};">Charger: ${s.chargers.join(', ')}</div>`);
         });
     } catch (err) {
         console.error('Failed to load Leaflet:', err);
@@ -372,6 +391,24 @@ const formatBookingDate = (dateTime) => {
     const [date, time] = dateTime.split(' ');
     return `${date} ${time}`;
 };
+
+// Helper function untuk mendapatkan warna marker berdasarkan jenis charger tertinggi
+const getMarkerColor = (chargers) => {
+    if (chargers.includes('Ultra Fast')) return '#9333ea'; // purple-600
+    if (chargers.includes('Fast')) return '#3b82f6'; // blue-500
+    if (chargers.includes('Regular')) return '#22c55e'; // green-500
+    return '#00C853'; // default green
+};
+
+// Helper function untuk membuat SVG pin dengan warna dinamis
+const createPinSvg = (color) => {
+    return encodeURIComponent(`
+        <svg width="32" height="48" viewBox="0 0 24 36" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 0C7 0 3.5 3.5 3.5 8.5 3.5 15.5 12 25.5 12 25.5s8.5-10 8.5-17C20.5 3.5 17 0 12 0z" fill="${color}"/>
+            <circle cx="12" cy="8.5" r="3.5" fill="white"/>
+        </svg>
+    `);
+};
 </script>
 
 <template>
@@ -414,23 +451,21 @@ const formatBookingDate = (dateTime) => {
                     </div>
                 </div>
 
-                <h2 class="text-2xl font-medium text-gray-800 mb-6">Stasiun Charging Tersedia</h2>
+                <h2 class="text-2xl font-medium text-gray-800 mb-6">Stasiun Charging Terdekat</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <div v-for="station in availableStations" :key="station.id"
+                    <div v-for="station in nearestStations" :key="station.id"
                          class="bg-white p-6 rounded-xl shadow-lg border border-gray-100 transition duration-300 hover:shadow-xl relative"
                          :class="{ 'border-[#00C853] ring-1 ring-[#00C853]': selectedStation && selectedStation.id === station.id && (showQrisPaymentModal || showReceiptModal) }">
-                        
-                        <div :class="[
-                            'absolute top-0 right-0 m-4 px-4 py-1 rounded-lg text-sm font-medium z-10',
-                            station.status === 'Tersedia' ? 'bg-[#00C853] text-white' : 'bg-red-600 text-white'
-                        ]">
-                            {{ station.status }}
-                        </div>
-                        
+
+
+
                         <h2 class="text-xl font-semibold text-gray-900 mb-1">{{ station.name }}</h2>
-                            <div class="flex items-center text-sm text-gray-500 mb-4">
-                                <i class="fas fa-map-marker-alt mr-2"></i>
-                                {{ station.location }}
+                            <div class="flex items-center justify-between text-sm text-gray-500 mb-4">
+                                <div class="flex items-center">
+                                    <i class="fas fa-map-marker-alt mr-2"></i>
+                                    {{ station.location }}
+                                </div>
+                                <span>{{ station.distance }}</span>
                             </div>
 
                         <div class="space-y-2 mb-6 text-sm">
@@ -440,7 +475,7 @@ const formatBookingDate = (dateTime) => {
                                     <i class="fas fa-bolt mr-2 text-yellow-600"></i>
                                     <span>Jenis Charger:</span>
                                 </div>
-                                <div class="text-left font-medium">{{ station.chargerType }} &bull; {{ station.power }}</div>
+                                <div class="text-left font-medium">{{ station.chargers.join(', ') }} &bull; {{ station.power }}</div>
                             </div>
                             <div class="grid grid-cols-2 gap-4 items-center text-gray-700">
                                 <div class="flex items-center font-medium text-gray-900">
@@ -465,9 +500,9 @@ const formatBookingDate = (dateTime) => {
                                 <span class="text-gray-900">{{ formatRupiah(calculateTotal(station.price, station.serviceFee)) }}</span>
                             </div>
                         </div>
-                        
+
                         <div class="mt-4">
-                            <button 
+                            <button
                                 @click="reserveStation(station.id)"
                                 :disabled="!station.isBookable"
                                 :class="[
@@ -747,7 +782,7 @@ const formatBookingDate = (dateTime) => {
                                 </div>
                                 <div class="flex items-center">
                                     <i class="fas fa-bolt text-yellow-600 mr-3"></i>
-                                    <p class="text-sm text-gray-600">Jenis Charger: **{{ selectedStation.chargerType }}** &bull; **{{ selectedStation.power }}**</p>
+                                    <p class="text-sm text-gray-600">Jenis Charger: **{{ selectedStation.chargers.join(', ') }}** &bull; **{{ selectedStation.power }}**</p>
                                 </div>
                             </div>
 
@@ -811,7 +846,7 @@ const formatBookingDate = (dateTime) => {
                                 </div>
                                 <div class="flex items-center">
                                     <i class="fas fa-bolt text-yellow-600 mr-3"></i>
-                                    <p class="text-sm text-gray-600">Jenis Charger: **{{ selectedStation.chargerType }}** &bull; **{{ selectedStation.power }}**</p>
+                                    <p class="text-sm text-gray-600">Jenis Charger: **{{ selectedStation.chargers.join(', ') }}** &bull; **{{ selectedStation.power }}**</p>
                                 </div>
                             </div>
 

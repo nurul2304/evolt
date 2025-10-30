@@ -417,7 +417,7 @@ const getChargerClass = (type) => {
     case 'Ultra Fast':
       return 'bg-purple-100 text-purple-800';
     case 'Regular':
-      return 'bg-gray-100 text-gray-800';
+      return 'bg-green-100 text-green-800';
     default:
       return 'bg-gray-100 text-gray-800';
   }
@@ -427,7 +427,7 @@ const getChargerClass = (type) => {
 const getMarkerColor = (chargers) => {
   if (chargers.includes('Ultra Fast')) return '#9333ea'; // purple-600
   if (chargers.includes('Fast')) return '#3b82f6'; // blue-500
-  if (chargers.includes('Regular')) return '#6b7280'; // gray-500
+  if (chargers.includes('Regular')) return '#22c55e'; // green-500
   return '#00C853'; // default green
 };
 
@@ -583,7 +583,7 @@ const addStation = () => {
             <div class="flex items-center space-x-4 text-sm mt-3 sm:mt-0">
               <span class="font-medium text-gray-600">Jenis Charger:</span>
               <div class="flex items-center">
-                <span class="h-3 w-3 rounded-full bg-gray-400 mr-1.5"></span>
+                <span class="h-3 w-3 rounded-full bg-green-500 mr-1.5"></span>
                 <span class="text-gray-600">Regular</span>
               </div>
               <div class="flex items-center">
