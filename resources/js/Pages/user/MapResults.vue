@@ -477,13 +477,6 @@ const createPinSvg = (color) => {
                                 </div>
                                 <div class="text-left font-medium">{{ station.chargers.join(', ') }} &bull; {{ station.power }}</div>
                             </div>
-                            <div class="grid grid-cols-2 gap-4 items-center text-gray-700">
-                                <div class="flex items-center font-medium text-gray-900">
-                                    <i class="fas fa-clock mr-2 text-blue-600"></i>
-                                    <span>Waktu Booking:</span>
-                                </div>
-                                <div class="text-left">{{ formatBookingDate(station.bookingTime) }} ({{ station.duration }})</div>
-                            </div>
                         </div>
 
                         <div class="border-t border-gray-100 pt-4 space-y-2 mb-4 text-sm">
@@ -577,42 +570,6 @@ const createPinSvg = (color) => {
                                 </div>
                             </div>
 
-                            <!-- DATE picker (same as LandingPage) -->
-                            <div class="relative">
-                                <label for="date-picker-trigger" class="block text-sm font-medium text-gray-700 mb-1">Tanggal</label>
-                                <div
-                                  id="date-picker-trigger"
-                                  @click.stop="isDateDropdownOpen = !isDateDropdownOpen; isTimeDropdownOpen = false"
-                                  class="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-lime-500 focus:border-lime-500 cursor-pointer flex justify-between items-center bg-white transition duration-150"
-                                  :class="{'ring-2 ring-lime-500 border-lime-500 shadow-md': isDateDropdownOpen}"
-                                >
-                                  <span class="text-gray-800">{{ datePickerText }}</span>
-                                  <svg class="w-5 h-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"></path></svg>
-                                </div>
-
-                                <div v-if="isDateDropdownOpen" @click.stop
-                                     class="date-picker-content absolute top-full mt-2 w-full sm:w-72 p-4 bg-white rounded-xl shadow-2xl border border-gray-100 z-30 left-0 sm:right-0 sm:transform sm:-translate-x-1/4">
-                                  <div class="flex justify-between items-center mb-4">
-                                    <button type="button" @click="prevMonth" class="p-2 rounded-full hover:bg-gray-100">
-                                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
-                                    </button>
-                                    <span class="font-semibold text-gray-900">{{ monthNames[calendarDisplayDate.getMonth()] }} {{ calendarDisplayDate.getFullYear() }}</span>
-                                    <button type="button" @click="nextMonth" class="p-2 rounded-full hover:bg-gray-100">
-                                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-                                    </button>
-                                  </div>
-
-                                  <div class="grid grid-cols-7 text-center gap-1">
-                                    <div v-for="day in dayNames" :key="day" class="text-xs font-semibold text-gray-500">{{ day }}</div>
-                                    <div v-for="(day, index) in calendarDays" :key="index" :class="day.classes" @click="selectDay(day)">
-                                      {{ day.number }}
-                                    </div>
-                                  </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <!-- DOMICILE: custom dropdown -->
                             <div class="relative">
                                 <label for="domicile" class="block text-sm font-medium text-gray-700 mb-1">Domisili</label>
@@ -636,7 +593,9 @@ const createPinSvg = (color) => {
                                     </div>
                                 </div>
                             </div>
+                        </div>
 
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <!-- STATION: custom dropdown -->
                             <div class="relative">
                                 <label for="station" class="block text-sm font-medium text-gray-700 mb-1">Stasiun Charger</label>
@@ -658,33 +617,6 @@ const createPinSvg = (color) => {
                                             {{ opt }}
                                         </div>
                                     </div>
-                                </div>
-                            </div>
-
-                            <!-- TIME picker (same as LandingPage) -->
-                            <div class="relative">
-                                <label for="time-picker-trigger" class="block text-sm font-medium text-gray-700 mb-1">Jam</label>
-                                <div
-                                  id="time-picker-trigger"
-                                  @click.stop="isTimeDropdownOpen = !isTimeDropdownOpen; isDateDropdownOpen = false"
-                                  class="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-lime-500 focus:border-lime-500 cursor-pointer flex justify-between items-center bg-white transition duration-150"
-                                  :class="{'ring-2 ring-lime-500 border-lime-500 shadow-md': isTimeDropdownOpen}"
-                                >
-                                  <span class="text-gray-800">{{ selectedTime || 'Pilih Jam' }}</span>
-                                  <svg class="w-5 h-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l3 3a1 1 0 001.414-1.414L10 10.586V6z" clip-rule="evenodd"></path></svg>
-                                </div>
-
-                                <div v-if="isTimeDropdownOpen" @click.stop
-                                     class="time-picker-content absolute top-full mt-2 w-full max-h-48 overflow-y-auto bg-white rounded-xl shadow-2xl border border-gray-100 z-30 left-0">
-                                  <div v-for="slot in timeSlots" :key="slot.time"
-                                       :class="{
-                                         'p-2 hover:bg-lime-100 cursor-pointer transition duration-100': !slot.isDisabled,
-                                         'text-gray-400 cursor-not-allowed bg-gray-50': slot.isDisabled,
-                                         'bg-lime-50 text-lime-800 font-semibold': slot.time === selectedTime
-                                       }"
-                                       @click="selectTime(slot)">
-                                    {{ slot.time }}
-                                  </div>
                                 </div>
                             </div>
                         </div>
