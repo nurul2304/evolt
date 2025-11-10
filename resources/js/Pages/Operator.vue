@@ -1,6 +1,6 @@
   <script setup>
 import { ref, computed, onMounted } from 'vue';
-import AppFooter from '@/Components/AppFooter.vue';
+import Footer from '@/Components/Footer.vue';
 import Modal from '@/Components/Modal.vue';
 
 // Verification state
@@ -219,7 +219,7 @@ onMounted(() => {
   <div class="min-h-screen flex flex-col bg-gray-50">
     <!-- Verification Modal -->
     <div class="fixed inset-0 bg-[#B6F500] bg-opacity-90 flex items-center justify-center z-50" v-if="showVerificationModal">
-      <div class="bg-white rounded-lg shadow-lg p-8 max-w-md w-full mx-4 border border-[#00C853]">
+      <div class="bg-white rounded-lg shadow-lg p-8 max-w-md w-full mx-4 border border-[#ffffff]">
         <h3 class="text-xl font-bold text-gray-900 mb-2 text-center">Verifikasi Akses</h3>
         <p class="text-sm text-gray-600 mb-6 text-center">Masukkan kode verifikasi untuk mengakses halaman Operator.</p>
         <form @submit.prevent="verifyCode" class="space-y-6">
@@ -503,7 +503,7 @@ onMounted(() => {
       </div>
     </Modal>
 
-    <AppFooter />
+    <Footer />
     </div>
   </div>
 </template>

@@ -1,7 +1,8 @@
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
-import AppNavbar from '@/Components/AppNavbar.vue';
-import AppFooter from '@/Components/AppFooter.vue';
+import { Link } from '@inertiajs/vue3';
+import Navbar from '@/Components/NavbarUser.vue';
+import Footer from '@/Components/Footer.vue';
 
 // Reactive state for the form
 const formState = ref({
@@ -226,7 +227,7 @@ onBeforeUnmount(() => {
 
 <template>
   <div class="min-h-screen flex flex-col">
-    <AppNavbar />
+    <Navbar />
 
     <main class="flex-grow relative z-0"> 
       
@@ -236,8 +237,9 @@ onBeforeUnmount(() => {
             
             <div class="lg:w-1/2 mb-12 lg:mb-0 lg:pr-10">
               <h2 class="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-[#333] leading-tight mb-4">
-                Menghubungkan <span class="text-[#398300]">pengendara</span> Dengan Stasiun Pengecasan Cerdas
+                Selamat Datang di Dashboard Anda
               </h2>
+              <h3 class="text-2xl sm:text-3xl font-semibold text-[#333]">Gunakan form di bawah ini untuk mencari stasiun pengisian daya yang tersedia</h3>
             </div>
 
             <div class="lg:w-1/2 flex justify-center lg:justify-end">
@@ -250,7 +252,8 @@ onBeforeUnmount(() => {
           </div>
         </div>
 
-        <div class="absolute left-1/2 bottom-0 transform -translate-x-1/2 translate-y-1/2 w-full max-w-6xl px-4 sm:px-6 lg:px-8 z-20">
+        <!-- Search Form -->
+        <div class="static mt-8 lg:absolute lg:left-1/2 lg:bottom-0 lg:transform lg:-translate-x-1/2 lg:translate-y-1/2 w-full max-w-6xl px-4 sm:px-6 lg:px-8 z-20">
           <form @submit.prevent="searchStations" class="bg-white p-6 md:p-8 rounded-2xl shadow-2xl border border-gray-100">
             <h3 class="text-xl font-semibold text-gray-800 mb-6">Cari EV Charge Station</h3>
             
@@ -415,38 +418,21 @@ onBeforeUnmount(() => {
             </div>
             
             <div class="text-end mt-6">
-                <button type="submit" class="inline-block bg-[#00C853] text-white font-semibold px-8 py-3 rounded-lg shadow-lg hover:bg-[#00A142] transition duration-300 focus:outline-none focus:ring-4 focus:ring-lime-300">
+                <Link href="/map-results" class="inline-block bg-[#00C853] text-white font-semibold px-8 py-3 rounded-lg shadow-lg hover:bg-[#00A142] transition duration-300 focus:outline-none focus:ring-4 focus:ring-lime-300">
                   Cari Jadwal
-                </button>
+                </Link>
             </div>
           </form>
         </div>
       </section>
-
-      <section class="pt-48 pb-24 bg-gray-100">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 class="text-2xl font-semibold text-gray-700">Selamat Datang di Dasbor Anda</h2>
-            <p class="mt-2 text-gray-500">Gunakan form di atas untuk mencari stasiun pengisian daya yang tersedia.</p>
-        </div>
-      </section>
       
-      <section class="py-16 bg-white">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h3 class="text-xl font-medium text-gray-500 mb-10">
-            Dipercaya oleh banyak perusahaan hebat
-          </h3>
-          <div class="flex flex-wrap justify-center items-center gap-8 md:gap-16 grayscale opacity-60">
-            <img src="https://cdn.worldvectorlogo.com/logos/tesla-9.svg" alt="Tesla Logo" class="h-10 transition duration-300 hover:grayscale-0 hover:opacity-100">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/e/e2/BYD_Auto_2022_logo.svg" alt="BYD Logo" class="h-10 transition duration-300 hover:grayscale-0 hover:opacity-100">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/4/44/Hyundai_Motor_Company_logo.svg" alt="Hyundai Logo" class="h-10 transition duration-300 hover:grayscale-0 hover:opacity-100">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/b/b6/KIA_logo3.svg" alt="Kia Logo" class="h-10 transition duration-300 hover:grayscale-0 hover:opacity-100">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/1/16/Wuling-logo.svg" alt="Wuling Logo" class="h-10 transition duration-300 hover:grayscale-0 hover:opacity-100">
-          </div>
+      <section class="pt-16 sm:pt-64 lg:pt-50 pb-24 lg:pb-32 bg-white"> 
+        <div class="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 text-center">
         </div>
       </section>
 
     </main>
 
-    <AppFooter />
+    <Footer />
   </div>
 </template>

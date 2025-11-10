@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-screen flex flex-col bg-gray-50">
-    <AppNavbar />
+    <Navbar />
 
     <main class="flex-grow">
       <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -60,8 +60,8 @@
           </div>
 
           <div class="pt-6 space-y-3">
-            <button @click="doDownload" type="button" class="w-full py-3 bg-blue-600 text-white font-medium rounded-xl hover:bg-blue-700 transition duration-300 shadow-md">
-              Unduh Struk
+            <button @click="doDownload" type="button" class="w-full py-3 bg-[#00C853] text-white font-medium rounded-xl hover:bg-[#00A142] transition duration-300 shadow-md">
+              Unduh PDF
             </button>
             <button @click="goBack" type="button" class="w-full py-3 text-gray-700 border border-gray-200 rounded-xl hover:bg-gray-50">
               Kembali
@@ -71,7 +71,7 @@
       </div>
     </main>
 
-    <AppFooter />
+    <Footer />
   </div>
 </template>
 

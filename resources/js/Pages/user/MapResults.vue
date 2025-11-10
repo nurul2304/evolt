@@ -1,8 +1,8 @@
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 
-import AppNavbar from '@/Components/AppNavbar.vue';
-import AppFooter from '@/Components/AppFooter.vue';
+import Navbar from '@/Components/NavbarUser.vue';
+import Footer from '@/Components/Footer.vue';
 import PrintStrukPembayaran from '@/Pages/PrintStrukPembayaran.vue';
 
 // -----------------------------------------------------------------------------------
@@ -413,7 +413,7 @@ const createPinSvg = (color) => {
 
 <template>
     <div class="min-h-screen flex flex-col bg-gray-50">
-        <AppNavbar />
+        <Navbar />
 
         <main class="flex-grow">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -451,7 +451,7 @@ const createPinSvg = (color) => {
                     </div>
                 </div>
 
-                <h2 class="text-2xl font-medium text-gray-800 mb-6">Stasiun Charging Terdekat</h2>
+                <h2 class="text-2xl font-semibold text-gray-800 mb-6">Stasiun Charging Terdekat</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     <div v-for="station in nearestStations" :key="station.id"
                          class="bg-white p-6 rounded-xl shadow-lg border border-gray-100 transition duration-300 hover:shadow-xl relative"
@@ -520,7 +520,7 @@ const createPinSvg = (color) => {
             </div>
         </main>
 
-        <AppFooter />
+        <Footer />
         
         <Transition name="fade">
             <div v-if="showSearchModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[99999] p-4" @click.self="closeModal">
