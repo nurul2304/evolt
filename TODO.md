@@ -1,7 +1,2 @@
--   [x] Update verification modal background to white
--   [x] Change modal border to #00C853
--   [x] Adjust text colors for readability on white background
--   [x] Update button color to #00C853
--   [x] Make input text green (#00C853)
--   [x] Fix overlapping text in code input fields
--   [x] Make input display random letters when typing
+-   [x] Remove the "Waktu Booking" row from the station cards in MapResults.vue to hide time and date display, matching the dashboard style.
+-   [x] Verify the changes by checking the station cards no longer show booking time.

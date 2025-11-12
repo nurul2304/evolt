@@ -1,7 +1,7 @@
 <script setup>
 import { Head, Link } from '@inertiajs/vue3';
-import AppNavbar from '@/Components/AppNavbar.vue';
-import AppFooter from '@/Components/AppFooter.vue'; 
+import Navbar from '@/Components/Navbar.vue';
+import Footer from '@/Components/Footer.vue'; 
 
 // --- Data Halaman (Ganti dengan Props Inertia dari Backend Anda) ---
 const teamMembers = [
@@ -29,7 +29,7 @@ const imageUrls = {
 <template>
     <Head title="About Us" />
 
-    <AppNavbar />
+    <Navbar />
     
     <main class="text-gray-800">
 
@@ -45,7 +45,7 @@ const imageUrls = {
                 </div>
 
                 <div class="lg:pt-16 order-1 lg:order-2">
-                    <p class="text-green-500 font-semibold  uppercase mb-2">About us</p>
+                    <p class="text-green-500 font-semibold  uppercase mb-2">Tentang Kami</p>
                     <h3 class="text-3xl sm:text-5xl font-semibold leading-tight text-gray-900 mb-6">
                         Lorem ipsum is simply dummy text of the printing.
                     </h3>
@@ -118,5 +118,5 @@ const imageUrls = {
 
     </main>
     
-    <AppFooter />
+    <Footer />
 </template>

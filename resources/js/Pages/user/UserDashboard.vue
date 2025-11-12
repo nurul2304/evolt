@@ -1,7 +1,8 @@
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
-import AppNavbar from '@/Components/AppNavbar.vue';
-import AppFooter from '@/Components/AppFooter.vue';
+import { Link } from '@inertiajs/vue3';
+import Navbar from '@/Components/NavbarUser.vue';
+import Footer from '@/Components/Footer.vue';
 
 // Reactive state for the form
 const formState = ref({
@@ -226,7 +227,7 @@ onBeforeUnmount(() => {
 
 <template>
   <div class="min-h-screen flex flex-col">
-    <AppNavbar />
+    <Navbar />
 
     <main class="flex-grow relative z-0"> 
       
@@ -236,8 +237,9 @@ onBeforeUnmount(() => {
             
             <div class="lg:w-1/2 mb-12 lg:mb-0 lg:pr-10">
               <h2 class="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-[#333] leading-tight mb-4">
-                Menghubungkan <span class="text-[#398300]">pengendara</span> Dengan Stasiun Pengecasan Cerdas
+                Selamat Datang di Dashboard Anda
               </h2>
+              <h3 class="text-2xl sm:text-3xl font-semibold text-[#333]">Gunakan form di bawah ini untuk mencari stasiun pengisian daya yang tersedia</h3>
             </div>
 
             <div class="lg:w-1/2 flex justify-center lg:justify-end">
@@ -250,11 +252,12 @@ onBeforeUnmount(() => {
           </div>
         </div>
 
-        <div class="absolute left-1/2 bottom-0 transform -translate-x-1/2 translate-y-1/2 w-full max-w-6xl px-4 sm:px-6 lg:px-8 z-20">
+        <!-- Search Form -->
+        <div class="static mt-8 lg:absolute lg:left-1/2 lg:bottom-0 lg:transform lg:-translate-x-1/2 lg:translate-y-1/2 w-full max-w-6xl px-4 sm:px-6 lg:px-8 z-20">
           <form @submit.prevent="searchStations" class="bg-white p-6 md:p-8 rounded-2xl shadow-2xl border border-gray-100">
             <h3 class="text-xl font-semibold text-gray-800 mb-6">Cari EV Charge Station</h3>
             
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               
               <!-- BRAND: custom dropdown -->
               <div class="relative">
@@ -305,38 +308,7 @@ onBeforeUnmount(() => {
               </div>
               
               <!-- DATE picker (leave unchanged) -->
-              <div class="relative">
-                <label for="date-picker-trigger" class="block text-sm font-medium text-gray-700 mb-2">Tanggal</label>
-                <div 
-                  id="date-picker-trigger"
-                  @click.stop="isDateDropdownOpen = !isDateDropdownOpen; isTimeDropdownOpen = false"
-                  class="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-lime-500 focus:border-lime-500 cursor-pointer flex justify-between items-center bg-white transition duration-150"
-                  :class="{'ring-2 ring-lime-500 border-lime-500 shadow-md': isDateDropdownOpen}"
-                >
-                  <span class="text-gray-800">{{ datePickerText }}</span>
-                  <svg class="w-5 h-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"></path></svg>
-                </div>
-
-                <div v-if="isDateDropdownOpen" @click.stop 
-                     class="date-picker-content absolute top-full mt-2 w-full sm:w-72 p-4 bg-white rounded-xl shadow-2xl border border-gray-100 z-30 left-0 sm:right-0 sm:transform sm:-translate-x-1/4">
-                  <div class="flex justify-between items-center mb-4">
-                    <button type="button" @click="prevMonth" class="p-2 rounded-full hover:bg-gray-100">
-                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
-                    </button>
-                    <span class="font-semibold text-gray-900">{{ monthNames[calendarDisplayDate.getMonth()] }} {{ calendarDisplayDate.getFullYear() }}</span>
-                    <button type="button" @click="nextMonth" class="p-2 rounded-full hover:bg-gray-100">
-                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-                    </button>
-                  </div>
-                  
-                  <div class="grid grid-cols-7 text-center gap-1">
-                    <div v-for="day in dayNames" :key="day" class="text-xs font-semibold text-gray-500">{{ day }}</div>
-                    <div v-for="(day, index) in calendarDays" :key="index" :class="day.classes" @click="selectDay(day)">
-                      {{ day.number }}
-                    </div>
-                  </div>
-                </div>
-              </div>
+              
 
               <!-- DOMICILE: custom dropdown -->
               <div class="relative">
@@ -386,67 +358,25 @@ onBeforeUnmount(() => {
                 </div>
               </div>
 
-              <!-- TIME picker (leave unchanged) -->
-              <div class="relative">
-                <label for="time-picker-trigger" class="block text-sm font-medium text-gray-700 mb-2">Jam</label>
-                <div 
-                  id="time-picker-trigger"
-                  @click.stop="isTimeDropdownOpen = !isTimeDropdownOpen; isDateDropdownOpen = false"
-                  class="w-full p-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-lime-500 focus:border-lime-500 cursor-pointer flex justify-between items-center bg-white transition duration-150"
-                  :class="{'ring-2 ring-lime-500 border-lime-500 shadow-md': isTimeDropdownOpen}"
-                >
-                  <span class="text-gray-800">{{ selectedTime || 'Pilih Jam' }}</span>
-                  <svg class="w-5 h-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l3 3a1 1 0 001.414-1.414L10 10.586V6z" clip-rule="evenodd"></path></svg>
-                </div>
-
-                <div v-if="isTimeDropdownOpen" @click.stop
-                     class="time-picker-content absolute top-full mt-2 w-full max-h-48 overflow-y-auto bg-white rounded-xl shadow-2xl border border-gray-100 z-30 left-0">
-                  <div v-for="slot in timeSlots" :key="slot.time"
-                       :class="{
-                         'p-2 hover:bg-lime-100 cursor-pointer transition duration-100': !slot.isDisabled,
-                         'text-gray-400 cursor-not-allowed bg-gray-50': slot.isDisabled,
-                         'bg-lime-50 text-lime-800 font-semibold': slot.time === selectedTime
-                       }"
-                       @click="selectTime(slot)">
-                    {{ slot.time }}
-                  </div>
-                </div>
-              </div>
+              
             </div>
             
             <div class="text-end mt-6">
-                <button type="submit" class="inline-block bg-[#00C853] text-white font-semibold px-8 py-3 rounded-lg shadow-lg hover:bg-[#00A142] transition duration-300 focus:outline-none focus:ring-4 focus:ring-lime-300">
+                <Link href="/map-results" class="inline-block bg-[#00C853] text-white font-semibold px-8 py-3 rounded-lg shadow-lg hover:bg-[#00A142] transition duration-300 focus:outline-none focus:ring-4 focus:ring-lime-300">
                   Cari Jadwal
-                </button>
+                </Link>
             </div>
           </form>
         </div>
       </section>
-
-      <section class="pt-48 pb-24 bg-gray-100">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 class="text-2xl font-semibold text-gray-700">Selamat Datang di Dasbor Anda</h2>
-            <p class="mt-2 text-gray-500">Gunakan form di atas untuk mencari stasiun pengisian daya yang tersedia.</p>
-        </div>
-      </section>
       
-      <section class="py-16 bg-white">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h3 class="text-xl font-medium text-gray-500 mb-10">
-            Dipercaya oleh banyak perusahaan hebat
-          </h3>
-          <div class="flex flex-wrap justify-center items-center gap-8 md:gap-16 grayscale opacity-60">
-            <img src="https://cdn.worldvectorlogo.com/logos/tesla-9.svg" alt="Tesla Logo" class="h-10 transition duration-300 hover:grayscale-0 hover:opacity-100">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/e/e2/BYD_Auto_2022_logo.svg" alt="BYD Logo" class="h-10 transition duration-300 hover:grayscale-0 hover:opacity-100">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/4/44/Hyundai_Motor_Company_logo.svg" alt="Hyundai Logo" class="h-10 transition duration-300 hover:grayscale-0 hover:opacity-100">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/b/b6/KIA_logo3.svg" alt="Kia Logo" class="h-10 transition duration-300 hover:grayscale-0 hover:opacity-100">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/1/16/Wuling-logo.svg" alt="Wuling Logo" class="h-10 transition duration-300 hover:grayscale-0 hover:opacity-100">
-          </div>
+      <section class="pt-16 sm:pt-64 lg:pt-50 pb-24 lg:pb-32 bg-white"> 
+        <div class="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 text-center">
         </div>
       </section>
 
     </main>
 
-    <AppFooter />
+    <Footer />
   </div>
 </template>
