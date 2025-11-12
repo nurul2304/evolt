@@ -6,25 +6,12 @@
       </div>
       <h1 class="welcome-title">Welcome back to the E-Volt Community</h1>
 
-      <div class="social-login">
-        <button class="social-btn">
-          <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google">
-          <span>Log in with Google</span>
-        </button>
-        <button class="social-btn">
-          <img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Octicons-mark-github.svg" alt="Github">
-          <span>Log in with Github</span>
-        </button>
-      </div>
-
-      <!-- Menampilkan error jika ada -->
       <div v-if="form.errors.email" class="error-message">
           {{ form.errors.email }}
       </div>
 
       <form class="login-form" @submit.prevent="handleLogin">
         <div class="input-group">
-          <!-- Ganti 'username' menjadi 'email' agar sesuai dengan standar Laravel -->
           <label for="email">Email or Username</label>
           <input type="text" id="email" name="email" v-model="form.email" required>
         </div>
@@ -45,13 +32,13 @@
             <input type="checkbox" id="remember" name="remember" v-model="form.remember">
             <label for="remember">Remember me</label>
           </div>
-          <!-- Tombol dinonaktifkan saat form sedang diproses -->
           <button type="submit" class="login-btn" :disabled="form.processing">LOG IN</button>
         </div>
       </form>
 
       <div class="signup-link">
-        No Account yet? <a href="#">SIGN UP</a>
+        No Account yet? 
+        <Link :href="route('register')">SIGN UP</Link>
       </div>
     </main>
   </div>
@@ -59,7 +46,8 @@
 
 <script setup>
 import { ref } from 'vue';
-import { useForm } from '@inertiajs/vue3'; // 1. Import useForm
+// 1. Import useForm DAN Link
+import { useForm, Link } from '@inertiajs/vue3'; 
 
 // 2. Ganti state management biasa dengan useForm
 const form = useForm({

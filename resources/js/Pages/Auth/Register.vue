@@ -10,22 +10,10 @@
         Join & Connect the Fastest Growing Online Community
       </h2>
 
-      <div class="flex space-x-4 mb-6">
-        <button
-          class="flex-1 flex items-center justify-center py-2 px-4 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
-        >
-          <span class="mr-2">G</span> Sign up with Google
-        </button>
-        <button
-          class="flex-1 flex items-center justify-center py-2 px-4 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
-        >
-          <span class="mr-2">🐙</span> Sign up with Github
-        </button>
-      </div>
-
       <form @submit.prevent="submit" class="space-y-4">
+        
         <div>
-          <label for="username" class="block text-sm font-medium text-gray-700">username</label>
+          <label for="username" class="block text-sm font-medium text-gray-700">Username</label>
           <input
             id="username"
             type="text"
@@ -51,6 +39,53 @@
         </div>
 
         <div>
+          <label for="nomor_plat" class="block text-sm font-medium text-gray-700">Nomor Plat</label>
+          <input
+            id="nomor_plat"
+            type="text"
+            v-model="form.nomor_plat"
+            required
+            autocomplete="off"
+            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500 sm:text-sm"
+            placeholder="Contoh: BP 1234 XY"
+          />
+          <p v-if="form.errors.nomor_plat" class="text-sm text-red-600 mt-1">{{ form.errors.nomor_plat }}</p>
+        </div>
+
+        <div>
+          <label for="nomor_telepon" class="block text-sm font-medium text-gray-700">Nomor Telepon</label>
+          <input
+            id="nomor_telepon"
+            type="tel"
+            v-model="form.nomor_telepon"
+            required
+            autocomplete="tel"
+            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500 sm:text-sm"
+            placeholder="Contoh: 08123456789"
+          />
+          <p v-if="form.errors.nomor_telepon" class="text-sm text-red-600 mt-1">{{ form.errors.nomor_telepon }}</p>
+        </div>
+
+        <div>
+          <label for="captcha" class="block text-sm font-medium text-gray-700">Captcha</label>
+          <div class="flex space-x-2 mt-1">
+            <div class="flex-shrink-0 w-32 h-10 bg-gray-200 border border-gray-300 rounded-md flex items-center justify-center text-gray-500 italic text-sm">
+              [Gambar Captcha]
+            </div>
+            <input
+              id="captcha"
+              type="text"
+              v-model="form.captcha"
+              required
+              autocomplete="off"
+              class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500 sm:text-sm"
+              placeholder="Masukkan kode di samping"
+            />
+          </div>
+          <p v-if="form.errors.captcha" class="text-sm text-red-600 mt-1">{{ form.errors.captcha }}</p>
+        </div>
+
+        <div>
           <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
           <div class="relative">
             <input
@@ -71,7 +106,18 @@
           </div>
           <p v-if="form.errors.password" class="text-sm text-red-600 mt-1">{{ form.errors.password }}</p>
         </div>
-
+        
+        <div>
+          <label for="password_confirmation" class="block text-sm font-medium text-gray-700">Password Confirmation</label>
+          <input
+            id="password_confirmation"
+            type="password"
+            v-model="form.password_confirmation"
+            required
+            autocomplete="new-password"
+            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500 sm:text-sm"
+          />
+        </div>
         <div class="flex items-center">
           <input
             id="terms"
@@ -100,9 +146,9 @@
       <div class="mt-6 text-center text-sm">
         <p>
           Own an Account?
-          <a :href="route('login')" class="font-medium text-green-600 hover:text-green-500">
+          <Link :href="route('login')" class="font-medium text-green-600 hover:text-green-500">
             JUMP RIGHT IN
-          </a>
+          </Link>
         </p>
       </div>
     </div>
@@ -111,12 +157,18 @@
 
 <script setup>
 import { ref } from 'vue';
-import { useForm } from '@inertiajs/vue3';
+// 1. Impor 'Link' dan 'router'
+import { useForm, Link, router } from '@inertiajs/vue3';
 
+// Perbarui form state untuk mencakup SEMUA kolom
 const form = useForm({
-    username: 'johndadev',
-    email: 'johndoe@email.com',
+    username: '',
+    email: '',
+    nomor_plat: '',
+    nomor_telepon: '',
+    captcha: '',
     password: '',
+    password_confirmation: '', // <-- TAMBAHKAN INI
     terms: false,
 });
 
@@ -128,7 +180,12 @@ const togglePasswordVisibility = () => {
 
 const submit = () => {
     form.post(route('register'), {
-        onFinish: () => form.reset('password'),
+        // PERBARUI INI: Reset kedua bidang password
+        onFinish: () => form.reset('password', 'password_confirmation'),
+        
+        onSuccess: () => {
+            router.visit(route('login'));
+        }
     });
 };
 </script>
@@ -138,6 +195,7 @@ const submit = () => {
   2. Ganti 'path/to/image-4.jpg' dan 'path/to/image-5.jpg' dengan lokasi gambar Anda yang sebenarnya.
   3. Menggunakan dua gambar dalam satu `background-image` menggunakan `url()` yang dipisahkan koma.
 */
+
 .bg-ev-pattern {
     /* Gunakan URL gambar Anda di sini. Sesuaikan jalurnya! */
     background-image: url('/images/image5.png'), url('/images/image4.png'); 

@@ -11,16 +11,32 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // --- INI BAGIAN YANG KITA UBAH ---
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->string('email')->unique();
-            $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
-            $table->rememberToken();
-            $table->timestamps();
-        });
+            
+            // $table->string('name'); // Kolom 'name' dihapus
 
+    // Kolom identitas utama
+    $table->string('username')->unique();
+    $table->string('email')->unique();
+    $table->string('nomor_plat')->unique();
+    $table->string('nomor_telepon');
+
+    // Kolom OTP dummy
+    $table->string('otp_code')->nullable();
+    $table->timestamp('otp_expires_at')->nullable();
+
+    // Kolom standar Laravel
+    $table->timestamp('email_verified_at')->nullable();
+    $table->string('password');
+    $table->rememberToken();
+    $table->timestamps();
+});
+        // --- BATAS PERUBAHAN ---
+
+
+        // Bagian ini standar dan tidak perlu diubah
         Schema::create('password_reset_tokens', function (Blueprint $table) {
             $table->string('email')->primary();
             $table->string('token');
