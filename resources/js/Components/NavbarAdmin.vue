@@ -26,7 +26,7 @@ const closeAllMenus = () => {
           <div class="w-9 h-9 bg-lime-500 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-inner group-hover:bg-lime-600 transition duration-150">
             U
           </div>
-          
+          <span class="text-gray-800 font-medium hidden sm:inline group-hover:text-lime-700 transition duration-150">Profil</span>
         </Link>
       </div>
 
