@@ -51,7 +51,7 @@ import { useForm, Link } from '@inertiajs/vue3';
 
 // 2. Ganti state management biasa dengan useForm
 const form = useForm({
-  email: 'johndadev', // Ganti 'username' menjadi 'email'
+  email: 'Username', // Ganti 'username' menjadi 'email'
   password: 'password',     // Isi dengan password yang valid, misal: 'password'
   remember: true,
 });
