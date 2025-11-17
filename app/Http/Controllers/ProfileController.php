@@ -16,29 +16,32 @@ class ProfileController extends Controller
     /**
      * Display the user's profile form.
      */
-    public function edit(Request $request): Response
-    {
-        return Inertia::render('Profile/Edit', [
-            'mustVerifyEmail' => $request->user() instanceof MustVerifyEmail,
-            'status' => session('status'),
-        ]);
-    }
+  public function edit(Request $request): Response
+{
+    return Inertia::render('Profile', [ // ubah 'Profile/Edit' jadi 'Profile' kalau file Vue-mu bernama Profile.vue
+        'user' => $request->user(), // <== tambahkan ini
+        'mustVerifyEmail' => $request->user() instanceof MustVerifyEmail,
+        'status' => session('status'),
+    ]);
+}
+
 
     /**
      * Update the user's profile information.
      */
-    public function update(ProfileUpdateRequest $request): RedirectResponse
-    {
-        $request->user()->fill($request->validated());
+   public function update(ProfileUpdateRequest $request): RedirectResponse
+{
+    $request->user()->fill($request->validated());
 
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
-        }
-
-        $request->user()->save();
-
-        return Redirect::route('profile.edit');
+    if ($request->user()->isDirty('email')) {
+        $request->user()->email_verified_at = null;
     }
+
+    $request->user()->save();
+
+    return Redirect::route('profile.edit')->with('success', 'Profil berhasil diperbarui!');
+}
+
 
     /**
      * Delete the user's account.

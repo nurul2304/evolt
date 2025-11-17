@@ -1,108 +1,76 @@
-<script setup>
-import { ref } from 'vue';
-// Import Link dan useForm dari Inertia
-import { useForm, Link } from '@inertiajs/vue3'; 
-
-// Menggunakan useForm untuk manajemen state form dan Inertia
-const form = useForm({
-  email: '', 
-  password: '',
-  remember: false,
-});
-
-const isPasswordVisible = ref(false);
-
-// Fungsi untuk menangani submit form
-const handleLogin = () => {
-  // Kirim data ke rute '/login' (POST request)
-  form.post(route('login'), {
-    onFinish: () => form.reset('password'), // Reset password setelah selesai
-  });
-};
-</script>
-
 <template>
-  <!-- Main container: Full screen, centered, with background image -->
-  <div class="min-h-screen flex items-center justify-center p-4 sm:p-6 bg-gray-50 bg-[url('https://i.imgur.com/G323a2A.jpg')] bg-cover bg-center font-sans">
-    
-    <!-- Login Card: Responsive card centered on screen -->
-    <main class="w-full max-w-sm sm:max-w-md bg-white rounded-3xl shadow-2xl p-6 sm:p-8 lg:p-10">
-      
-      <!-- Logo -->
-      <div class="text-center text-3xl font-bold mb-2">
-        <span class="text-lime-500">E</span><span class="text-gray-700">-VOLT</span>
+  <div class="login-page">
+    <main class="login-container">
+      <div class="logo">
+        <span class="green">E</span><span class="dark">-VOLT</span>
       </div>
-      <h1 class="text-center text-xl sm:text-2xl font-semibold text-gray-800 mb-6">Welcome back to the E-Volt Community</h1>
+      <h1 class="welcome-title">Welcome back to the E-Volt Community</h1>
 
-      <!-- Social Login Buttons -->
-      <div class="flex flex-col sm:flex-row gap-3 mb-6">
-        <button class="flex-1 flex items-center justify-center gap-2 p-3 border border-gray-300 rounded-lg bg-white text-gray-700 text-sm font-medium cursor-pointer hover:bg-gray-50 transition duration-150 shadow-sm">
-          <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google" class="w-5 h-5">
-          <span>Log in with Google</span>
-        </button>
-      </div>
-
-      <!-- Separator (Opsional: Garis pemisah) -->
-      <div class="flex items-center my-6">
-        <hr class="flex-grow border-t border-gray-300">
-        <span class="px-3 text-sm text-gray-500 font-medium">or</span>
-        <hr class="flex-grow border-t border-gray-300">
-      </div>
-
-      <!-- Form Login -->
-      <form class="text-left" @submit.prevent="handleLogin">
-        
-        <!-- Error Message (Jika ada error dari backend) -->
-        <div v-if="form.errors.email" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4 text-sm font-medium" role="alert">
+      <div v-if="form.errors.email" class="error-message">
           {{ form.errors.email }}
+      </div>
+
+      <form class="login-form" @submit.prevent="handleLogin">
+        <div class="input-group">
+          <label for="email">Email or Username</label>
+          <input type="text" id="email" name="email" v-model="form.email" required>
         </div>
 
-        <!-- Email or Username Input -->
-        <div class="mb-4">
-          <label for="email" class="block text-sm font-medium text-gray-700 mb-1.5">Email or Username</label>
-          <input type="text" id="email" name="email" v-model="form.email" required 
-                 class="w-full p-3 text-base border border-gray-300 rounded-lg outline-none transition duration-200 focus:border-lime-500 focus:ring-4 focus:ring-lime-100"
-                 autocomplete="username">
-        </div>
-
-        <!-- Password Input -->
-        <div class="mb-4">
-          <label for="password" class="block text-sm font-medium text-gray-700 mb-1.5">Password</label>
-          <div class="relative">
-            <input :type="isPasswordVisible ? 'text' : 'password'" id="password" name="password" v-model="form.password" required 
-                   class="w-full p-3 text-base border border-gray-300 rounded-lg outline-none transition duration-200 focus:border-lime-500 focus:ring-4 focus:ring-lime-100"
-                   autocomplete="current-password">
-            
-            <button type="button" @click="isPasswordVisible = !isPasswordVisible"
-                    class="absolute top-1/2 right-4 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 transition duration-150 p-0 flex items-center border-none bg-transparent">
-              <!-- Ikon Mata -->
-              <svg v-if="!isPasswordVisible" class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" /></svg>
-              <!-- Ikon Mata Dicoret -->
-              <svg v-else class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.243 4.243L6.228 6.228" /></svg>
+        <div class="input-group">
+          <label for="password">Password</label>
+          <div class="password-wrapper">
+            <input :type="isPasswordVisible ? 'text' : 'password'" id="password" name="password" v-model="form.password" required>
+            <button type="button" id="togglePassword" @click="isPasswordVisible = !isPasswordVisible">
+                <svg v-if="!isPasswordVisible" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" /></svg>
+                <svg v-else xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.243 4.243L6.228 6.228" /></svg>
             </button>
           </div>
         </div>
 
-        <!-- Remember Me & Submit Button Area -->
-        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mt-6 mb-4">
-          <div class="flex items-center gap-2 mb-4 sm:mb-0">
-            <input type="checkbox" id="remember" name="remember" v-model="form.remember"
-                   class="w-4 h-4 text-lime-600 bg-gray-100 border-gray-300 rounded focus:ring-lime-500 cursor-pointer">
-            <label for="remember" class="text-sm text-gray-600 font-medium cursor-pointer">Remember me</label>
+        <div class="form-options">
+          <div class="remember-me">
+            <input type="checkbox" id="remember" name="remember" v-model="form.remember">
+            <label for="remember">Remember me</label>
           </div>
-          
-          <button type="submit" :disabled="form.processing"
-                  class="w-full sm:w-auto bg-[#00C853] text-white font-semibold text-base py-2 px-6 rounded-lg cursor-pointer hover:bg-[#00A142] transition duration-200 shadow-md disabled:bg-gray-400 disabled:cursor-not-allowed">
-            Masuk
-          </button>
+          <button type="submit" class="login-btn" :disabled="form.processing">LOG IN</button>
         </div>
       </form>
 
-      <!-- Sign Up Link -->
-      <div class="text-center text-sm text-gray-500 mt-6">
+      <div class="signup-link">
         No Account yet? 
-        <Link :href="route('register')" class="text-lime-600 font-semibold hover:underline">SIGN UP</Link>
+        <Link :href="route('register')">SIGN UP</Link>
       </div>
     </main>
   </div>
 </template>
+
+<script setup>
+import { ref } from 'vue';
+// 1. Import useForm DAN Link
+import { useForm, Link } from '@inertiajs/vue3'; 
+
+// 2. Ganti state management biasa dengan useForm
+const form = useForm({
+  email: 'Username', // Ganti 'username' menjadi 'email'
+  password: 'password',     // Isi dengan password yang valid, misal: 'password'
+  remember: true,
+});
+
+const isPasswordVisible = ref(false);
+
+// 3. Buat fungsi handleLogin untuk mengirim form
+const handleLogin = () => {
+  // Kirim data ke rute '/login' di Laravel
+  form.post('/login', {
+    // Setelah selesai, kosongkan field password
+    onFinish: () => form.reset('password'),
+  });
+};
+</script>
+
+<style scoped>
+/* CSS Anda tidak perlu diubah, saya ringkas di sini agar tidak terlalu panjang */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+.login-page{font-family:'Poppins',sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1rem;background-image:url(https://i.imgur.com/G323a2A.jpg);background-size:cover;background-position:center;background-color:#f0f4f8}.login-container{width:100%;max-width:460px;background-color:#fff;border-radius:24px;box-shadow:0 10px 40px rgba(0,0,0,.1);padding:2.5rem;text-align:center}.logo{font-size:2rem;font-weight:700;margin-bottom:.5rem}.logo .green{color:#84cc16}.logo .dark{color:#4b5563}.welcome-title{font-size:1.25rem;font-weight:600;color:#1f2937;margin-bottom:1.5rem}.social-login{display:flex;gap:1rem;margin-bottom:1.5rem}.social-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:.5rem;padding:.75rem;border:1px solid #d1d5db;border-radius:8px;background-color:#fff;color:#374151;font-size:.9rem;font-weight:500;cursor:pointer;transition:background-color .2s ease,border-color .2s ease}.social-btn:hover{background-color:#f9fafb;border-color:#9ca3af}.social-btn img{width:20px;height:20px}.login-form{text-align:left}.input-group{margin-bottom:1rem}.input-group label{display:block;font-size:.875rem;font-weight:500;color:#374151;margin-bottom:.5rem}.input-group input{width:100%;padding:.8rem 1rem;font-size:.95rem;border:1px solid #d1d5db;border-radius:8px;outline:none;transition:border-color .2s,box-shadow .2s;font-family:'Poppins',sans-serif}.input-group input:focus{border-color:#84cc16;box-shadow:0 0 0 3px rgba(132,204,22,.2)}.password-wrapper{position:relative}#togglePassword{position:absolute;top:50%;right:1rem;transform:translateY(-50%);background:0 0;border:none;cursor:pointer;color:#6b7280;padding:0;display:flex;align-items:center}#togglePassword svg{width:20px;height:20px}.form-options{display:flex;justify-content:space-between;align-items:center;margin-top:1.5rem;margin-bottom:1.5rem}.remember-me{display:flex;align-items:center;gap:.5rem}.remember-me label{font-size:.9rem;color:#4b5563;margin-bottom:0;cursor:pointer}.remember-me input[type=checkbox]{width:18px;height:18px;accent-color:#84cc16;cursor:pointer}.login-btn{background-color:#d9ef54;color:#1f2937;font-weight:700;font-size:.95rem;border:none;border-radius:8px;padding:.8rem 2rem;cursor:pointer;transition:background-color .2s ease;font-family:'Poppins',sans-serif}.login-btn:hover{background-color:#cde441}.signup-link{font-size:.9rem;color:#6b7280;margin-top:1rem}.signup-link a{color:#84cc16;font-weight:600;text-decoration:none;transition:text-decoration .2s}.signup-link a:hover{text-decoration:underline}.error-message{background-color: #f8d7da;color: #721c24;border: 1px solid #f5c6cb;padding: .75rem 1.25rem;margin-bottom: 1rem;border-radius: .25rem;text-align: left;}
+</style>
+

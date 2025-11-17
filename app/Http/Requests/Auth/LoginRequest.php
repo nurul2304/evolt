@@ -12,7 +12,7 @@ use Illuminate\Validation\ValidationException;
 class LoginRequest extends FormRequest
 {
     /**
-     * Determine if the user is authorized to make this request.
+     * Tentukan apakah user diizinkan membuat request ini.
      */
     public function authorize(): bool
     {
@@ -20,20 +20,19 @@ class LoginRequest extends FormRequest
     }
 
     /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * Dapatkan aturan validasi yang berlaku untuk request.
      */
     public function rules(): array
     {
         return [
-            'email' => ['required', 'string', 'email'],
+            // 'email' adalah nama input v-model dari form Vue
+            'email' => ['required', 'string'], 
             'password' => ['required', 'string'],
         ];
     }
 
     /**
-     * Attempt to authenticate the request's credentials.
+     * Coba autentikasi kredensial request.
      *
      * @throws \Illuminate\Validation\ValidationException
      */
@@ -41,10 +40,13 @@ class LoginRequest extends FormRequest
     {
         $this->ensureIsNotRateLimited();
 
-        if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
+        // GANTI: Auth::attempt($this->only('email', 'password')...
+        // MENJADI: Auth::attempt($this->getCredentials()...
+        if (! Auth::attempt($this->getCredentials(), $this->boolean('remember'))) {
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([
+                // Error tetap dilempar ke field 'email'
                 'email' => trans('auth.failed'),
             ]);
         }
@@ -53,7 +55,26 @@ class LoginRequest extends FormRequest
     }
 
     /**
-     * Ensure the login request is not rate limited.
+     * [METODE BARU]
+     * Menyiapkan kredensial untuk login (bisa email atau username).
+     */
+    public function getCredentials(): array
+    {
+        // Ambil input dari form (v-model="form.email")
+        $loginInput = $this->input('email');
+
+        // Cek apakah inputan adalah email atau username
+        $fieldType = filter_var($loginInput, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
+
+        // Kembalikan array yang benar untuk dicoba oleh Auth::attempt()
+        return [
+            $fieldType => $loginInput,
+            'password' => $this->input('password'),
+        ];
+    }
+
+    /**
+     * Pastikan request login tidak di-rate limit.
      *
      * @throws \Illuminate\Validation\ValidationException
      */
@@ -76,10 +97,11 @@ class LoginRequest extends FormRequest
     }
 
     /**
-     * Get the rate limiting throttle key for the request.
+     * Dapatkan throttle key untuk request.
      */
     public function throttleKey(): string
     {
-        return Str::transliterate(Str::lower($this->string('email')).'|'.$this->ip());
+        // Kunci throttle berdasarkan input 'email' (yang bisa jadi username) dan IP
+        return Str::transliterate(Str::lower($this->input('email')).'|'.$this->ip());
     }
 }

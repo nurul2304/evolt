@@ -3,17 +3,17 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Hash; // ✅ tambahkan ini
 use App\Models\User;
 
-class DatabaseSeeder extends Seeder
+class AdminSeeder extends Seeder
 {
+    /**
+     * Seed the application's database.
+     */
     public function run(): void
     {
-        // Jalankan AdminSeeder kalau ada
-        $this->call(AdminSeeder::class);
-
-        // Atau langsung buat admin di sini
+        // 🔹 Buat akun admin default
         User::updateOrCreate(
             ['email' => 'admin@evolt.com'],
             [
