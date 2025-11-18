@@ -13,6 +13,7 @@ const showQrisPaymentModal = ref(false); // Modal baru untuk pembayaran QRIS
 const showReceiptModal = ref(false);    // Modal untuk struk akhir
 const showPrintModal = ref(false);     // Modal/page untuk tampilan print struk
 const selectedStation = ref(null);
+const hasStartedBooking = ref(false); // Track if user has started booking process
 
 const anyModalOpen = computed(() => showSearchModal.value || showConfirmationModal.value || showQrisPaymentModal.value || showReceiptModal.value);
 
@@ -248,12 +249,94 @@ const closePickersOnOutsideClick = (event) => {
     }
 };
 
-onMounted(() => {
+onMounted(async () => {
     document.body.addEventListener('click', closePickersOnOutsideClick);
+
+    // Handle back button on mobile to close modals instead of navigating away
+    window.addEventListener('popstate', handleBackButton);
+
+    try {
+        const L = await loadLeaflet();
+
+        // initialize map centered on Batam
+        map = L.map('map').setView([1.126, 104.030], 12);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        // create a Google-like SVG pin (green)
+        const pinSvg = encodeURIComponent(`
+            <svg width="32" height="48" viewBox="0 0 24 36" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 0C7 0 3.5 3.5 3.5 8.5 3.5 15.5 12 25.5 12 25.5s8.5-10 8.5-17C20.5 3.5 17 0 12 0z" fill="#00C853"/>
+              <circle cx="12" cy="8.5" r="3.5" fill="white"/>
+            </svg>
+        `);
+        const iconUrl = `data:image/svg+xml;charset=UTF-8,${pinSvg}`;
+
+        const customIcon = L.icon({
+            iconUrl,
+            iconSize: [28, 42],
+            iconAnchor: [14, 42],
+            popupAnchor: [0, -38]
+        });
+
+        // add markers for available stations with coordinates using dynamic colored icons
+        stations.value.filter(s => s.status === 'Tersedia' && s.lat && s.lng).forEach(s => {
+            const color = getMarkerColor(s.chargers);
+            const pinSvg = createPinSvg(color);
+            const iconUrl = `data:image/svg+xml;charset=UTF-8,${pinSvg}`;
+
+            const customIcon = L.icon({
+                iconUrl,
+                iconSize: [28, 42],
+                iconAnchor: [14, 42],
+                popupAnchor: [0, -38]
+            });
+
+            const marker = L.marker([s.lat, s.lng], { icon: customIcon }).addTo(map);
+            marker.bindPopup(`
+                <div class="font-medium">${s.name}</div>
+                <div class="text-sm text-gray-600">${s.location}</div>
+                <div class="text-sm text-gray-500">Status: ${s.status}</div>
+                <div class="text-sm" style="color: ${getMarkerColor(s.chargers)};">Charger: ${s.chargers.join(', ')}</div>
+                <button onclick="openMapsLocation(${s.lat}, ${s.lng})" class="mt-2 w-full py-2 px-4 bg-[#00C853] text-white font-medium rounded-lg hover:bg-[#00A142] transition duration-200 shadow-md flex items-center justify-center space-x-2 text-sm">
+                    <i class="fas fa-external-link-alt"></i>
+                    <span>Lihat Lokasi</span>
+                </button>
+            `);
+        });
+    } catch (err) {
+        console.error('Failed to load Leaflet:', err);
+    }
 });
+
+const handleBackButton = (event) => {
+    if (showReceiptModal.value) {
+        closeReceiptModal();
+        event.preventDefault();
+    } else if (showQrisPaymentModal.value) {
+        cancelProcess();
+        event.preventDefault();
+    } else if (showConfirmationModal.value) {
+        cancelProcess();
+        event.preventDefault();
+    } else if (showSearchModal.value) {
+        closeModal();
+        event.preventDefault();
+    } else if (hasStartedBooking.value) {
+        // Jika sudah mulai booking tapi tidak ada modal terbuka, tetap di halaman map
+        event.preventDefault();
+    }
+    // Jika belum mulai booking, biarkan navigasi normal (kembali ke halaman sebelumnya)
+};
 
 onBeforeUnmount(() => {
     document.body.removeEventListener('click', closePickersOnOutsideClick);
+    // Reset body styles to prevent stuck scrolling on mobile when navigating away
+    document.body.classList.remove('modal-open');
+    document.body.style.top = '';
 });
 
 // Watch for modal state to prevent background scrolling on mobile
@@ -335,70 +418,7 @@ window.openMapsLocation = (lat, lng) => {
     }
 };
 
-onMounted(async () => {
-    try {
-        const L = await loadLeaflet();
 
-        // initialize map centered on Batam
-        map = L.map('map').setView([1.126, 104.030], 12);
-
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '&copy; OpenStreetMap contributors'
-        }).addTo(map);
-
-        // create a Google-like SVG pin (green)
-        const pinSvg = encodeURIComponent(`
-            <svg width="32" height="48" viewBox="0 0 24 36" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 0C7 0 3.5 3.5 3.5 8.5 3.5 15.5 12 25.5 12 25.5s8.5-10 8.5-17C20.5 3.5 17 0 12 0z" fill="#00C853"/>
-              <circle cx="12" cy="8.5" r="3.5" fill="white"/>
-            </svg>
-        `);
-        const iconUrl = `data:image/svg+xml;charset=UTF-8,${pinSvg}`;
-
-        const customIcon = L.icon({
-            iconUrl,
-            iconSize: [28, 42],
-            iconAnchor: [14, 42],
-            popupAnchor: [0, -38]
-        });
-
-        // add markers for available stations with coordinates using dynamic colored icons
-        stations.value.filter(s => s.status === 'Tersedia' && s.lat && s.lng).forEach(s => {
-            const color = getMarkerColor(s.chargers);
-            const pinSvg = createPinSvg(color);
-            const iconUrl = `data:image/svg+xml;charset=UTF-8,${pinSvg}`;
-
-            const customIcon = L.icon({
-                iconUrl,
-                iconSize: [28, 42],
-                iconAnchor: [14, 42],
-                popupAnchor: [0, -38]
-            });
-
-            const marker = L.marker([s.lat, s.lng], { icon: customIcon }).addTo(map);
-            marker.bindPopup(`
-                <div class="font-medium">${s.name}</div>
-                <div class="text-sm text-gray-600">${s.location}</div>
-                <div class="text-sm text-gray-500">Status: ${s.status}</div>
-                <div class="text-sm" style="color: ${getMarkerColor(s.chargers)};">Charger: ${s.chargers.join(', ')}</div>
-                <button onclick="openMapsLocation(${s.lat}, ${s.lng})" class="mt-2 w-full py-2 px-4 bg-[#00C853] text-white font-medium rounded-lg hover:bg-[#00A142] transition duration-200 shadow-md flex items-center justify-center space-x-2 text-sm">
-                    <i class="fas fa-external-link-alt"></i>
-                    <span>Lihat Lokasi</span>
-                </button>
-            `);
-        });
-    } catch (err) {
-        console.error('Failed to load Leaflet:', err);
-    }
-});
-
-onBeforeUnmount(() => {
-    if (map) {
-        map.remove();
-        map = null;
-    }
-});
 
 const formatRupiah = (amount) => {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0, }).format(amount);
@@ -419,6 +439,7 @@ const reserveStation = (stationId) => {
     if (station && station.isBookable) {
         selectedStation.value = station;
         showConfirmationModal.value = true;
+        history.pushState({modal: 'confirmation'}, '', window.location.href);
     }
 };
 
@@ -433,6 +454,7 @@ const cancelProcess = () => {
 const proceedToPayment = () => {
     showConfirmationModal.value = false; // Tutup modal konfirmasi
     showQrisPaymentModal.value = true;  // Buka modal pembayaran QRIS
+    history.pushState({modal: 'payment'}, '', window.location.href);
 };
 
 // Fungsi setelah user mengklik "Konfirmasi Pembayaran" di modal QRIS
@@ -448,6 +470,9 @@ const confirmPayment = () => {
 const closeReceiptModal = () => {
     showReceiptModal.value = false;
     selectedStation.value = null; // Reset data stasiun
+    if (history.state && history.state.modal) {
+        history.back(); // Kembali ke state sebelumnya jika ada modal
+    }
 };
 
 // buka tampilan PrintStrukPembayaran dari tombol "Unduh Struk"
