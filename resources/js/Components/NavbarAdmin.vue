@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from 'vue';
-import { Link } from '@inertiajs/vue3';
+import { Link, router } from '@inertiajs/vue3';
 
 const isMenuOpen = ref(false);
 const closeAllMenus = () => {
@@ -18,8 +18,8 @@ const closeAllMenus = () => {
 
       <!-- Ikon Profil -->
       <div class="hidden md:flex items-center ml-6">
-        <Link
-          href="/admin-profile"
+        <button
+          @click="router.visit('/admin/profile')"
           class="flex items-center space-x-2 p-2 rounded-full hover:bg-gray-100 transition duration-150 focus:outline-none focus:ring-2 focus:ring-[#00C853] group"
           title="Pengaturan Profil"
         >
@@ -27,7 +27,7 @@ const closeAllMenus = () => {
             U
           </div>
           <span class="text-gray-800 font-medium hidden sm:inline group-hover:text-lime-700 transition duration-150">Profil</span>
-        </Link>
+        </button>
       </div>
 
       <!-- Tombol Menu Mobile -->
@@ -55,7 +55,7 @@ const closeAllMenus = () => {
         <div class="bg-white shadow-lg border-t border-gray-100 rounded-b-xl mx-4 p-4">
           <nav class="flex flex-col p-2 space-y-2">
             <Link @click="closeAllMenus" href="/" class="py-2 px-3 block hover:bg-lime-50 rounded-lg text-gray-700 font-medium transition duration-150">Beranda</Link>
-            <Link @click="closeAllMenus" href="/admin" class="py-2 px-3 block hover:bg-lime-50 rounded-lg text-gray-700 font-medium transition duration-150">Pengaturan Profil</Link>
+            <button @click="router.visit('/admin/profile'); closeAllMenus()" class="py-2 px-3 block hover:bg-lime-50 rounded-lg text-gray-700 font-medium transition duration-150 text-left">Pengaturan Profil</button>
           </nav>
         </div>
       </div>

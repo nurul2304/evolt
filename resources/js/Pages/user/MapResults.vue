@@ -254,6 +254,69 @@ onBeforeUnmount(() => {
     document.body.removeEventListener('click', closePickersOnOutsideClick);
 });
 
+// Buat fungsi global untuk digunakan di popup
+window.openMapsLocation = (lat, lng) => {
+    const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+    if (isMobile) {
+        // Untuk mobile, gunakan Google Maps URL scheme yang lebih kompatibel
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const userLat = position.coords.latitude;
+                    const userLng = position.coords.longitude;
+                    // Gunakan Google Maps URL scheme untuk Android/iOS dengan directions
+                    const url = `https://www.google.com/maps/dir/${userLat},${userLng}/${lat},${lng}`;
+                    window.open(url, '_blank');
+                },
+                (error) => {
+                    console.warn('Geolocation error:', error);
+                    // Fallback: buka Google Maps dengan tujuan saja
+                    const url = `https://www.google.com/maps?q=${lat},${lng}`;
+                    window.open(url, '_blank');
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 300000 // 5 menit
+                }
+            );
+        } else {
+            // Fallback jika geolocation tidak didukung
+            const url = `https://www.google.com/maps?q=${lat},${lng}`;
+            window.open(url, '_blank');
+        }
+    } else {
+        // Untuk desktop, coba dapatkan lokasi user dan buat rute otomatis
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const userLat = position.coords.latitude;
+                    const userLng = position.coords.longitude;
+                    // Buat URL dengan rute dari lokasi user ke stasiun
+                    const url = `https://www.google.com/maps/dir/${userLat},${userLng}/${lat},${lng}`;
+                    window.open(url, '_blank');
+                },
+                (error) => {
+                    console.warn('Geolocation error:', error);
+                    // Fallback: buka Google Maps dengan tujuan saja
+                    const url = `https://www.google.com/maps?q=${lat},${lng}`;
+                    window.open(url, '_blank');
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 300000 // 5 menit
+                }
+            );
+        } else {
+            // Fallback jika geolocation tidak didukung
+            const url = `https://www.google.com/maps?q=${lat},${lng}`;
+            window.open(url, '_blank');
+        }
+    }
+};
+
 onMounted(async () => {
     try {
         const L = await loadLeaflet();
@@ -296,7 +359,16 @@ onMounted(async () => {
             });
 
             const marker = L.marker([s.lat, s.lng], { icon: customIcon }).addTo(map);
-            marker.bindPopup(`<div class="font-medium">${s.name}</div><div class="text-sm text-gray-600">${s.location}</div><div class="text-sm text-gray-500">Status: ${s.status}</div><div class="text-sm" style="color: ${getMarkerColor(s.chargers)};">Charger: ${s.chargers.join(', ')}</div>`);
+            marker.bindPopup(`
+                <div class="font-medium">${s.name}</div>
+                <div class="text-sm text-gray-600">${s.location}</div>
+                <div class="text-sm text-gray-500">Status: ${s.status}</div>
+                <div class="text-sm" style="color: ${getMarkerColor(s.chargers)};">Charger: ${s.chargers.join(', ')}</div>
+                <button onclick="openMapsLocation(${s.lat}, ${s.lng})" class="mt-2 w-full py-2 px-4 bg-[#00C853] text-white font-medium rounded-lg hover:bg-[#00A142] transition duration-200 shadow-md flex items-center justify-center space-x-2 text-sm">
+                    <i class="fas fa-external-link-alt"></i>
+                    <span>Lihat Lokasi</span>
+                </button>
+            `);
         });
     } catch (err) {
         console.error('Failed to load Leaflet:', err);
@@ -408,6 +480,18 @@ const createPinSvg = (color) => {
             <circle cx="12" cy="8.5" r="3.5" fill="white"/>
         </svg>
     `);
+};
+
+// Helper function untuk mendapatkan URL Maps berdasarkan device
+const getMapsUrl = (lat, lng) => {
+    const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    if (isMobile) {
+        // Gunakan geo scheme untuk membuka aplikasi maps default (biasanya Google Maps)
+        return `geo:${lat},${lng}`;
+    } else {
+        // Untuk desktop, buka Google Maps di browser
+        return `https://www.google.com/maps?q=${lat},${lng}`;
+    }
 };
 </script>
 
