@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
+import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue';
 
 import Navbar from '@/Components/NavbarUser.vue';
 import Footer from '@/Components/Footer.vue';
@@ -13,6 +13,8 @@ const showQrisPaymentModal = ref(false); // Modal baru untuk pembayaran QRIS
 const showReceiptModal = ref(false);    // Modal untuk struk akhir
 const showPrintModal = ref(false);     // Modal/page untuk tampilan print struk
 const selectedStation = ref(null);
+
+const anyModalOpen = computed(() => showSearchModal.value || showConfirmationModal.value || showQrisPaymentModal.value || showReceiptModal.value);
 
 const formState = ref({
     brand: 'Nissan',
@@ -252,6 +254,22 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
     document.body.removeEventListener('click', closePickersOnOutsideClick);
+});
+
+// Watch for modal state to prevent background scrolling on mobile
+watch(anyModalOpen, (isOpen) => {
+    if (window.innerWidth <= 768) { // Only on mobile
+        if (isOpen) {
+            const scrollY = window.scrollY;
+            document.body.style.top = `-${scrollY}px`;
+            document.body.classList.add('modal-open');
+        } else {
+            document.body.classList.remove('modal-open');
+            const scrollY = parseInt(document.body.style.top || '0');
+            document.body.style.top = '';
+            window.scrollTo(0, -scrollY);
+        }
+    }
 });
 
 // Buat fungsi global untuk digunakan di popup
@@ -600,7 +618,7 @@ const getMapsUrl = (lat, lng) => {
         <Footer />
         
         <Transition name="fade">
-            <div v-if="showSearchModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[99999] p-4" @click.self="closeModal">
+            <div v-if="showSearchModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[99999] p-4 overflow-y-auto" @click.self="closeModal">
                 <div class="bg-white rounded-xl p-8 shadow-2xl w-full max-w-2xl transform transition-all duration-300">
                     <h3 class="text-2xl font-medium text-gray-900 mb-6">Cari Jadwal Pengecasan</h3>
                     
@@ -720,7 +738,7 @@ const getMapsUrl = (lat, lng) => {
         </Transition>
 
         <Transition name="fade">
-            <div v-if="showConfirmationModal && selectedStation" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[99999] p-4" @click.self="cancelProcess">
+            <div v-if="showConfirmationModal && selectedStation" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[99999] p-4 overflow-y-auto" @click.self="cancelProcess">
                 <div class="bg-white rounded-lg p-6 shadow-2xl w-full max-w-lg transform transition-all duration-300">
                     <h3 class="text-xl font-medium text-gray-900 mb-6">Anda yakin ingin memesan tiket ini?</h3>
                     
@@ -759,7 +777,7 @@ const getMapsUrl = (lat, lng) => {
         </Transition>
 
         <Transition name="fade">
-            <div v-if="showQrisPaymentModal && selectedStation" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[99999] p-4" @click.self="cancelProcess">
+            <div v-if="showQrisPaymentModal && selectedStation" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[99999] p-4 overflow-y-auto" @click.self="cancelProcess">
                 <div class="bg-white rounded-lg p-4 shadow-2xl w-full max-w-2xl transform transition-all duration-300">
                     <div class="flex justify-between items-center pb-2">
                         <div class="flex items-center bg-[#FFFBEB] text-[#9A6A01] px-3 py-1 rounded-full text-sm font-medium">
@@ -822,7 +840,7 @@ const getMapsUrl = (lat, lng) => {
         </Transition>
 
         <Transition name="fade">
-            <div v-if="showReceiptModal && selectedStation" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[99999] p-4" @click.self="closeReceiptModal">
+            <div v-if="showReceiptModal && selectedStation" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[99999] p-4 overflow-y-auto" @click.self="closeReceiptModal">
                 <div class="bg-white rounded-xl p-4 shadow-2xl w-full max-w-xl transform transition-all duration-300">
                     
                     <div class="flex justify-between items-center pb-2">
@@ -904,5 +922,16 @@ const getMapsUrl = (lat, lng) => {
 }
 .fade-enter-from, .fade-leave-to {
     opacity: 0;
+}
+</style>
+
+<style>
+/* Prevent background scrolling when modal is open on mobile only */
+@media (max-width: 768px) {
+    .modal-open {
+        overflow: hidden;
+        position: fixed;
+        width: 100%;
+    }
 }
 </style>

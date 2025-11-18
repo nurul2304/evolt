@@ -41,7 +41,7 @@ const isMenuOpen = ref(false);
           <div v-if="isMenuOpen" class="md:hidden absolute top-full left-0 right-0 z-40">
             <div class="bg-white shadow-lg border-t border-gray-100 rounded-b-xl mx-4 p-4">
               <nav class="flex flex-col p-2 space-y-2">
-                <Link @click="isMenuOpen = false" :href="route('welcome')" class="py-2 px-3 block hover:bg-lime-50 rounded-lg text-gray-700 font-medium transition duration-150">B</Link>
+                <Link @click="isMenuOpen = false" :href="route('welcome')" class="py-2 px-3 block hover:bg-lime-50 rounded-lg text-gray-700 font-medium transition duration-150">Beranda</Link>
                 <Link @click="isMenuOpen = false" :href="route('about')" class="py-2 px-3 block hover:bg-lime-50 rounded-lg text-gray-700 font-medium transition duration-150">Tentang Kami</Link>
                
                 <Link @click="isMenuOpen = false" :href="route('login')" class="mt-4 px-6 py-2 border-2 border-[#00C853] text-[#00C853] font-semibold rounded-lg hover:bg-[#00C853] hover:text-white transition duration-300 shadow-md text-center">

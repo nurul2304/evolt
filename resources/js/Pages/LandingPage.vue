@@ -95,7 +95,7 @@ onBeforeUnmount(() => {
                 Pencarian Stasiun <span class="text-lime-600">Terdekat</span>
               </h2>
               <p class="text-sm sm:text-base md:text-lg text-gray-600 leading-relaxed max-w-xl mx-auto lg:mx-0">
-                **Lorem ipsum** is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s.
+                Temukan stasiun pengisian daya terdekat dengan mudah menggunakan aplikasi kami yang dilengkapi dengan peta interaktif dan lokasi real-time, memungkinkan Anda mencapai stasiun dengan cepat dan efisien.
               </p>
             </div>
             <div class="lg:w-1/2 flex justify-center w-full">
@@ -114,7 +114,7 @@ onBeforeUnmount(() => {
                 Reservasi Slot <span class="text-lime-600">Real-Time</span>
               </h2>
               <p class="text-sm sm:text-base md:text-lg text-gray-600 leading-relaxed max-w-xl mx-auto lg:mx-0">
-                **Lorem ipsum** is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text.
+                Reservasi slot pengisian daya secara real-time dengan mudah melalui aplikasi kami, memastikan Anda mendapatkan waktu yang tepat tanpa antrian panjang dan meningkatkan efisiensi perjalanan Anda.
               </p>
             </div>
             <div class="lg:w-1/2 flex justify-center w-full">
@@ -128,12 +128,12 @@ onBeforeUnmount(() => {
         <div class="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
           <div class="flex flex-col lg:flex-row items-center gap-8 md:gap-12 text-center lg:text-left">
             <div class="lg:w-1/2">
-              <span class="text-xs sm:text-sm font-semibold text-lime-600 uppercase tracking-widest block mb-2 sm:mb-3">Langkah 3</span>
+              <span class="text-xs sm:text-sm font-semibold text-lime-600 uppercase tracking-widest block mb-2 sm:mb-3"></span>
               <h2 class="text-2xl sm:text-3xl md:text-4xl font-semibold text-gray-900 mb-3 sm:mb-4 md:mb-6 text-balance">
                 Integrasi <span class="text-lime-600">Teknologi</span> Terbaru
               </h2>
               <p class="text-sm sm:text-base md:text-lg text-gray-600 leading-relaxed max-w-xl mx-auto lg:mx-0">
-                **Lorem ipsum** is simply dummy text of the printing and typesetting industry. It has survived not only five centuries.
+                Kami mengintegrasikan teknologi terbaru seperti kecerdasan buatan (AI) dan Internet of Things (IoT) untuk memberikan pengalaman pengisian daya kendaraan listrik yang lebih efisien, cerdas, dan ramah lingkungan di seluruh Indonesia.
               </p>
             </div>
             <div class="lg:w-1/2 flex justify-center w-full">
