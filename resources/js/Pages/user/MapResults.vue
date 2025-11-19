@@ -47,19 +47,25 @@ const availablePorts = computed(() => {
 const anyModalOpen = computed(() => showSearchModal.value || showConfirmationModal.value || showQrisPaymentModal.value || showReceiptModal.value);
 
 const formState = ref({
-    brand: 'Nissan',
-    type: 'SUV', 
+    brand: '',
+    type: '',
     date: new Date().toISOString().split('T')[0],
-    domicile: 'Batam Center', 
-    station: 'SPKLU Mega Mall', 
+    domicile: '',
+    station: '',
     time: '12:00',
 });
 
-// Reuse LandingPage custom dropdown data/logic to provide smooth, scrollable dropdowns
-const brandOptions = ['Nissan','Toyota','Wuling','Hyundai','Tesla','BYD','Kia'];
+// Reuse UserDashboard custom dropdown data/logic to provide smooth, scrollable dropdowns
+const brandOptions = ['Hyundai', 'Wuling', 'Tesla', 'BYD', 'Kia'];
 const typeOptions = ['SUV', 'City Car', 'Hatchback', 'Sedan', 'MPV'];
-const domicileOptions = ['Batam Center','Nagoya','Harbour Bay','Sekupang','Batu Aji','Lubuk Baja','Tiban','Kabil','Batu Ampar'];
-const stationOptions = ['SPKLU Mega Mall','SPKLU Grand Batam Mall','SPKLU Nagoya Hill','SPKLU Harbour Bay','SPKLU Batam Center','SPKLU Batam City Square','SPKLU Kepri Mall','SPKLU Batam View','SPKLU Nagoya City'];
+const domicileOptions = [
+  'Batam Center', 'Nagoya', 'Harbour Bay', 'Sekupang', 'Batu Aji',
+  'Lubuk Baja', 'Tiban', 'Kabil', 'Batu Ampar', 'Galang', 'Bulang'
+];
+const stationOptions = [
+  'SPKLU Mega Mall','SPKLU Grand Batam Mall','SPKLU Nagoya Hill','SPKLU Harbour Bay',
+  'SPKLU Batam Center','SPKLU Batam City Square','SPKLU Kepri Mall','SPKLU Batam View','SPKLU Nagoya City'
+];
 
 const isBrandOpen = ref(false);
 const isTypeOpen = ref(false);
@@ -733,7 +739,7 @@ const getMapsUrl = (lat, lng) => {
                                     <svg class="w-5 h-5 text-gray-500 transform" :class="{'rotate-180': isBrandOpen}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                                 </div>
 
-                                <div v-if="isBrandOpen" @click.stop class="brand-dropdown-content absolute top-full mt-2 w-full bg-white rounded-xl shadow-2xl border border-gray-100 z-30 left-0 max-h-48 overflow-y-auto">
+                                <div v-if="isBrandOpen" @click.stop class="brand-dropdown-content absolute top-full mt-2 w-full bg-white rounded-xl shadow-2xl border border-gray-100 z-30 left-0 max-h-48 overflow-y-auto" :class="{ 'show': isBrandOpen }">
                                     <div class="py-2">
                                         <div v-for="opt in brandOptions" :key="opt"
                                              @click="selectOption('brand', opt)"
@@ -757,7 +763,7 @@ const getMapsUrl = (lat, lng) => {
                                     <svg class="w-5 h-5 text-gray-500 transform" :class="{'rotate-180': isTypeOpen}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                                 </div>
 
-                                <div v-if="isTypeOpen" @click.stop class="type-dropdown-content absolute top-full mt-2 w-full bg-white rounded-xl shadow-2xl border border-gray-100 z-30 left-0 max-h-48 overflow-y-auto">
+                                <div v-if="isTypeOpen" @click.stop class="type-dropdown-content absolute top-full mt-2 w-full bg-white rounded-xl shadow-2xl border border-gray-100 z-30 left-0 max-h-48 overflow-y-auto" :class="{ 'show': isTypeOpen }">
                                     <div class="py-2">
                                         <div v-for="opt in typeOptions" :key="opt"
                                              @click="selectOption('type', opt)"
@@ -781,7 +787,7 @@ const getMapsUrl = (lat, lng) => {
                                     <svg class="w-5 h-5 text-gray-500 transform" :class="{'rotate-180': isDomicileOpen}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                                 </div>
 
-                                <div v-if="isDomicileOpen" @click.stop class="domicile-dropdown-content absolute top-full mt-2 w-full bg-white rounded-xl shadow-2xl border border-gray-100 z-30 left-0 max-h-48 overflow-y-auto">
+                                <div v-if="isDomicileOpen" @click.stop class="domicile-dropdown-content absolute top-full mt-2 w-full bg-white rounded-xl shadow-2xl border border-gray-100 z-30 left-0 max-h-48 overflow-y-auto" :class="{ 'show': isDomicileOpen }">
                                     <div class="py-2">
                                         <div v-for="opt in domicileOptions" :key="opt"
                                              @click="selectOption('domicile', opt)"
@@ -807,7 +813,7 @@ const getMapsUrl = (lat, lng) => {
                                     <svg class="w-5 h-5 text-gray-500 transform" :class="{'rotate-180': isStationOpen}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                                 </div>
 
-                                <div v-if="isStationOpen" @click.stop class="station-dropdown-content absolute top-full mt-2 w-full bg-white rounded-xl shadow-2xl border border-gray-100 z-30 left-0 max-h-48 overflow-y-auto">
+                                <div v-if="isStationOpen" @click.stop class="station-dropdown-content absolute top-full mt-2 w-full bg-white rounded-xl shadow-2xl border border-gray-100 z-30 left-0 max-h-48 overflow-y-auto" :class="{ 'show': isStationOpen }">
                                     <div class="py-2">
                                         <div v-for="opt in stationOptions" :key="opt"
                                              @click="selectOption('station', opt)"
