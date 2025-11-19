@@ -40,6 +40,10 @@ Route::get('/about', function () {
     return Inertia::render('AboutUs');
     })->name('about');
 
+Route::get('/contact', function () {
+    return Inertia::render('ContactUs');
+})->name('contact');
+
 
 /*
 |--------------------------------------------------------------------------

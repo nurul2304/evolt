@@ -15,6 +15,35 @@ const showPrintModal = ref(false);     // Modal/page untuk tampilan print struk
 const selectedStation = ref(null);
 const hasStartedBooking = ref(false); // Track if user has started booking process
 
+// New reactive variables for port and duration selection
+const selectedPort = ref('');
+const selectedDuration = ref('60'); // Default to 1 hour (60 minutes)
+const durationOptions = [
+    { label: '30 menit', value: '30', multiplier: 0.5 },
+    { label: '1 jam', value: '60', multiplier: 1 },
+    { label: '1.5 jam', value: '90', multiplier: 1.5 },
+    { label: '2 jam', value: '120', multiplier: 2 }
+];
+
+// Port options based on available ports
+const portOptions = computed(() => {
+    return availablePorts.value.map(port => ({
+        label: `Port ${port.id.split('-')[1]} - ${port.type} (${port.power})`,
+        value: port.id
+    }));
+});
+
+// Computed property for available ports based on selected station
+const availablePorts = computed(() => {
+    if (!selectedStation.value) return [];
+    return selectedStation.value.chargers.map((charger, index) => ({
+        id: `port-${index + 1}`,
+        type: charger,
+        power: selectedStation.value.power,
+        status: selectedStation.value.status
+    }));
+});
+
 const anyModalOpen = computed(() => showSearchModal.value || showConfirmationModal.value || showQrisPaymentModal.value || showReceiptModal.value);
 
 const formState = ref({
@@ -36,12 +65,16 @@ const isBrandOpen = ref(false);
 const isTypeOpen = ref(false);
 const isDomicileOpen = ref(false);
 const isStationOpen = ref(false);
+const isPortOpen = ref(false);
+const isDurationOpen = ref(false);
 
 const closeAllCustomDropdowns = () => {
     isBrandOpen.value = false;
     isTypeOpen.value = false;
     isDomicileOpen.value = false;
     isStationOpen.value = false;
+    isPortOpen.value = false;
+    isDurationOpen.value = false;
 };
 
 const openOnly = (which) => {
@@ -50,21 +83,43 @@ const openOnly = (which) => {
         isTypeOpen.value = false;
         isDomicileOpen.value = false;
         isStationOpen.value = false;
+        isPortOpen.value = false;
+        isDurationOpen.value = false;
     } else if (which === 'type') {
         isTypeOpen.value = !isTypeOpen.value;
         isBrandOpen.value = false;
         isDomicileOpen.value = false;
         isStationOpen.value = false;
+        isPortOpen.value = false;
+        isDurationOpen.value = false;
     } else if (which === 'domicile') {
         isDomicileOpen.value = !isDomicileOpen.value;
         isBrandOpen.value = false;
         isTypeOpen.value = false;
         isStationOpen.value = false;
+        isPortOpen.value = false;
+        isDurationOpen.value = false;
     } else if (which === 'station') {
         isStationOpen.value = !isStationOpen.value;
         isBrandOpen.value = false;
         isTypeOpen.value = false;
         isDomicileOpen.value = false;
+        isPortOpen.value = false;
+        isDurationOpen.value = false;
+    } else if (which === 'port') {
+        isPortOpen.value = !isPortOpen.value;
+        isBrandOpen.value = false;
+        isTypeOpen.value = false;
+        isDomicileOpen.value = false;
+        isStationOpen.value = false;
+        isDurationOpen.value = false;
+    } else if (which === 'duration') {
+        isDurationOpen.value = !isDurationOpen.value;
+        isBrandOpen.value = false;
+        isTypeOpen.value = false;
+        isDomicileOpen.value = false;
+        isStationOpen.value = false;
+        isPortOpen.value = false;
     }
 
     // keep date/time closed when toggling custom dropdowns
@@ -73,7 +128,13 @@ const openOnly = (which) => {
 };
 
 const selectOption = (field, value) => {
-    formState.value[field] = value;
+    if (field === 'port') {
+        selectedPort.value = value;
+    } else if (field === 'duration') {
+        selectedDuration.value = value;
+    } else {
+        formState.value[field] = value;
+    }
     closeAllCustomDropdowns();
 };
 
@@ -246,6 +307,12 @@ const closePickersOnOutsideClick = (event) => {
     }
     if (isStationOpen.value && !event.target.closest('#station-trigger') && !event.target.closest('.station-dropdown-content')) {
         isStationOpen.value = false;
+    }
+    if (isPortOpen.value && !event.target.closest('#port-trigger') && !event.target.closest('.port-dropdown-content')) {
+        isPortOpen.value = false;
+    }
+    if (isDurationOpen.value && !event.target.closest('#duration-trigger') && !event.target.closest('.duration-dropdown-content')) {
+        isDurationOpen.value = false;
     }
 };
 
@@ -428,7 +495,10 @@ const calculateTotal = (price, fee) => {
 };
 const calculateTotalFormatted = computed(() => {
     if (selectedStation.value) {
-        return formatRupiah(calculateTotal(selectedStation.value.price, selectedStation.value.serviceFee));
+        const durationMultiplier = durationOptions.find(d => d.value === selectedDuration.value)?.multiplier || 1;
+        const adjustedPrice = selectedStation.value.price * durationMultiplier;
+        const adjustedFee = selectedStation.value.serviceFee * durationMultiplier;
+        return formatRupiah(calculateTotal(adjustedPrice, adjustedFee));
     }
     return '';
 });
@@ -448,6 +518,8 @@ const cancelProcess = () => {
     showConfirmationModal.value = false;
     showQrisPaymentModal.value = false;
     selectedStation.value = null;
+    selectedPort.value = '';
+    selectedDuration.value = '60'; // Reset to default
 };
 
 // Fungsi setelah user mengklik "Ya, Pesan" di modal konfirmasi
@@ -766,7 +838,55 @@ const getMapsUrl = (lat, lng) => {
             <div v-if="showConfirmationModal && selectedStation" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[99999] p-4 overflow-y-auto" @click.self="cancelProcess">
                 <div class="bg-white rounded-lg p-6 shadow-2xl w-full max-w-lg transform transition-all duration-300">
                     <h3 class="text-xl font-medium text-gray-900 mb-6">Anda yakin ingin memesan tiket ini?</h3>
-                    
+
+                    <!-- Port Selection -->
+                    <div class="relative mb-4">
+                        <label for="port" class="block text-sm font-medium text-gray-700 mb-2">Pilih Port Charging</label>
+                        <div id="port-trigger"
+                             @click.stop="openOnly('port')"
+                             class="w-full p-3 border border-gray-300 rounded-xl cursor-pointer flex justify-between items-center bg-white transition duration-150"
+                             :class="{'ring-2 ring-lime-500 border-lime-500 shadow-md': isPortOpen}"
+                        >
+                            <span class="text-gray-800">{{ selectedPort ? portOptions.find(p => p.value === selectedPort)?.label : 'Pilih Port' }}</span>
+                            <svg class="w-5 h-5 text-gray-500 transform" :class="{'rotate-180': isPortOpen}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </div>
+
+                        <div v-if="isPortOpen" @click.stop class="port-dropdown-content absolute top-full mt-2 w-full bg-white rounded-xl shadow-2xl border border-gray-100 z-30 left-0 max-h-48 overflow-y-auto" :class="{ 'show': isPortOpen }">
+                            <div class="py-2">
+                                <div v-for="port in portOptions" :key="port.value"
+                                     @click="selectOption('port', port.value)"
+                                     class="px-4 py-2 hover:bg-lime-50 cursor-pointer transition-colors duration-150"
+                                     :class="{'bg-lime-50 font-semibold text-lime-800': selectedPort === port.value}">
+                                    {{ port.label }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Duration Selection -->
+                    <div class="relative mb-4">
+                        <label for="duration" class="block text-sm font-medium text-gray-700 mb-2">Pilih Durasi Charging</label>
+                        <div id="duration-trigger"
+                             @click.stop="openOnly('duration')"
+                             class="w-full p-3 border border-gray-300 rounded-xl cursor-pointer flex justify-between items-center bg-white transition duration-150"
+                             :class="{'ring-2 ring-lime-500 border-lime-500 shadow-md': isDurationOpen}"
+                        >
+                            <span class="text-gray-800">{{ durationOptions.find(d => d.value === selectedDuration)?.label || 'Pilih Durasi' }}</span>
+                            <svg class="w-5 h-5 text-gray-500 transform" :class="{'rotate-180': isDurationOpen}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </div>
+
+                        <div v-if="isDurationOpen" @click.stop class="duration-dropdown-content absolute top-full mt-2 w-full bg-white rounded-xl shadow-2xl border border-gray-100 z-30 left-0 max-h-48 overflow-y-auto" :class="{ 'show': isDurationOpen }">
+                            <div class="py-2">
+                                <div v-for="duration in durationOptions" :key="duration.value"
+                                     @click="selectOption('duration', duration.value)"
+                                     class="px-4 py-2 hover:bg-lime-50 cursor-pointer transition-colors duration-150"
+                                     :class="{'bg-lime-50 font-semibold text-lime-800': selectedDuration === duration.value}">
+                                    {{ duration.label }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="space-y-3 text-gray-700">
                         <div class="flex items-start">
                             <i class="fas fa-map-marker-alt text-gray-400 mt-1 mr-3"></i>
@@ -777,7 +897,11 @@ const getMapsUrl = (lat, lng) => {
                         </div>
                         <div class="flex items-center">
                             <i class="fas fa-clock text-gray-400 mr-3"></i>
-                            <p class="text-sm">{{ formatBookingDate(selectedStation.bookingTime) }} ({{ selectedStation.duration }})</p>
+                            <p class="text-sm">{{ formatBookingDate(selectedStation.bookingTime) }} ({{ selectedDuration }} menit)</p>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-bolt text-yellow-600 mr-3"></i>
+                            <p class="text-sm">{{ selectedPort ? `Port ${selectedPort.split('-')[1]}` : 'Port belum dipilih' }}</p>
                         </div>
                         <div class="flex justify-between items-center pt-4 border-t border-gray-100">
                             <div class="flex items-center">
@@ -792,8 +916,8 @@ const getMapsUrl = (lat, lng) => {
                         <button type="button" @click="cancelProcess" class="px-6 py-3 text-sm font-medium text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition duration-300">
                             Batal
                         </button>
-                        <button type="button" @click="proceedToPayment" 
-                            class="bg-[#00C853] text-white font-medium px-8 py-3 rounded-lg hover:bg-[#00A142] transition duration-300 shadow-md">
+                        <button type="button" @click="proceedToPayment" :disabled="!selectedPort"
+                            class="bg-[#00C853] text-white font-medium px-8 py-3 rounded-lg hover:bg-[#00A142] transition duration-300 shadow-md disabled:bg-gray-300 disabled:cursor-not-allowed">
                             Ya, Pesan
                         </button>
                     </div>
@@ -837,11 +961,11 @@ const getMapsUrl = (lat, lng) => {
                                 </div>
                                 <div class="flex items-center">
                                     <i class="fas fa-clock text-gray-500 mr-3"></i>
-                                    <p class="text-sm text-gray-600">{{ formatBookingDate(selectedStation.bookingTime) }} ({{ selectedStation.duration }})</p>
+                                    <p class="text-sm text-gray-600">{{ formatBookingDate(selectedStation.bookingTime) }} ({{ selectedDuration }} menit)</p>
                                 </div>
                                 <div class="flex items-center">
                                     <i class="fas fa-bolt text-yellow-600 mr-3"></i>
-                                    <p class="text-sm text-gray-600">Jenis Charger: **{{ selectedStation.chargers.join(', ') }}** &bull; **{{ selectedStation.power }}**</p>
+                                    <p class="text-sm text-gray-600">Port: {{ selectedPort ? `Port ${selectedPort.split('-')[1]}` : 'Port belum dipilih' }} &bull; {{ selectedStation.chargers.join(', ') }} &bull; {{ selectedStation.power }}</p>
                                 </div>
                             </div>
 
@@ -901,11 +1025,11 @@ const getMapsUrl = (lat, lng) => {
                                 </div>
                                 <div class="flex items-center">
                                     <i class="fas fa-clock text-gray-500 mr-3"></i>
-                                    <p class="text-sm text-gray-600">{{ formatBookingDate(selectedStation.bookingTime) }} ({{ selectedStation.duration }})</p>
+                                    <p class="text-sm text-gray-600">{{ formatBookingDate(selectedStation.bookingTime) }} ({{ selectedDuration }} menit)</p>
                                 </div>
                                 <div class="flex items-center">
                                     <i class="fas fa-bolt text-yellow-600 mr-3"></i>
-                                    <p class="text-sm text-gray-600">Jenis Charger: **{{ selectedStation.chargers.join(', ') }}** &bull; **{{ selectedStation.power }}**</p>
+                                    <p class="text-sm text-gray-600">Port: {{ selectedPort ? `Port ${selectedPort.split('-')[1]}` : 'Port belum dipilih' }} &bull; {{ selectedStation.chargers.join(', ') }} &bull; {{ selectedStation.power }}</p>
                                 </div>
                             </div>
 
@@ -940,6 +1064,55 @@ const getMapsUrl = (lat, lng) => {
 .fa-check-circle { color: #008000; } /* hijau untuk sukses */
 .fa-dollar-sign { color: #00C853; } /* hijau E-VOLT untuk icon total harga */
 
+/* Smooth dropdown animations */
+.brand-dropdown-content,
+.type-dropdown-content,
+.domicile-dropdown-content,
+.station-dropdown-content,
+.port-dropdown-content,
+.duration-dropdown-content {
+    transform: translateY(-10px);
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+}
+
+.brand-dropdown-content.show,
+.type-dropdown-content.show,
+.domicile-dropdown-content.show,
+.station-dropdown-content.show,
+.port-dropdown-content.show,
+.duration-dropdown-content.show {
+    transform: translateY(0);
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Enhanced dropdown item animations */
+.brand-dropdown-content .px-4,
+.type-dropdown-content .px-4,
+.domicile-dropdown-content .px-4,
+.station-dropdown-content .px-4,
+.port-dropdown-content .px-4,
+.duration-dropdown-content .px-4 {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: translateX(0);
+}
+
+.brand-dropdown-content .px-4:hover,
+.type-dropdown-content .px-4:hover,
+.domicile-dropdown-content .px-4:hover,
+.station-dropdown-content .px-4:hover,
+.port-dropdown-content .px-4:hover,
+.duration-dropdown-content .px-4:hover {
+    transform: translateX(4px);
+    background-color: #ecfdf5;
+}
+
+/* Smooth icon rotation */
+.transform {
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
 
 /* Animasi untuk Modal */
 .fade-enter-active, .fade-leave-active {

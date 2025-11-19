@@ -43,7 +43,7 @@ onBeforeUnmount(() => {
 
     <main class="flex-grow relative z-10"> 
       
-      <section class="bg-[#CCFF00] pt-8 sm:pt-12 md:pt-16 lg:pt-20 pb-12 sm:pb-16 md:pb-20 relative overflow-hidden">
+      <section class="bg-[#B6F500] pt-8 sm:pt-12 md:pt-16 lg:pt-20 pb-12 sm:pb-16 md:pb-20 relative overflow-hidden">
         <div class="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 relative z-10">
           <div class="flex flex-col lg:flex-row items-center justify-between gap-6 md:gap-8 lg:gap-12">
             
@@ -95,7 +95,7 @@ onBeforeUnmount(() => {
                 Pencarian Stasiun <span class="text-lime-600">Terdekat</span>
               </h2>
               <p class="text-sm sm:text-base md:text-lg text-gray-600 leading-relaxed max-w-xl mx-auto lg:mx-0">
-                Temukan stasiun pengisian daya terdekat dengan mudah menggunakan aplikasi kami yang dilengkapi dengan peta interaktif dan lokasi real-time, memungkinkan Anda mencapai stasiun dengan cepat dan efisien.
+                Aplikasi menampilkan peta geolokasi dengan semua SPKLU yang terdaftar. Kami menggunakan data Status Real-Time yang secara akurat menampilkan slot yang Available (siap pakai) ke pengguna.
               </p>
             </div>
             <div class="lg:w-1/2 flex justify-center w-full">
@@ -111,10 +111,10 @@ onBeforeUnmount(() => {
             <div class="lg:w-1/2">
               <span class="text-xs sm:text-sm font-semibold text-lime-600 uppercase tracking-widest block mb-2 sm:mb-3">Langkah 2</span>
               <h2 class="text-2xl sm:text-3xl md:text-4xl font-semibold text-gray-900 mb-3 sm:mb-4 md:mb-6 text-balance">
-                Reservasi Slot <span class="text-lime-600">Real-Time</span>
+                Reservasi Slot <span class="text-lime-600">Terjamin</span>
               </h2>
               <p class="text-sm sm:text-base md:text-lg text-gray-600 leading-relaxed max-w-xl mx-auto lg:mx-0">
-                Reservasi slot pengisian daya secara real-time dengan mudah melalui aplikasi kami, memastikan Anda mendapatkan waktu yang tepat tanpa antrian panjang dan meningkatkan efisiensi perjalanan Anda.
+                Pengguna dapat memilih stasiun dan mengunci slot pengisian spesifik. Sistem mengirimkan perintah OCPP Remote Reservation ke stasiun. Setelah pembayaran, slot terjamin dan pengguna menerima QR Booking untuk memulai sesi tanpa antrian.
               </p>
             </div>
             <div class="lg:w-1/2 flex justify-center w-full">
@@ -128,12 +128,12 @@ onBeforeUnmount(() => {
         <div class="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
           <div class="flex flex-col lg:flex-row items-center gap-8 md:gap-12 text-center lg:text-left">
             <div class="lg:w-1/2">
-              <span class="text-xs sm:text-sm font-semibold text-lime-600 uppercase tracking-widest block mb-2 sm:mb-3"></span>
+              <span class="text-xs sm:text-sm font-semibold text-lime-600 uppercase tracking-widest block mb-2 sm:mb-3">Langkah 3</span>
               <h2 class="text-2xl sm:text-3xl md:text-4xl font-semibold text-gray-900 mb-3 sm:mb-4 md:mb-6 text-balance">
-                Integrasi <span class="text-lime-600">Teknologi</span> Terbaru
+                <span class="text-lime-600"> Otomasi</span> Operasional & Data Audit
               </h2>
               <p class="text-sm sm:text-base md:text-lg text-gray-600 leading-relaxed max-w-xl mx-auto lg:mx-0">
-                Kami mengintegrasikan teknologi terbaru seperti kecerdasan buatan (AI) dan Internet of Things (IoT) untuk memberikan pengalaman pengisian daya kendaraan listrik yang lebih efisien, cerdas, dan ramah lingkungan di seluruh Indonesia.
+                Platform dibangun di atas protokol OCPP yang memungkinkan Komunikasi Dua Arah antara Backend Server dan SPKLU. Integrasi ini menghasilkan Audit Data Transaksi Otomatis dan mendukung model Zero Operator Cost yang efisien.
               </p>
             </div>
             <div class="lg:w-1/2 flex justify-center w-full">
