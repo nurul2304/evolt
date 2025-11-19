@@ -3,21 +3,59 @@ import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue';
 
 import Navbar from '@/Components/NavbarUser.vue';
 import Footer from '@/Components/Footer.vue';
-import PrintStrukPembayaran from '@/Pages/PrintStrukPembayaran.vue';
 
 // -----------------------------------------------------------------------------------
 
 const showSearchModal = ref(false);
 const showConfirmationModal = ref(false);
-const showQrisPaymentModal = ref(false); // Modal baru untuk pembayaran QRIS
-const showReceiptModal = ref(false);    // Modal untuk struk akhir
-const showPrintModal = ref(false);     // Modal/page untuk tampilan print struk
+const showQrisPaymentModal = ref(false); 
+const showReceiptModal = ref(false);    
+const showPrintModal = ref(false);     
 const selectedStation = ref(null);
-const hasStartedBooking = ref(false); // Track if user has started booking process
+const hasStartedBooking = ref(false); 
 
-// New reactive variables for port and duration selection
+// --- LOGIC DRAG-TO-DISMISS (SWIPE DOWN) ---
+const dragOffset = ref(0);
+const isDragging = ref(false);
+let startY = 0;
+
+// Mulai sentuh pada Handle Bar
+const onTouchStart = (e) => {
+    isDragging.value = true;
+    startY = e.touches[0].clientY;
+};
+
+// Saat jari bergerak
+const onTouchMove = (e) => {
+    if (!isDragging.value) return;
+    const currentY = e.touches[0].clientY;
+    const diff = currentY - startY;
+    
+    // Hanya izinkan drag ke bawah (diff positif)
+    if (diff > 0) {
+        dragOffset.value = diff;
+    }
+};
+
+// Saat jari dilepas
+const onTouchEnd = () => {
+    isDragging.value = false;
+    // Jika ditarik lebih dari 100px, tutup modal yang sedang aktif
+    if (dragOffset.value > 100) {
+        if (showSearchModal.value) {
+            closeModal();
+        } else {
+            cancelProcess(); // Tutup modal konfirmasi
+        }
+    } else {
+        // Jika kurang, kembalikan ke posisi semula (snap back)
+        dragOffset.value = 0;
+    }
+};
+// ------------------------------------------
+
 const selectedPort = ref('');
-const selectedDuration = ref('60'); // Default to 1 hour (60 minutes)
+const selectedDuration = ref('60'); 
 const durationOptions = [
     { label: '30 menit', value: '30', multiplier: 0.5 },
     { label: '1 jam', value: '60', multiplier: 1 },
@@ -25,7 +63,6 @@ const durationOptions = [
     { label: '2 jam', value: '120', multiplier: 2 }
 ];
 
-// Port options based on available ports
 const portOptions = computed(() => {
     return availablePorts.value.map(port => ({
         label: `Port ${port.id.split('-')[1]} - ${port.type} (${port.power})`,
@@ -33,7 +70,6 @@ const portOptions = computed(() => {
     }));
 });
 
-// Computed property for available ports based on selected station
 const availablePorts = computed(() => {
     if (!selectedStation.value) return [];
     return selectedStation.value.chargers.map((charger, index) => ({
@@ -55,7 +91,6 @@ const formState = ref({
     time: '12:00',
 });
 
-// Reuse UserDashboard custom dropdown data/logic to provide smooth, scrollable dropdowns
 const brandOptions = ['Hyundai', 'Wuling', 'Tesla', 'BYD', 'Kia'];
 const typeOptions = ['SUV', 'City Car', 'Hatchback', 'Sedan', 'MPV'];
 const domicileOptions = [
@@ -86,49 +121,23 @@ const closeAllCustomDropdowns = () => {
 const openOnly = (which) => {
     if (which === 'brand') {
         isBrandOpen.value = !isBrandOpen.value;
-        isTypeOpen.value = false;
-        isDomicileOpen.value = false;
-        isStationOpen.value = false;
-        isPortOpen.value = false;
-        isDurationOpen.value = false;
+        isTypeOpen.value = false; isDomicileOpen.value = false; isStationOpen.value = false; isPortOpen.value = false; isDurationOpen.value = false;
     } else if (which === 'type') {
         isTypeOpen.value = !isTypeOpen.value;
-        isBrandOpen.value = false;
-        isDomicileOpen.value = false;
-        isStationOpen.value = false;
-        isPortOpen.value = false;
-        isDurationOpen.value = false;
+        isBrandOpen.value = false; isDomicileOpen.value = false; isStationOpen.value = false; isPortOpen.value = false; isDurationOpen.value = false;
     } else if (which === 'domicile') {
         isDomicileOpen.value = !isDomicileOpen.value;
-        isBrandOpen.value = false;
-        isTypeOpen.value = false;
-        isStationOpen.value = false;
-        isPortOpen.value = false;
-        isDurationOpen.value = false;
+        isBrandOpen.value = false; isTypeOpen.value = false; isStationOpen.value = false; isPortOpen.value = false; isDurationOpen.value = false;
     } else if (which === 'station') {
         isStationOpen.value = !isStationOpen.value;
-        isBrandOpen.value = false;
-        isTypeOpen.value = false;
-        isDomicileOpen.value = false;
-        isPortOpen.value = false;
-        isDurationOpen.value = false;
+        isBrandOpen.value = false; isTypeOpen.value = false; isDomicileOpen.value = false; isPortOpen.value = false; isDurationOpen.value = false;
     } else if (which === 'port') {
         isPortOpen.value = !isPortOpen.value;
-        isBrandOpen.value = false;
-        isTypeOpen.value = false;
-        isDomicileOpen.value = false;
-        isStationOpen.value = false;
-        isDurationOpen.value = false;
+        isBrandOpen.value = false; isTypeOpen.value = false; isDomicileOpen.value = false; isStationOpen.value = false; isDurationOpen.value = false;
     } else if (which === 'duration') {
         isDurationOpen.value = !isDurationOpen.value;
-        isBrandOpen.value = false;
-        isTypeOpen.value = false;
-        isDomicileOpen.value = false;
-        isStationOpen.value = false;
-        isPortOpen.value = false;
+        isBrandOpen.value = false; isTypeOpen.value = false; isDomicileOpen.value = false; isStationOpen.value = false; isPortOpen.value = false;
     }
-
-    // keep date/time closed when toggling custom dropdowns
     isDateDropdownOpen.value = false;
     isTimeDropdownOpen.value = false;
 };
@@ -150,6 +159,9 @@ const openModal = () => {
 
 const closeModal = () => {
     showSearchModal.value = false;
+    // Reset Drag state saat tutup
+    dragOffset.value = 0;
+    isDragging.value = false;
 };
 
 const submitSearch = () => {
@@ -165,7 +177,6 @@ const stations = ref([
     { id: 5, name: 'SPKLU Batam City Square', location: 'Batam City Square', distance: '1.8km', chargers: ['Regular'], power: '11 kW', status: 'Penuh', bookingTime: '2025-10-22 10:00', duration: '90 menit', price: 30000, serviceFee: 8000, isBookable: false, bookingNumber: 'BK1005', lat: 1.1210, lng: 104.0335 },
     { id: 6, name: 'SPKLU Kepri Mall', location: 'Kepri Mall', distance: '2.1km', chargers: ['Regular'], power: '22 kW', status: 'Tersedia', bookingTime: '2025-10-22 11:00', duration: '60 menit', price: 45000, serviceFee: 9000, isBookable: true, bookingNumber: 'BK1006', lat: 1.1122, lng: 104.0450 },
     { id: 7, name: 'SPKLU Batam View', location: 'Batam View', distance: '4.0km', chargers: ['Ultra Fast'], power: '150 kW', status: 'Tersedia', bookingTime: '2025-10-22 13:00', duration: '45 menit', price: 90000, serviceFee: 10000, isBookable: true, bookingNumber: 'BK1007', lat: 1.1390, lng: 104.0480 },
-    // SPKLU Kabil removed per request
     { id: 9, name: 'SPKLU Tiban', location: 'Tiban', distance: '5.5km', chargers: ['Fast'], power: '50 kW', status: 'Penuh', bookingTime: '2025-10-22 15:00', duration: '30 menit', price: 80000, serviceFee: 10000, isBookable: false, bookingNumber: 'BK1009', lat: 1.0956, lng: 104.0103 },
     { id: 10, name: 'SPKLU Sekupang', location: 'Sekupang', distance: '7.2km', chargers: ['Regular'], power: '22 kW', status: 'Tersedia', bookingTime: '2025-10-22 08:00', duration: '60 menit', price: 35000, serviceFee: 7000, isBookable: true, bookingNumber: 'BK1010', lat: 1.0552, lng: 103.9824 },
     { id: 11, name: 'SPKLU Batu Ampar', location: 'Batu Ampar', distance: '6.0km', chargers: ['Regular'], power: '11 kW', status: 'Tersedia', bookingTime: '2025-10-22 10:30', duration: '90 menit', price: 30000, serviceFee: 7000, isBookable: true, bookingNumber: 'BK1011', lat: 1.0873, lng: 104.0128 },
@@ -190,8 +201,6 @@ let map = null;
 const loadLeaflet = () => {
     return new Promise((resolve, reject) => {
         if (window.L) return resolve(window.L);
-
-        // load CSS
         if (!document.querySelector('link[data-leaflet]')) {
             const link = document.createElement('link');
             link.rel = 'stylesheet';
@@ -199,8 +208,6 @@ const loadLeaflet = () => {
             link.setAttribute('data-leaflet', '1');
             document.head.appendChild(link);
         }
-
-        // load script
         if (!document.querySelector('script[data-leaflet]')) {
             const script = document.createElement('script');
             script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
@@ -210,7 +217,6 @@ const loadLeaflet = () => {
             script.onerror = reject;
             document.body.appendChild(script);
         } else {
-            // script already present but window.L may not be ready yet
             const check = () => {
                 if (window.L) resolve(window.L);
                 else setTimeout(check, 50);
@@ -220,164 +226,52 @@ const loadLeaflet = () => {
     });
 };
 
-// Date & Time picker helpers (copied from LandingPage for consistent UX)
+// Date & Time picker helpers
 const today = new Date();
 today.setHours(0,0,0,0);
-const monthNames = ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
-const dayNames = ["Min","Sen","Sel","Rab","Kam","Jum","Sab"];
-
 const isDateDropdownOpen = ref(false);
-const selectedDate = ref(new Date(today));
-const calendarDisplayDate = ref(new Date(today));
-
 const isTimeDropdownOpen = ref(false);
-const selectedTime = ref(formState.value.time || '');
 
-const formatDate = (date) => `${date.getDate()} ${monthNames[date.getMonth()]} ${date.getFullYear()}`;
-const datePickerText = computed(() => selectedDate.value ? formatDate(selectedDate.value) : 'Pilih Tanggal');
-
-const calendarDays = computed(() => {
-    const year = calendarDisplayDate.value.getFullYear();
-    const month = calendarDisplayDate.value.getMonth();
-    const firstDayIndex = new Date(year, month, 1).getDay();
-    const lastDate = new Date(year, month+1, 0).getDate();
-    let days = [];
-    for (let i=0;i<firstDayIndex;i++) days.push({ number: null, classes: 'text-gray-300' });
-    for (let i=1;i<=lastDate;i++){
-        const currentDate = new Date(year, month, i);
-        const isSelected = selectedDate.value && currentDate.toDateString() === selectedDate.value.toDateString();
-        const isDisabled = currentDate < today;
-        let classes = 'day-number w-8 h-8 flex items-center justify-center rounded-full text-sm font-medium transition duration-100';
-        if (isDisabled) classes += ' text-gray-400 cursor-not-allowed';
-        else if (isSelected) classes += ' bg-lime-600 text-white shadow-md';
-        else classes += ' text-gray-800 hover:bg-lime-100 cursor-pointer';
-        days.push({ number: i, date: currentDate, classes, isDisabled });
-    }
-    return days;
-});
-
-const prevMonth = () => { const d = new Date(calendarDisplayDate.value); d.setMonth(d.getMonth()-1); calendarDisplayDate.value = d; };
-const nextMonth = () => { const d = new Date(calendarDisplayDate.value); d.setMonth(d.getMonth()+1); calendarDisplayDate.value = d; };
-
-const selectDay = (day) => {
-    if (!day.isDisabled){
-        selectedDate.value = day.date;
-        formState.value.date = day.date.toISOString().split('T')[0];
-        selectedTime.value = '';
-        formState.value.time = '';
-        isDateDropdownOpen.value = false;
-    }
-};
-
-const timeSlots = computed(() => {
-    const slots = [];
-    const now = new Date();
-    const isToday = selectedDate.value.toDateString() === new Date(now).toDateString();
-    for (let h=0; h<24; h++){
-        for (let m=0;m<60;m+=30){
-            const timeString = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
-            let isDisabled = false;
-            if (isToday){
-                if (h < now.getHours() || (h === now.getHours() && m < now.getMinutes())) isDisabled = true;
-            }
-            slots.push({ time: timeString, isDisabled });
-        }
-    }
-    return slots;
-});
-
-const selectTime = (slot) => {
-    if (!slot.isDisabled){
-        selectedTime.value = slot.time;
-        formState.value.time = slot.time;
-        isTimeDropdownOpen.value = false;
-    }
-};
-
-// Close pickers when clicking outside (improves mobile behavior)
+// Close pickers
 const closePickersOnOutsideClick = (event) => {
-    if (isDateDropdownOpen.value && !event.target.closest('#date-picker-trigger') && !event.target.closest('.date-picker-content')) {
-        isDateDropdownOpen.value = false;
-    }
-    if (isTimeDropdownOpen.value && !event.target.closest('#time-picker-trigger') && !event.target.closest('.time-picker-content')) {
-        isTimeDropdownOpen.value = false;
-    }
-    if (isBrandOpen.value && !event.target.closest('#brand-trigger') && !event.target.closest('.brand-dropdown-content')) {
-        isBrandOpen.value = false;
-    }
-    if (isTypeOpen.value && !event.target.closest('#type-trigger') && !event.target.closest('.type-dropdown-content')) {
-        isTypeOpen.value = false;
-    }
-    if (isDomicileOpen.value && !event.target.closest('#domicile-trigger') && !event.target.closest('.domicile-dropdown-content')) {
-        isDomicileOpen.value = false;
-    }
-    if (isStationOpen.value && !event.target.closest('#station-trigger') && !event.target.closest('.station-dropdown-content')) {
-        isStationOpen.value = false;
-    }
-    if (isPortOpen.value && !event.target.closest('#port-trigger') && !event.target.closest('.port-dropdown-content')) {
-        isPortOpen.value = false;
-    }
-    if (isDurationOpen.value && !event.target.closest('#duration-trigger') && !event.target.closest('.duration-dropdown-content')) {
-        isDurationOpen.value = false;
-    }
+    if (isBrandOpen.value && !event.target.closest('#brand-trigger') && !event.target.closest('.brand-dropdown-content')) isBrandOpen.value = false;
+    if (isTypeOpen.value && !event.target.closest('#type-trigger') && !event.target.closest('.type-dropdown-content')) isTypeOpen.value = false;
+    if (isDomicileOpen.value && !event.target.closest('#domicile-trigger') && !event.target.closest('.domicile-dropdown-content')) isDomicileOpen.value = false;
+    if (isStationOpen.value && !event.target.closest('#station-trigger') && !event.target.closest('.station-dropdown-content')) isStationOpen.value = false;
+    if (isPortOpen.value && !event.target.closest('#port-trigger') && !event.target.closest('.port-dropdown-content')) isPortOpen.value = false;
+    if (isDurationOpen.value && !event.target.closest('#duration-trigger') && !event.target.closest('.duration-dropdown-content')) isDurationOpen.value = false;
 };
 
 onMounted(async () => {
     document.body.addEventListener('click', closePickersOnOutsideClick);
-
-    // Handle back button on mobile to close modals instead of navigating away
     window.addEventListener('popstate', handleBackButton);
 
     try {
         const L = await loadLeaflet();
-
-        // initialize map centered on Batam
-        map = L.map('map').setView([1.126, 104.030], 12);
+        map = L.map('map', { zoomControl: false }).setView([1.126, 104.030], 12); 
+        L.control.zoom({ position: 'bottomright' }).addTo(map);
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
-            attribution: '&copy; OpenStreetMap contributors'
+            attribution: '&copy; OpenStreetMap'
         }).addTo(map);
 
-        // create a Google-like SVG pin (green)
-        const pinSvg = encodeURIComponent(`
-            <svg width="32" height="48" viewBox="0 0 24 36" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 0C7 0 3.5 3.5 3.5 8.5 3.5 15.5 12 25.5 12 25.5s8.5-10 8.5-17C20.5 3.5 17 0 12 0z" fill="#00C853"/>
-              <circle cx="12" cy="8.5" r="3.5" fill="white"/>
-            </svg>
-        `);
-        const iconUrl = `data:image/svg+xml;charset=UTF-8,${pinSvg}`;
-
-        const customIcon = L.icon({
-            iconUrl,
-            iconSize: [28, 42],
-            iconAnchor: [14, 42],
-            popupAnchor: [0, -38]
-        });
-
-        // add markers for available stations with coordinates using dynamic colored icons
         stations.value.filter(s => s.status === 'Tersedia' && s.lat && s.lng).forEach(s => {
             const color = getMarkerColor(s.chargers);
             const pinSvg = createPinSvg(color);
             const iconUrl = `data:image/svg+xml;charset=UTF-8,${pinSvg}`;
-
             const customIcon = L.icon({
-                iconUrl,
-                iconSize: [28, 42],
-                iconAnchor: [14, 42],
-                popupAnchor: [0, -38]
+                iconUrl, iconSize: [28, 42], iconAnchor: [14, 42], popupAnchor: [0, -38]
             });
-
             const marker = L.marker([s.lat, s.lng], { icon: customIcon }).addTo(map);
             marker.bindPopup(`
-                <div class="font-medium">${s.name}</div>
-                <div class="text-sm text-gray-600">${s.location}</div>
-                <div class="text-sm text-gray-500">Status: ${s.status}</div>
-                <div class="text-sm" style="color: ${getMarkerColor(s.chargers)};">Charger: ${s.chargers.join(', ')}</div>
-                <button onclick="openMapsLocation(${s.lat}, ${s.lng})" class="mt-2 w-full py-2 px-4 bg-[#00C853] text-white font-medium rounded-lg hover:bg-[#00A142] transition duration-200 shadow-md flex items-center justify-center space-x-2 text-sm">
-                    <i class="fas fa-external-link-alt"></i>
-                    <span>Lihat Lokasi</span>
-                </button>
+                <div class="font-sans text-center">
+                    <div class="font-bold text-base text-gray-800 mb-1">${s.name}</div>
+                    <div class="text-xs text-gray-500 mb-2">${s.location}</div>
+                    <button onclick="openMapsLocation(${s.lat}, ${s.lng})" class="w-full py-1.5 px-3 bg-[#00C853] text-white font-bold rounded-lg hover:bg-[#00A142] text-xs shadow-sm">
+                        Buka Peta
+                    </button>
+                </div>
             `);
         });
     } catch (err) {
@@ -386,35 +280,21 @@ onMounted(async () => {
 });
 
 const handleBackButton = (event) => {
-    if (showReceiptModal.value) {
-        closeReceiptModal();
-        event.preventDefault();
-    } else if (showQrisPaymentModal.value) {
-        cancelProcess();
-        event.preventDefault();
-    } else if (showConfirmationModal.value) {
-        cancelProcess();
-        event.preventDefault();
-    } else if (showSearchModal.value) {
-        closeModal();
-        event.preventDefault();
-    } else if (hasStartedBooking.value) {
-        // Jika sudah mulai booking tapi tidak ada modal terbuka, tetap di halaman map
-        event.preventDefault();
-    }
-    // Jika belum mulai booking, biarkan navigasi normal (kembali ke halaman sebelumnya)
+    if (showReceiptModal.value) { closeReceiptModal(); event.preventDefault(); }
+    else if (showQrisPaymentModal.value) { cancelProcess(); event.preventDefault(); }
+    else if (showConfirmationModal.value) { cancelProcess(); event.preventDefault(); }
+    else if (showSearchModal.value) { closeModal(); event.preventDefault(); }
+    else if (hasStartedBooking.value) { event.preventDefault(); }
 };
 
 onBeforeUnmount(() => {
     document.body.removeEventListener('click', closePickersOnOutsideClick);
-    // Reset body styles to prevent stuck scrolling on mobile when navigating away
     document.body.classList.remove('modal-open');
     document.body.style.top = '';
 });
 
-// Watch for modal state to prevent background scrolling on mobile
 watch(anyModalOpen, (isOpen) => {
-    if (window.innerWidth <= 768) { // Only on mobile
+    if (window.innerWidth <= 768) {
         if (isOpen) {
             const scrollY = window.scrollY;
             document.body.style.top = `-${scrollY}px`;
@@ -428,77 +308,13 @@ watch(anyModalOpen, (isOpen) => {
     }
 });
 
-// Buat fungsi global untuk digunakan di popup
 window.openMapsLocation = (lat, lng) => {
-    const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-
-    if (isMobile) {
-        // Untuk mobile, gunakan Google Maps URL scheme yang lebih kompatibel
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    const userLat = position.coords.latitude;
-                    const userLng = position.coords.longitude;
-                    // Gunakan Google Maps URL scheme untuk Android/iOS dengan directions
-                    const url = `https://www.google.com/maps/dir/${userLat},${userLng}/${lat},${lng}`;
-                    window.open(url, '_blank');
-                },
-                (error) => {
-                    console.warn('Geolocation error:', error);
-                    // Fallback: buka Google Maps dengan tujuan saja
-                    const url = `https://www.google.com/maps?q=${lat},${lng}`;
-                    window.open(url, '_blank');
-                },
-                {
-                    enableHighAccuracy: true,
-                    timeout: 10000,
-                    maximumAge: 300000 // 5 menit
-                }
-            );
-        } else {
-            // Fallback jika geolocation tidak didukung
-            const url = `https://www.google.com/maps?q=${lat},${lng}`;
-            window.open(url, '_blank');
-        }
-    } else {
-        // Untuk desktop, coba dapatkan lokasi user dan buat rute otomatis
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    const userLat = position.coords.latitude;
-                    const userLng = position.coords.longitude;
-                    // Buat URL dengan rute dari lokasi user ke stasiun
-                    const url = `https://www.google.com/maps/dir/${userLat},${userLng}/${lat},${lng}`;
-                    window.open(url, '_blank');
-                },
-                (error) => {
-                    console.warn('Geolocation error:', error);
-                    // Fallback: buka Google Maps dengan tujuan saja
-                    const url = `https://www.google.com/maps?q=${lat},${lng}`;
-                    window.open(url, '_blank');
-                },
-                {
-                    enableHighAccuracy: true,
-                    timeout: 10000,
-                    maximumAge: 300000 // 5 menit
-                }
-            );
-        } else {
-            // Fallback jika geolocation tidak didukung
-            const url = `https://www.google.com/maps?q=${lat},${lng}`;
-            window.open(url, '_blank');
-        }
-    }
+    const url = `https://www.google.com/maps?q=${lat},${lng}`;
+    window.open(url, '_blank');
 };
 
-
-
-const formatRupiah = (amount) => {
-    return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0, }).format(amount);
-};
-const calculateTotal = (price, fee) => {
-    return price + fee;
-};
+const formatRupiah = (amount) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0, }).format(amount);
+const calculateTotal = (price, fee) => price + fee;
 const calculateTotalFormatted = computed(() => {
     if (selectedStation.value) {
         const durationMultiplier = durationOptions.find(d => d.value === selectedDuration.value)?.multiplier || 1;
@@ -509,7 +325,6 @@ const calculateTotalFormatted = computed(() => {
     return '';
 });
 
-// Fungsi untuk menampilkan modal konfirmasi
 const reserveStation = (stationId) => {
     const station = stations.value.find(s => s.id === stationId);
     if (station && station.isBookable) {
@@ -519,81 +334,52 @@ const reserveStation = (stationId) => {
     }
 };
 
-// Fungsi untuk membatalkan proses (dari modal konfirmasi atau pembayaran)
 const cancelProcess = () => {
     showConfirmationModal.value = false;
     showQrisPaymentModal.value = false;
     selectedStation.value = null;
     selectedPort.value = '';
-    selectedDuration.value = '60'; // Reset to default
+    selectedDuration.value = '60';
+    // Reset Drag offset
+    dragOffset.value = 0;
+    isDragging.value = false;
 };
 
-// Fungsi setelah user mengklik "Ya, Pesan" di modal konfirmasi
 const proceedToPayment = () => {
-    showConfirmationModal.value = false; // Tutup modal konfirmasi
-    showQrisPaymentModal.value = true;  // Buka modal pembayaran QRIS
+    showConfirmationModal.value = false;
+    showQrisPaymentModal.value = true;
     history.pushState({modal: 'payment'}, '', window.location.href);
 };
 
-// Fungsi setelah user mengklik "Konfirmasi Pembayaran" di modal QRIS
 const confirmPayment = () => {
-    // Di sini akan ada logika sebenarnya untuk memverifikasi pembayaran.
-    // Untuk demo, kita langsung asumsikan berhasil.
-    console.log(`Pembayaran dikonfirmasi untuk booking: ${selectedStation.value.bookingNumber}`);
-    showQrisPaymentModal.value = false; // Tutup modal QRIS
-    showReceiptModal.value = true;      // Buka modal struk
+    console.log(`Pembayaran dikonfirmasi`);
+    showQrisPaymentModal.value = false;
+    showReceiptModal.value = true;
 };
 
-// Fungsi untuk menutup modal struk akhir
 const closeReceiptModal = () => {
     showReceiptModal.value = false;
-    selectedStation.value = null; // Reset data stasiun
-    if (history.state && history.state.modal) {
-        history.back(); // Kembali ke state sebelumnya jika ada modal
-    }
+    selectedStation.value = null;
+    if (history.state && history.state.modal) history.back();
 };
 
-// buka tampilan PrintStrukPembayaran dari tombol "Unduh Struk"
 const openPrintStruk = () => {
-    // tutup modal struk jika masih terbuka, lalu navigasi ke halaman print struk
     showReceiptModal.value = false;
-    // navigasi ke halaman PrintStrukPembayaran dengan data station dan total
     window.location.href = `/print-struk?station=${encodeURIComponent(JSON.stringify(selectedStation.value))}&total=${encodeURIComponent(calculateTotalFormatted.value)}`;
 };
 
-// Fungsi untuk menutup modal print struk
-const closePrintStruk = () => {
-    showPrintModal.value = false;
-    selectedStation.value = null;
-};
-
-// Fungsi untuk membuat QR code di struk (placeholder)
-const generateQrisQrCode = () => {
-    // Dalam implementasi nyata, ini akan menjadi library QR code dengan data QRIS
-    return 'QRIS_PAYMENT_DATA_FOR_' + selectedStation.value.bookingNumber;
-};
-
-// Fungsi untuk membuat QR code untuk charging (placeholder)
-const generateChargingQrCode = () => {
-    // Ini adalah QR code yang berbeda untuk digunakan di stasiun charging.
-    return 'CHARGING_SESSION_DATA_FOR_' + selectedStation.value.bookingNumber;
-};
-
-// Utility untuk memformat tanggal bookingTime
 const formatBookingDate = (dateTime) => {
     const [date, time] = dateTime.split(' ');
     return `${date} ${time}`;
 };
 
-// Helper function untuk mendapatkan warna marker berdasarkan jenis charger tertinggi
 const getMarkerColor = (chargers) => {
-    if (chargers.includes('Ultra Fast')) return '#9333ea'; // purple-600
-    if (chargers.includes('Fast')) return '#3b82f6'; // blue-500
-    if (chargers.includes('Regular')) return '#22c55e'; // green-500
-    return '#00C853'; // default green
+    if (chargers.includes('Ultra Fast')) return '#9333ea';
+    if (chargers.includes('Fast')) return '#3b82f6';
+    if (chargers.includes('Regular')) return '#22c55e';
+    return '#00C853';
 };
 
-// Helper function untuk membuat SVG pin dengan warna dinamis
 const createPinSvg = (color) => {
     return encodeURIComponent(`
         <svg width="32" height="48" viewBox="0 0 24 36" xmlns="http://www.w3.org/2000/svg">
@@ -602,114 +388,118 @@ const createPinSvg = (color) => {
         </svg>
     `);
 };
-
-// Helper function untuk mendapatkan URL Maps berdasarkan device
-const getMapsUrl = (lat, lng) => {
-    const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    if (isMobile) {
-        // Gunakan geo scheme untuk membuka aplikasi maps default (biasanya Google Maps)
-        return `geo:${lat},${lng}`;
-    } else {
-        // Untuk desktop, buka Google Maps di browser
-        return `https://www.google.com/maps?q=${lat},${lng}`;
-    }
-};
 </script>
 
 <template>
-    <div class="min-h-screen flex flex-col bg-gray-50">
+    <div class="min-h-screen flex flex-col bg-gray-50 font-sans text-gray-800">
         <Navbar />
 
         <main class="flex-grow">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
 
+                <!-- SEARCH BAR -->
                 <div class="flex flex-col md:flex-row justify-end items-start md:items-center mb-6">
-                    <div class="relative w-full md:w-64">
+                    <div class="relative w-full md:w-72 group">
                         <input 
                             type="text" 
                             placeholder="Cari Stasiun Lain..." 
-                            class="w-full p-3 pl-4 border border-gray-300 rounded-xl focus:ring-[#00C853] focus:border-[#00C853] cursor-pointer"
+                            class="w-full p-3.5 pl-12 border border-gray-200 rounded-2xl bg-white shadow-sm focus:ring-2 focus:ring-[#00C853]/20 focus:border-[#00C853] cursor-pointer transition-all hover:shadow-md text-sm sm:text-base"
                             @click="openModal"
                             readonly
                             value="Cari Stasiun Lainnya..."
                         >
-                        <i class="fas fa-search absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                        <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 group-hover:text-[#00C853] transition-colors"></i>
                     </div>
                 </div>
 
-                <div class="relative w-full mb-8 rounded-xl shadow-lg overflow-hidden border border-gray-200" style="height: 450px; background-color: #e9f5ff;">
-                    <!-- Dummy map background -->
+                <!-- MAP CONTAINER -->
+                <div class="relative w-full mb-8 rounded-3xl shadow-xl overflow-hidden border border-white h-72 md:h-[450px] bg-[#e9f5ff] z-0">
                     <div class="absolute inset-0 bg-[url('/images/map-grid.png')] bg-cover bg-center opacity-40"></div>
-
-                    <!-- Map content -->
                     <div class="absolute inset-0">
                         <div class="w-full h-full relative">
-                            <!-- Center label -->
-                            <div class="absolute left-1/2 top-4 transform -translate-x-1/2 text-center">
-                                <h3 class="text-lg font-medium text-gray-800">Peta Sementara (Dummy)</h3>
-                                <p class="text-sm text-gray-600">Markers are sample locations — interaksi akan dilakukan di implementasi nyata.</p>
+                            <!-- Floating Label -->
+                            <div class="absolute left-1/2 top-4 transform -translate-x-1/2 text-center bg-white/90 backdrop-blur-sm px-4 py-1.5 rounded-full shadow-sm z-[500]">
+                                <h3 class="text-xs md:text-sm font-semibold text-gray-700 flex items-center gap-1">
+                                   <i class="fas fa-info-circle text-[#00C853]"></i> Area Batam
+                                </h3>
                             </div>
-
-                            <!-- Leaflet map will render here -->
-                            <div id="map" class="w-full h-full"></div>
+                            <div id="map" class="w-full h-full z-10"></div>
                         </div>
                     </div>
                 </div>
 
-                <h2 class="text-2xl font-semibold text-gray-800 mb-6">Stasiun Charging Terdekat</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- CARD LIST HEADER -->
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-xl sm:text-2xl font-bold text-gray-800">
+                        Stasiun <span class="text-[#00C853]">Terdekat</span>
+                    </h2>
+                    <span class="text-xs sm:text-sm font-medium text-gray-500 bg-white px-3 py-1 rounded-full border border-gray-200 shadow-sm">
+                        {{ nearestStations.length }} Ditemukan
+                    </span>
+                </div>
+                
+                <!-- CARD GRID -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
                     <div v-for="station in nearestStations" :key="station.id"
-                         class="bg-white p-6 rounded-xl shadow-lg border border-gray-100 transition duration-300 hover:shadow-xl relative"
-                         :class="{ 'border-[#00C853] ring-1 ring-[#00C853]': selectedStation && selectedStation.id === station.id && (showQrisPaymentModal || showReceiptModal) }">
-
-
-
-                        <h2 class="text-xl font-semibold text-gray-900 mb-1">{{ station.name }}</h2>
-                            <div class="flex items-center justify-between text-sm text-gray-500 mb-4">
-                                <div class="flex items-center">
-                                    <i class="fas fa-map-marker-alt mr-2"></i>
-                                    {{ station.location }}
+                         class="bg-white p-5 sm:p-6 rounded-3xl shadow-md hover:shadow-xl border border-transparent transition-all duration-300 transform hover:-translate-y-1 flex flex-col relative group"
+                         :class="{ 'ring-2 ring-[#00C853] ring-offset-2': selectedStation && selectedStation.id === station.id && (showQrisPaymentModal || showReceiptModal) }">
+                        
+                        <!-- Header Card -->
+                        <div class="flex justify-between items-start mb-3">
+                            <div>
+                                <h2 class="text-lg sm:text-xl font-bold text-gray-900 leading-tight mb-1">{{ station.name }}</h2>
+                                <div class="flex items-center text-xs sm:text-sm text-gray-500">
+                                    <i class="fas fa-map-marker-alt mr-1.5 text-gray-400"></i>
+                                    {{ station.distance }}
                                 </div>
-                                <span>{{ station.distance }}</span>
                             </div>
-
-                        <div class="space-y-2 mb-6 text-sm">
-                            <!-- Use a two-column grid so labels align flush-left with the pricing section -->
-                            <div class="grid grid-cols-2 gap-4 items-center text-gray-700">
-                                <div class="flex items-center font-medium text-gray-900">
-                                    <i class="fas fa-bolt mr-2 text-yellow-600"></i>
-                                    <span>Jenis Charger:</span>
-                                </div>
-                                <div class="text-left font-medium">{{ station.chargers.join(', ') }} &bull; {{ station.power }}</div>
+                            <div class="bg-lime-50 text-lime-700 text-xs font-bold px-2.5 py-1 rounded-lg">
+                                {{ station.status }}
                             </div>
                         </div>
 
-                        <div class="border-t border-gray-100 pt-4 space-y-2 mb-4 text-sm">
-                            <div class="flex justify-between text-gray-600">
-                                <span>Harga Charging:</span>
-                                <span class="font-medium">{{ formatRupiah(station.price) }}</span>
+                        <!-- Info Details -->
+                        <div class="space-y-3 mb-6 text-sm sm:text-base bg-gray-50 p-4 rounded-2xl">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center text-gray-600">
+                                    <i class="fas fa-bolt w-5 text-center mr-2 text-yellow-500"></i>
+                                    <span>Tipe</span>
+                                </div>
+                                <span class="font-semibold text-gray-800">{{ station.chargers[0] }}</span>
                             </div>
-                            <div class="flex justify-between text-gray-600">
-                                <span>Biaya Layanan:</span>
-                                <span class="font-medium">{{ formatRupiah(station.serviceFee) }}</span>
-                            </div>
-                            <div class="flex justify-between items-center font-semibold text-lg p-3 rounded-lg shadow-sm" style="background: linear-gradient(180deg,#f7ffe6,#e6ffb3);">
-                                <span class="text-gray-900">Total Harga:</span>
-                                <span class="text-gray-900">{{ formatRupiah(calculateTotal(station.price, station.serviceFee)) }}</span>
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center text-gray-600">
+                                    <i class="fas fa-tachometer-alt w-5 text-center mr-2 text-blue-500"></i>
+                                    <span>Daya</span>
+                                </div>
+                                <span class="font-semibold text-gray-800">{{ station.power }}</span>
                             </div>
                         </div>
 
-                        <div class="mt-4">
+                        <!-- Pricing & Action -->
+                        <div class="mt-auto space-y-4">
+                            <div class="flex flex-col gap-1">
+                                <div class="flex justify-between items-center text-sm text-gray-500">
+                                    <span>Estimasi Total</span>
+                                    <span class="text-xs">(Inc. Service Fee)</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-xl sm:text-2xl font-bold text-[#00C853]">{{ formatRupiah(calculateTotal(station.price, station.serviceFee)) }}</span>
+                                </div>
+                            </div>
+
                             <button
                                 @click="reserveStation(station.id)"
                                 :disabled="!station.isBookable"
                                 :class="[
-                                    'w-full py-3 rounded-xl text-white font-semibold transition duration-200 shadow-md flex items-center justify-center space-x-2',
-                                    station.isBookable ? 'bg-[#00C853] hover:bg-[#00A142]' : 'bg-gray-300 text-gray-600 cursor-not-allowed'
+                                    'w-full py-3.5 rounded-xl sm:rounded-2xl font-bold text-sm sm:text-base transition-all duration-200 flex items-center justify-center space-x-2 shadow-lg',
+                                    station.isBookable 
+                                        ? 'bg-[#00C853] text-white hover:bg-[#00A142] active:scale-95 hover:shadow-[#00C853]/30' 
+                                        : 'bg-gray-200 text-gray-400 cursor-not-allowed shadow-none'
                                 ]"
                             >
-                                <i class="fas fa-ticket-alt mr-2"></i>
-                                <span>Pesan Tiket</span>
+                                <i class="fas fa-ticket-alt"></i>
+                                <span>{{ station.isBookable ? 'Pesan Sekarang' : 'Penuh' }}</span>
                             </button>
                         </div>
                     </div>
@@ -720,341 +510,226 @@ const getMapsUrl = (lat, lng) => {
 
         <Footer />
         
-        <Transition name="fade">
-            <div v-if="showSearchModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[99999] p-4 overflow-y-auto" @click.self="closeModal">
-                <div class="bg-white rounded-xl p-8 shadow-2xl w-full max-w-2xl transform transition-all duration-300">
-                    <h3 class="text-2xl font-medium text-gray-900 mb-6">Cari Jadwal Pengecasan</h3>
-                    
-                    <form @submit.prevent="submitSearch" class="space-y-5">
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <!-- BRAND: custom dropdown -->
-                            <div class="relative">
-                                <label for="brand" class="block text-sm font-medium text-gray-700 mb-1">Merk Mobil</label>
-                                <div id="brand-trigger"
-                                     @click.stop="openOnly('brand')"
-                                     class="w-full p-3 border border-gray-300 rounded-xl cursor-pointer flex justify-between items-center bg-white transition duration-150"
-                                     :class="{'ring-2 ring-lime-500 border-lime-500 shadow-md': isBrandOpen}"
-                                >
-                                    <span class="text-gray-800">{{ formState.brand || 'Pilih Merk Mobil' }}</span>
-                                    <svg class="w-5 h-5 text-gray-500 transform" :class="{'rotate-180': isBrandOpen}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                                </div>
+        <!-- SEARCH MODAL (Slide Up on Mobile with Drag-to-Dismiss) -->
+        <Transition name="slide-up">
+            <div v-if="showSearchModal" class="fixed inset-0 bg-gray-900/80 backdrop-blur-sm flex items-end sm:items-center justify-center z-[99999] p-0 sm:p-4" @click.self="closeModal">
+                <div 
+                    class="bg-white w-full h-[90vh] sm:h-auto sm:max-w-2xl rounded-t-[2rem] sm:rounded-3xl p-6 sm:p-8 shadow-2xl transform transition-transform duration-300 sm:duration-200 flex flex-col relative touch-none sm:touch-auto"
+                    :style="{ transform: isDragging ? `translateY(${dragOffset}px)` : '' }"
+                >
+                    <!-- Handle bar for mobile (Draggable Area) -->
+                     <div 
+                        class="w-full h-8 absolute top-0 left-0 z-50 flex justify-center items-center sm:hidden cursor-grab active:cursor-grabbing"
+                        @touchstart="onTouchStart"
+                        @touchmove="onTouchMove"
+                        @touchend="onTouchEnd"
+                     >
+                        <div class="w-14 h-1.5 bg-gray-300 rounded-full"></div>
+                     </div>
 
-                                <div v-if="isBrandOpen" @click.stop class="brand-dropdown-content absolute top-full mt-2 w-full bg-white rounded-xl shadow-2xl border border-gray-100 z-30 left-0 max-h-48 overflow-y-auto" :class="{ 'show': isBrandOpen }">
-                                    <div class="py-2">
-                                        <div v-for="opt in brandOptions" :key="opt"
-                                             @click="selectOption('brand', opt)"
-                                             class="px-4 py-2 hover:bg-lime-50 cursor-pointer transition-colors duration-150"
-                                             :class="{'bg-lime-50 font-semibold text-lime-800': formState.brand === opt}">
-                                            {{ opt }}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- TYPE: custom dropdown -->
-                            <div class="relative">
-                                <label for="type" class="block text-sm font-medium text-gray-700 mb-1">Tipe Mobil</label>
-                                <div id="type-trigger"
-                                     @click.stop="openOnly('type')"
-                                     class="w-full p-3 border border-gray-300 rounded-xl cursor-pointer flex justify-between items-center bg-white transition duration-150"
-                                     :class="{'ring-2 ring-lime-500 border-lime-500 shadow-md': isTypeOpen}"
-                                >
-                                    <span class="text-gray-800">{{ formState.type || 'Pilih Tipe Mobil' }}</span>
-                                    <svg class="w-5 h-5 text-gray-500 transform" :class="{'rotate-180': isTypeOpen}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                                </div>
-
-                                <div v-if="isTypeOpen" @click.stop class="type-dropdown-content absolute top-full mt-2 w-full bg-white rounded-xl shadow-2xl border border-gray-100 z-30 left-0 max-h-48 overflow-y-auto" :class="{ 'show': isTypeOpen }">
-                                    <div class="py-2">
-                                        <div v-for="opt in typeOptions" :key="opt"
-                                             @click="selectOption('type', opt)"
-                                             class="px-4 py-2 hover:bg-lime-50 cursor-pointer transition-colors duration-150"
-                                             :class="{'bg-lime-50 font-semibold text-lime-800': formState.type === opt}">
-                                            {{ opt }}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- DOMICILE: custom dropdown -->
-                            <div class="relative">
-                                <label for="domicile" class="block text-sm font-medium text-gray-700 mb-1">Domisili</label>
-                                <div id="domicile-trigger"
-                                     @click.stop="openOnly('domicile')"
-                                     class="w-full p-3 border border-gray-300 rounded-xl cursor-pointer flex justify-between items-center bg-white transition duration-150"
-                                     :class="{'ring-2 ring-lime-500 border-lime-500 shadow-md': isDomicileOpen}"
-                                >
-                                    <span class="text-gray-800">{{ formState.domicile || 'Pilih Domisili' }}</span>
-                                    <svg class="w-5 h-5 text-gray-500 transform" :class="{'rotate-180': isDomicileOpen}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                                </div>
-
-                                <div v-if="isDomicileOpen" @click.stop class="domicile-dropdown-content absolute top-full mt-2 w-full bg-white rounded-xl shadow-2xl border border-gray-100 z-30 left-0 max-h-48 overflow-y-auto" :class="{ 'show': isDomicileOpen }">
-                                    <div class="py-2">
-                                        <div v-for="opt in domicileOptions" :key="opt"
-                                             @click="selectOption('domicile', opt)"
-                                             class="px-4 py-2 hover:bg-lime-50 cursor-pointer transition-colors duration-150"
-                                             :class="{'bg-lime-50 font-semibold text-lime-800': formState.domicile === opt}">
-                                            {{ opt }}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <!-- STATION: custom dropdown -->
-                            <div class="relative">
-                                <label for="station" class="block text-sm font-medium text-gray-700 mb-1">Stasiun Charger</label>
-                                <div id="station-trigger"
-                                     @click.stop="openOnly('station')"
-                                     class="w-full p-3 border border-gray-300 rounded-xl cursor-pointer flex justify-between items-center bg-white transition duration-150"
-                                     :class="{'ring-2 ring-lime-500 border-lime-500 shadow-md': isStationOpen}"
-                                >
-                                    <span class="text-gray-800">{{ formState.station || 'Pilih Stasiun' }}</span>
-                                    <svg class="w-5 h-5 text-gray-500 transform" :class="{'rotate-180': isStationOpen}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                                </div>
-
-                                <div v-if="isStationOpen" @click.stop class="station-dropdown-content absolute top-full mt-2 w-full bg-white rounded-xl shadow-2xl border border-gray-100 z-30 left-0 max-h-48 overflow-y-auto" :class="{ 'show': isStationOpen }">
-                                    <div class="py-2">
-                                        <div v-for="opt in stationOptions" :key="opt"
-                                             @click="selectOption('station', opt)"
-                                             class="px-4 py-2 hover:bg-lime-50 cursor-pointer transition-colors duration-150"
-                                             :class="{'bg-lime-50 font-semibold text-lime-800': formState.station === opt}">
-                                            {{ opt }}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                    <div class="mt-4 sm:mt-0 h-full flex flex-col"> <!-- Wrapper -->
+                        <h3 class="text-2xl font-bold text-gray-900 mb-6">Cari Stasiun</h3>
                         
-                        <div class="pt-3 flex justify-end space-x-3">
-                            <button type="button" @click="closeModal" class="px-6 py-3 text-sm text-gray-600 hover:text-gray-900 transition duration-300 rounded-lg">
+                        <form @submit.prevent="submitSearch" class="space-y-5 overflow-y-auto flex-grow custom-scrollbar px-1">
+                             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div class="relative">
+                                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Merk</label>
+                                    <div @click.stop="openOnly('brand')" class="dropdown-trigger" :class="{'active': isBrandOpen}">
+                                        <span class="text-gray-800 truncate">{{ formState.brand || 'Pilih Merk' }}</span>
+                                        <i class="fas fa-chevron-down text-gray-400 text-xs transition-transform" :class="{'rotate-180': isBrandOpen}"></i>
+                                    </div>
+                                    <div v-if="isBrandOpen" class="dropdown-menu">
+                                        <div v-for="opt in brandOptions" :key="opt" @click="selectOption('brand', opt)" class="dropdown-item" :class="{'selected': formState.brand === opt}">{{ opt }}</div>
+                                    </div>
+                                </div>
+                                <div class="relative">
+                                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Tipe</label>
+                                    <div @click.stop="openOnly('type')" class="dropdown-trigger" :class="{'active': isTypeOpen}">
+                                        <span class="text-gray-800 truncate">{{ formState.type || 'Pilih Tipe' }}</span>
+                                        <i class="fas fa-chevron-down text-gray-400 text-xs transition-transform" :class="{'rotate-180': isTypeOpen}"></i>
+                                    </div>
+                                    <div v-if="isTypeOpen" class="dropdown-menu">
+                                        <div v-for="opt in typeOptions" :key="opt" @click="selectOption('type', opt)" class="dropdown-item" :class="{'selected': formState.type === opt}">{{ opt }}</div>
+                                    </div>
+                                </div>
+                                <div class="relative">
+                                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Domisili</label>
+                                    <div @click.stop="openOnly('domicile')" class="dropdown-trigger" :class="{'active': isDomicileOpen}">
+                                        <span class="text-gray-800 truncate">{{ formState.domicile || 'Pilih Area' }}</span>
+                                        <i class="fas fa-chevron-down text-gray-400 text-xs transition-transform" :class="{'rotate-180': isDomicileOpen}"></i>
+                                    </div>
+                                    <div v-if="isDomicileOpen" class="dropdown-menu">
+                                        <div v-for="opt in domicileOptions" :key="opt" @click="selectOption('domicile', opt)" class="dropdown-item" :class="{'selected': formState.domicile === opt}">{{ opt }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="relative">
+                                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Stasiun</label>
+                                    <div @click.stop="openOnly('station')" class="dropdown-trigger" :class="{'active': isStationOpen}">
+                                        <span class="text-gray-800 truncate">{{ formState.station || 'Semua Stasiun' }}</span>
+                                        <i class="fas fa-chevron-down text-gray-400 text-xs transition-transform" :class="{'rotate-180': isStationOpen}"></i>
+                                    </div>
+                                    <div v-if="isStationOpen" class="dropdown-menu">
+                                        <div v-for="opt in stationOptions" :key="opt" @click="selectOption('station', opt)" class="dropdown-item" :class="{'selected': formState.station === opt}">{{ opt }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="h-20 sm:hidden"></div>
+                        </form>
+
+                        <div class="pt-4 mt-auto border-t border-gray-100 flex flex-col-reverse sm:flex-row gap-3 sm:justify-end">
+                             <button type="button" @click="closeModal" class="w-full sm:w-auto px-6 py-3.5 rounded-xl text-gray-600 font-semibold hover:bg-gray-100 transition">
                                 Batal
                             </button>
-                            <button type="submit" 
-                                class="bg-[#00C853] text-white font-medium px-8 py-3 rounded-lg hover:bg-[#00A142] transition duration-300 shadow-md">
-                                Cari Stasiun
+                            <button type="button" @click="submitSearch" class="w-full sm:w-auto bg-[#00C853] text-white font-bold px-8 py-3.5 rounded-xl hover:bg-[#00A142] active:scale-95 transition shadow-lg shadow-[#00C853]/20">
+                                Terapkan Filter
                             </button>
                         </div>
-                    </form>
-                </div>
-            </div>
-        </Transition>
-
-        <Transition name="fade">
-            <div v-if="showConfirmationModal && selectedStation" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[99999] p-4 overflow-y-auto" @click.self="cancelProcess">
-                <div class="bg-white rounded-lg p-6 shadow-2xl w-full max-w-lg transform transition-all duration-300">
-                    <h3 class="text-xl font-medium text-gray-900 mb-6">Anda yakin ingin memesan tiket ini?</h3>
-
-                    <!-- Port Selection -->
-                    <div class="relative mb-4">
-                        <label for="port" class="block text-sm font-medium text-gray-700 mb-2">Pilih Port Charging</label>
-                        <div id="port-trigger"
-                             @click.stop="openOnly('port')"
-                             class="w-full p-3 border border-gray-300 rounded-xl cursor-pointer flex justify-between items-center bg-white transition duration-150"
-                             :class="{'ring-2 ring-lime-500 border-lime-500 shadow-md': isPortOpen}"
-                        >
-                            <span class="text-gray-800">{{ selectedPort ? portOptions.find(p => p.value === selectedPort)?.label : 'Pilih Port' }}</span>
-                            <svg class="w-5 h-5 text-gray-500 transform" :class="{'rotate-180': isPortOpen}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                        </div>
-
-                        <div v-if="isPortOpen" @click.stop class="port-dropdown-content absolute top-full mt-2 w-full bg-white rounded-xl shadow-2xl border border-gray-100 z-30 left-0 max-h-48 overflow-y-auto" :class="{ 'show': isPortOpen }">
-                            <div class="py-2">
-                                <div v-for="port in portOptions" :key="port.value"
-                                     @click="selectOption('port', port.value)"
-                                     class="px-4 py-2 hover:bg-lime-50 cursor-pointer transition-colors duration-150"
-                                     :class="{'bg-lime-50 font-semibold text-lime-800': selectedPort === port.value}">
-                                    {{ port.label }}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Duration Selection -->
-                    <div class="relative mb-4">
-                        <label for="duration" class="block text-sm font-medium text-gray-700 mb-2">Pilih Durasi Charging</label>
-                        <div id="duration-trigger"
-                             @click.stop="openOnly('duration')"
-                             class="w-full p-3 border border-gray-300 rounded-xl cursor-pointer flex justify-between items-center bg-white transition duration-150"
-                             :class="{'ring-2 ring-lime-500 border-lime-500 shadow-md': isDurationOpen}"
-                        >
-                            <span class="text-gray-800">{{ durationOptions.find(d => d.value === selectedDuration)?.label || 'Pilih Durasi' }}</span>
-                            <svg class="w-5 h-5 text-gray-500 transform" :class="{'rotate-180': isDurationOpen}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                        </div>
-
-                        <div v-if="isDurationOpen" @click.stop class="duration-dropdown-content absolute top-full mt-2 w-full bg-white rounded-xl shadow-2xl border border-gray-100 z-30 left-0 max-h-48 overflow-y-auto" :class="{ 'show': isDurationOpen }">
-                            <div class="py-2">
-                                <div v-for="duration in durationOptions" :key="duration.value"
-                                     @click="selectOption('duration', duration.value)"
-                                     class="px-4 py-2 hover:bg-lime-50 cursor-pointer transition-colors duration-150"
-                                     :class="{'bg-lime-50 font-semibold text-lime-800': selectedDuration === duration.value}">
-                                    {{ duration.label }}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="space-y-3 text-gray-700">
-                        <div class="flex items-start">
-                            <i class="fas fa-map-marker-alt text-gray-400 mt-1 mr-3"></i>
-                            <div>
-                                <p class="font-medium">{{ selectedStation.name }}</p>
-                                <p class="text-sm">{{ selectedStation.location }}</p>
-                            </div>
-                        </div>
-                        <div class="flex items-center">
-                            <i class="fas fa-clock text-gray-400 mr-3"></i>
-                            <p class="text-sm">{{ formatBookingDate(selectedStation.bookingTime) }} ({{ selectedDuration }} menit)</p>
-                        </div>
-                        <div class="flex items-center">
-                            <i class="fas fa-bolt text-yellow-600 mr-3"></i>
-                            <p class="text-sm">{{ selectedPort ? `Port ${selectedPort.split('-')[1]}` : 'Port belum dipilih' }}</p>
-                        </div>
-                        <div class="flex justify-between items-center pt-4 border-t border-gray-100">
-                            <div class="flex items-center">
-                                <i class="fas fa-dollar-sign text-xl text-gray-500 mr-2"></i>
-                                <span class="text-lg font-medium text-gray-900">Total Harga:</span>
-                            </div>
-                            <span class="text-xl font-medium text-[#00C853]">{{ calculateTotalFormatted }}</span>
-                        </div>
-                    </div>
-
-                    <div class="pt-6 flex justify-end space-x-3">
-                        <button type="button" @click="cancelProcess" class="px-6 py-3 text-sm font-medium text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition duration-300">
-                            Batal
-                        </button>
-                        <button type="button" @click="proceedToPayment" :disabled="!selectedPort"
-                            class="bg-[#00C853] text-white font-medium px-8 py-3 rounded-lg hover:bg-[#00A142] transition duration-300 shadow-md disabled:bg-gray-300 disabled:cursor-not-allowed">
-                            Ya, Pesan
-                        </button>
                     </div>
                 </div>
             </div>
         </Transition>
 
-        <Transition name="fade">
-            <div v-if="showQrisPaymentModal && selectedStation" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[99999] p-4 overflow-y-auto" @click.self="cancelProcess">
-                <div class="bg-white rounded-lg p-4 shadow-2xl w-full max-w-2xl transform transition-all duration-300">
-                    <div class="flex justify-between items-center pb-2">
-                        <div class="flex items-center bg-[#FFFBEB] text-[#9A6A01] px-3 py-1 rounded-full text-sm font-medium">
-                            <i class="fas fa-clock mr-2"></i> <span>Menunggu Pembayaran</span>
-                        </div>
-                        <button @click="cancelProcess" class="text-gray-400 hover:text-gray-600 text-2xl font-light">
-                            &times;
-                        </button>
-                    </div>
-
-                    <h3 class="text-xl font-semibold text-gray-900 mb-4 text-center">Pembayaran QRIS</h3>
+        <!-- CONFIRMATION MODAL (Slide Up on Mobile with Drag-to-Dismiss) -->
+        <Transition name="slide-up">
+            <div v-if="showConfirmationModal && selectedStation" class="fixed inset-0 bg-gray-900/80 backdrop-blur-sm flex items-end sm:items-center justify-center z-[99999] p-0 sm:p-4" @click.self="cancelProcess">
+                <div 
+                    class="bg-white w-full rounded-t-[2rem] sm:rounded-3xl p-6 sm:p-8 shadow-2xl max-w-lg transform transition-transform duration-300 sm:duration-200 pb-8 sm:pb-8 relative touch-none sm:touch-auto"
+                    :style="{ transform: isDragging ? `translateY(${dragOffset}px)` : '' }"
+                >
                     
-                    <div class="flex flex-col md:flex-row gap-4 items-center">
-                        <div class="w-full md:w-1/2 p-4 rounded-xl flex flex-col items-center">
-                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=192x192&data=QRIS%20Payment%20Dummy" alt="QRIS Payment Code" class="w-48 h-48 rounded-lg shadow-inner">
-                            <p class="text-center text-sm text-gray-600 mt-3">Scan QR code dengan aplikasi pembayaran Anda</p>
+                     <!-- Handle bar for mobile (Draggable Area) -->
+                     <div 
+                        class="w-full h-8 absolute top-0 left-0 z-50 flex justify-center items-center sm:hidden cursor-grab active:cursor-grabbing"
+                        @touchstart="onTouchStart"
+                        @touchmove="onTouchMove"
+                        @touchend="onTouchEnd"
+                     >
+                        <div class="w-14 h-1.5 bg-gray-300 rounded-full"></div>
+                     </div>
+
+                    <div class="mt-4 sm:mt-0"> <!-- Spacer for handle -->
+                        <h3 class="text-xl font-bold text-gray-900 mb-6 text-center">Konfirmasi Pesanan</h3>
+
+                        <!-- Selection Inputs -->
+                        <div class="space-y-4 mb-6">
+                            <div class="relative">
+                                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Port Charging</label>
+                                <div @click.stop="openOnly('port')" class="dropdown-trigger" :class="{'active': isPortOpen}">
+                                    <span class="text-gray-800">{{ selectedPort ? portOptions.find(p => p.value === selectedPort)?.label : 'Pilih Port' }}</span>
+                                    <i class="fas fa-chevron-down text-gray-400 text-xs transition-transform" :class="{'rotate-180': isPortOpen}"></i>
+                                </div>
+                                <div v-if="isPortOpen" class="dropdown-menu">
+                                    <div v-for="port in portOptions" :key="port.value" @click="selectOption('port', port.value)" class="dropdown-item" :class="{'selected': selectedPort === port.value}">{{ port.label }}</div>
+                                </div>
+                            </div>
+
+                            <div class="relative">
+                                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Durasi</label>
+                                <div @click.stop="openOnly('duration')" class="dropdown-trigger" :class="{'active': isDurationOpen}">
+                                    <span class="text-gray-800">{{ durationOptions.find(d => d.value === selectedDuration)?.label || 'Pilih Durasi' }}</span>
+                                    <i class="fas fa-chevron-down text-gray-400 text-xs transition-transform" :class="{'rotate-180': isDurationOpen}"></i>
+                                </div>
+                                <div v-if="isDurationOpen" class="dropdown-menu">
+                                    <div v-for="duration in durationOptions" :key="duration.value" @click="selectOption('duration', duration.value)" class="dropdown-item" :class="{'selected': selectedDuration === duration.value}">{{ duration.label }}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Summary Card -->
+                        <div class="bg-gray-50 rounded-2xl p-4 space-y-3 mb-6 border border-gray-100">
+                            <div class="flex justify-between items-center text-sm">
+                                <span class="text-gray-500">Lokasi</span>
+                                <span class="font-semibold text-gray-800 text-right">{{ selectedStation.name }}</span>
+                            </div>
+                            <div class="flex justify-between items-center text-sm">
+                                <span class="text-gray-500">Waktu</span>
+                                <span class="font-medium text-gray-800">{{ formatBookingDate(selectedStation.bookingTime) }}</span>
+                            </div>
+                            <div class="border-t border-gray-200 pt-3 flex justify-between items-center">
+                                <span class="font-bold text-gray-900">Total</span>
+                                <span class="font-bold text-xl text-[#00C853]">{{ calculateTotalFormatted }}</span>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-col-reverse sm:flex-row gap-3">
+                            <button type="button" @click="cancelProcess" class="w-full py-3.5 rounded-xl font-bold text-gray-500 bg-gray-100 hover:bg-gray-200 transition">
+                                Batal
+                            </button>
+                            <button type="button" @click="proceedToPayment" :disabled="!selectedPort"
+                                class="w-full py-3.5 rounded-xl font-bold text-white bg-[#00C853] hover:bg-[#00A142] shadow-lg shadow-[#00C853]/20 active:scale-95 transition disabled:bg-gray-300 disabled:shadow-none">
+                                Lanjut Bayar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </Transition>
+
+        <!-- QRIS MODAL -->
+        <Transition name="fade">
+            <div v-if="showQrisPaymentModal && selectedStation" class="fixed inset-0 bg-gray-900/90 backdrop-blur-sm flex items-center justify-center z-[99999] p-4" @click.self="cancelProcess">
+                <div class="bg-white rounded-3xl p-6 shadow-2xl w-full max-w-md relative overflow-hidden">
+                    <div class="absolute top-0 left-0 w-full h-2 bg-[#00C853]"></div>
+                    
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-xl font-bold text-gray-900">Scan QRIS</h3>
+                        <button @click="cancelProcess" class="bg-gray-100 rounded-full p-2 text-gray-500 hover:bg-gray-200 transition">
+                           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        </button>
+                    </div>
+                    
+                    <div class="flex flex-col items-center mb-6">
+                        <div class="bg-white p-4 rounded-2xl shadow-[0_0_20px_rgba(0,0,0,0.1)] border border-gray-100 mb-4">
+                             <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=QRIS%20Payment" alt="QRIS" class="w-48 h-48 rounded-lg">
+                        </div>
+                        <div class="text-center">
+                             <p class="text-sm text-gray-500 mb-1">Total Pembayaran</p>
+                             <p class="text-2xl font-bold text-gray-900">{{ calculateTotalFormatted }}</p>
+                        </div>
+                    </div>
+
+                    <button @click="confirmPayment" 
+                        class="w-full py-3.5 bg-[#00C853] text-white font-bold rounded-xl hover:bg-[#00A142] shadow-lg shadow-[#00C853]/30 active:scale-95 transition flex items-center justify-center gap-2">
+                        <span>Cek Status Bayar</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+        </Transition>
+
+        <!-- RECEIPT MODAL -->
+        <Transition name="fade">
+            <div v-if="showReceiptModal && selectedStation" class="fixed inset-0 bg-[#00C853] flex flex-col items-center justify-center z-[99999] p-4">
+                <div class="bg-white rounded-3xl w-full max-w-sm shadow-2xl overflow-hidden relative">
+                    <div class="absolute top-0 left-0 right-0 h-4 bg-[#00A142]"></div>
+
+                    <div class="p-8 text-center">
+                        <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-check text-2xl text-[#00C853]"></i>
+                        </div>
+                        <h2 class="text-2xl font-bold text-gray-900 mb-1">Booking Berhasil!</h2>
+                        <p class="text-gray-500 text-sm mb-6">Kode booking Anda siap digunakan.</p>
+
+                        <div class="bg-gray-50 rounded-xl p-4 border-2 border-dashed border-gray-200 mb-6">
+                             <div class="text-xs text-gray-400 uppercase tracking-widest mb-1">Booking ID</div>
+                             <div class="text-2xl font-mono font-bold text-gray-800 tracking-wider">{{ selectedStation.bookingNumber }}</div>
                         </div>
                         
-                        <div class="w-full md:w-1/2 space-y-3">
-                            <div>
-                                <div class="text-sm font-medium text-gray-700">Nomor Booking</div>
-                                <div class="text-lg font-semibold text-[#00C853]">{{ selectedStation.bookingNumber }}</div>
-                            </div>
-                            <div class="space-y-2 pt-2 border-t border-gray-100">
-                                <div class="flex items-start">
-                                    <i class="fas fa-map-marker-alt text-gray-500 mt-1 mr-3"></i>
-                                    <div>
-                                        <p class="font-medium text-gray-900">Lokasi Charging</p>
-                                        <p class="text-sm text-gray-600">{{ selectedStation.name }}</p>
-                                        <p class="text-sm text-gray-600">{{ selectedStation.location }}</p>
-                                    </div>
-                                </div>
-                                <div class="flex items-center">
-                                    <i class="fas fa-clock text-gray-500 mr-3"></i>
-                                    <p class="text-sm text-gray-600">{{ formatBookingDate(selectedStation.bookingTime) }} ({{ selectedDuration }} menit)</p>
-                                </div>
-                                <div class="flex items-center">
-                                    <i class="fas fa-bolt text-yellow-600 mr-3"></i>
-                                    <p class="text-sm text-gray-600">Port: {{ selectedPort ? `Port ${selectedPort.split('-')[1]}` : 'Port belum dipilih' }} &bull; {{ selectedStation.chargers.join(', ') }} &bull; {{ selectedStation.power }}</p>
-                                </div>
-                            </div>
-
-                            <div class="flex justify-between items-center bg-[#E6FFB3] p-3 rounded-lg mt-4">
-                                <div class="flex items-center text-lg text-gray-900">
-                                    <i class="fas fa-dollar-sign mr-2"></i> <span class="font-semibold">Total Pembayaran :</span>
-                                </div>
-                                <span class="text-xl font-semibold text-gray-900">{{ calculateTotalFormatted }}</span>
-                            </div>
+                         <div class="bg-white p-2 rounded-xl border border-gray-100 inline-block mb-4 shadow-sm">
+                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=Access" alt="QR Access" class="w-32 h-32">
                         </div>
+                        <p class="text-xs text-gray-400">Scan QR ini pada mesin charging</p>
                     </div>
 
-                    <div class="pt-6">
-                        <button @click="confirmPayment" 
-                            class="w-full py-3 bg-[#00C853] text-white font-semibold rounded-xl hover:bg-[#00A142] transition duration-300 shadow-md flex items-center justify-center space-x-2">
-                            <i class="fas fa-check-circle"></i> <span>Konfirmasi Pembayaran</span>
+                    <div class="p-4 bg-gray-50 border-t border-gray-100">
+                         <button @click="openPrintStruk" class="w-full py-3.5 bg-gray-900 text-white font-bold rounded-xl hover:bg-gray-800 shadow-lg active:scale-95 transition mb-3">
+                            <i class="fas fa-download mr-2"></i> Simpan Struk
                         </button>
-                    </div>
-                </div>
-            </div>
-        </Transition>
-
-        <Transition name="fade">
-            <div v-if="showReceiptModal && selectedStation" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[99999] p-4 overflow-y-auto" @click.self="closeReceiptModal">
-                <div class="bg-white rounded-xl p-4 shadow-2xl w-full max-w-xl transform transition-all duration-300">
-                    
-                    <div class="flex justify-between items-center pb-2">
-                        <div class="flex items-center bg-[#D4EDDA] text-[#008000] px-3 py-1 rounded-full text-sm font-medium">
-                            <i class="fas fa-check-circle mr-2"></i> <span>Pembayaran Berhasil</span>
-                        </div>
-                        <button @click="closeReceiptModal" class="text-gray-400 hover:text-gray-600 text-2xl font-light">
-                            &times;
+                         <button @click="closeReceiptModal" class="w-full py-3.5 text-gray-500 font-bold hover:text-gray-800 transition">
+                            Tutup
                         </button>
-                    </div>
-
-                    <h3 class="text-xl font-medium text-gray-900 mb-4 text-center">Struk Pembayaran</h3>
-                    
-                    <div class="flex flex-col md:flex-row gap-4 items-center">
-                        <div class="w-full md:w-1/2 p-4 rounded-xl flex flex-col items-center">
-                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=192x192&data=QR%20Charging%20Dummy" alt="QR Charging Code" class="w-48 h-48 rounded-lg shadow-inner">
-                            <p class="text-center text-sm text-gray-600 mt-3">Scan QR code ini saat tiba di lokasi charging</p>
-                        </div>
-
-                        <div class="w-full md:w-1/2 space-y-3">
-                            <div>
-                                <div class="text-sm font-medium text-gray-700">Nomor Booking</div>
-                                <div class="text-lg font-medium text-[#00C853]">{{ selectedStation.bookingNumber }}</div>
-                            </div>
-                            <div class="space-y-2 pt-2 border-t border-gray-100">
-                                <div class="flex items-start">
-                                    <i class="fas fa-map-marker-alt text-gray-500 mt-1 mr-3"></i>
-                                    <div>
-                                        <p class="font-medium text-gray-900">Lokasi</p>
-                                        <p class="text-sm text-gray-600">{{ selectedStation.name }}</p>
-                                        <p class="text-sm text-gray-600">{{ selectedStation.location }}</p>
-                                    </div>
-                                </div>
-                                <div class="flex items-center">
-                                    <i class="fas fa-clock text-gray-500 mr-3"></i>
-                                    <p class="text-sm text-gray-600">{{ formatBookingDate(selectedStation.bookingTime) }} ({{ selectedDuration }} menit)</p>
-                                </div>
-                                <div class="flex items-center">
-                                    <i class="fas fa-bolt text-yellow-600 mr-3"></i>
-                                    <p class="text-sm text-gray-600">Port: {{ selectedPort ? `Port ${selectedPort.split('-')[1]}` : 'Port belum dipilih' }} &bull; {{ selectedStation.chargers.join(', ') }} &bull; {{ selectedStation.power }}</p>
-                                </div>
-                            </div>
-
-                            <div class="flex justify-between items-center bg-[#E6FFB3] p-3 rounded-lg mt-4">
-                                <div class="flex items-center text-lg text-gray-900">
-                                    <i class="fas fa-dollar-sign mr-2"></i> <span class="font-medium">Total Harga</span>
-                                </div>
-                                <span class="text-xl font-medium text-gray-900">{{ calculateTotalFormatted }}</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="pt-6">
-                        <button @click="openPrintStruk" class="w-full py-3 bg-[#00C853] text-white font-medium rounded-xl hover:bg-[#00A142] transition duration-300 shadow-md flex items-center justify-center space-x-2">
-                            <i class="fas fa-download"></i> <span>Unduh Struk</span>
-                        </button>
-                        <div class="bg-[#FFFBEB] text-[#9A6A01] p-3 rounded-lg text-sm text-center mt-3 font-medium">
-                            Terima kasih telah menggunakan layanan kami!
-                        </div>
                     </div>
                 </div>
             </div>
@@ -1063,79 +738,98 @@ const getMapsUrl = (lat, lng) => {
 </template>
 
 <style scoped>
-/* Ikon menggunakan warna yang sesuai dengan desain E-VOLT */
-.fa-bolt { color: #f59e0b; /* kuning */ }
-.fa-clock { color: #3b82f6; /* biru */ } /* Digunakan juga untuk "Menunggu Pembayaran" */
-.fa-hourglass-half { color: #8b5cf6; /* ungu */ }
-.fa-check-circle { color: #008000; } /* hijau untuk sukses */
-.fa-dollar-sign { color: #00C853; } /* hijau E-VOLT untuk icon total harga */
-
-/* Smooth dropdown animations */
-.brand-dropdown-content,
-.type-dropdown-content,
-.domicile-dropdown-content,
-.station-dropdown-content,
-.port-dropdown-content,
-.duration-dropdown-content {
-    transform: translateY(-10px);
-    opacity: 0;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    pointer-events: none;
+/* Custom Styles for Dropdowns */
+.dropdown-trigger {
+    width: 100%;
+    padding: 0.875rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.75rem;
+    background-color: #ffffff;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 200ms;
+}
+.dropdown-trigger:hover {
+    border-color: #00C853;
+}
+.dropdown-trigger.active {
+    border-color: #00C853;
+    box-shadow: 0 0 0 2px rgba(0, 200, 83, 0.2), 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+.dropdown-menu {
+    position: absolute;
+    top: 100%;
+    margin-top: 0.5rem;
+    width: 100%;
+    background-color: #ffffff;
+    border-radius: 0.75rem;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    border: 1px solid #f3f4f6;
+    z-index: 50;
+    max-height: 15rem;
+    overflow-y: auto;
+    padding: 0.5rem 0;
+    animation: fadeInDown 0.2s ease-out forwards;
+}
+.dropdown-item {
+    padding: 0.625rem 1rem;
+    cursor: pointer;
+    font-size: 0.875rem;
+    color: #374151;
+    transition: color 200ms, background-color 200ms;
+}
+.dropdown-item:hover {
+    background-color: #f7fdee;
+    color: #00C853;
+}
+.dropdown-item.selected {
+    background-color: #f7fdee;
+    color: #00C853;
+    font-weight: 700;
 }
 
-.brand-dropdown-content.show,
-.type-dropdown-content.show,
-.domicile-dropdown-content.show,
-.station-dropdown-content.show,
-.port-dropdown-content.show,
-.duration-dropdown-content.show {
-    transform: translateY(0);
+/* Animation for Dropdowns */
+.animate-fade-in-down {
+    animation: fadeInDown 0.2s ease-out forwards;
+}
+@keyframes fadeInDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Custom Scrollbar */
+.custom-scrollbar::-webkit-scrollbar { width: 6px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 10px; }
+.custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+
+/* Standard Fade Transition */
+.fade-enter-active, .fade-leave-active { transition: opacity 0.3s ease; }
+.fade-enter-from, .fade-leave-to { opacity: 0; }
+
+/* Slide Up Transition for Mobile Bottom Sheet */
+.slide-up-enter-active, .slide-up-leave-active {
+    transition: transform 0.3s cubic-bezier(0.33, 1, 0.68, 1), opacity 0.3s ease;
+}
+.slide-up-enter-from, .slide-up-leave-to {
+    transform: translateY(100%);
     opacity: 1;
-    pointer-events: auto;
 }
 
-/* Enhanced dropdown item animations */
-.brand-dropdown-content .px-4,
-.type-dropdown-content .px-4,
-.domicile-dropdown-content .px-4,
-.station-dropdown-content .px-4,
-.port-dropdown-content .px-4,
-.duration-dropdown-content .px-4 {
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    transform: translateX(0);
-}
-
-.brand-dropdown-content .px-4:hover,
-.type-dropdown-content .px-4:hover,
-.domicile-dropdown-content .px-4:hover,
-.station-dropdown-content .px-4:hover,
-.port-dropdown-content .px-4:hover,
-.duration-dropdown-content .px-4:hover {
-    transform: translateX(4px);
-    background-color: #ecfdf5;
-}
-
-/* Smooth icon rotation */
-.transform {
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* Animasi untuk Modal */
-.fade-enter-active, .fade-leave-active {
-    transition: opacity 0.3s;
-}
-.fade-enter-from, .fade-leave-to {
-    opacity: 0;
+/* Desktop override for Slide Up (act as fade/scale) */
+@media (min-width: 640px) {
+    .slide-up-enter-from, .slide-up-leave-to {
+        transform: scale(0.95);
+        opacity: 0;
+    }
 }
 </style>
 
 <style>
-/* Prevent background scrolling when modal is open on mobile only */
+/* Mobile Body Lock */
 @media (max-width: 768px) {
-    .modal-open {
-        overflow: hidden;
-        position: fixed;
-        width: 100%;
-    }
+    .modal-open { overflow: hidden; position: fixed; width: 100%; height: 100%; }
 }
 </style>
