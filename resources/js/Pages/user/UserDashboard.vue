@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
+import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue';
 import { Link } from '@inertiajs/vue3';
 import Navbar from '@/Components/NavbarUser.vue';
 import Footer from '@/Components/Footer.vue';
@@ -17,14 +17,38 @@ const formState = ref({
 // New: options + dropdown states for custom dropdowns (brand, type, domicile, station)
 const brandOptions = ['Hyundai', 'Wuling', 'Tesla', 'BYD', 'Kia'];
 const typeOptions = ['SUV', 'City Car', 'Hatchback', 'Sedan', 'MPV'];
+
+const allStationOptions = [
+  'SPKLU Mega Mall', 'SPKLU Grand Batam Mall', 'SPKLU Nagoya Hill', 'SPKLU Harbour Bay',
+  'SPKLU Batam Center', 'SPKLU Batam City Square', 'SPKLU Kepri Mall', 'SPKLU Nagoya City'
+];
+
+// Peta pemetaan Domisili ke Stasiun (Logika yang diminta)
+const stationMapping = {
+    'Batam Center': ['SPKLU Mega Mall', 'SPKLU Batam Center', 'SPKLU Kepri Mall'],
+    'Nagoya': ['SPKLU Nagoya Hill', 'SPKLU Nagoya City'],
+    'Lubuk Baja': ['SPKLU Grand Batam Mall', 'SPKLU Batam City Square'], // Asumsi Lubuk Baja mencakup BCS & GBM
+    'Harbour Bay': ['SPKLU Harbour Bay'],
+    // Tambahkan domisili lain jika ada (Batu Aji, Tiban, Kabil, Batu Ampar, dll.)
+};
+
+// Pastikan definisi domicileOptions sesuai dengan kunci di atas:
 const domicileOptions = [
-  'Batam Center', 'Nagoya', 'Harbour Bay', 'Sekupang', 'Batu Aji',
-  'Lubuk Baja', 'Tiban', 'Kabil', 'Batu Ampar', 'Galang', 'Bulang'
+  'Batam Center', 'Nagoya', 'Harbour Bay', 'Lubuk Baja', // Kunci mapping
+  'Batu Aji', 'Tiban', 'Kabil', 'Batu Ampar' // Domisili lain
 ];
-const stationOptions = [
-  'SPKLU Mega Mall','SPKLU Grand Batam Mall','SPKLU Nagoya Hill','SPKLU Harbour Bay',
-  'SPKLU Batam Center','SPKLU Batam City Square','SPKLU Kepri Mall','SPKLU Batam View','SPKLU Nagoya City'
-];
+
+// Computed property untuk menentukan opsi stasiun yang ditampilkan berdasarkan Domisili
+const filteredStationOptions = computed(() => {
+    const selectedDomicile = formState.value.domicile;
+    
+    if (selectedDomicile && stationMapping[selectedDomicile]) {
+        return stationMapping[selectedDomicile];
+    }
+    
+    // Jika Domisili belum dipilih atau tidak ada mapping, kembalikan semua opsi.
+    return allStationOptions;
+});
 
 const isBrandOpen = ref(false);
 const isTypeOpen = ref(false);
@@ -72,6 +96,14 @@ const selectOption = (field, value) => {
   formState.value[field] = value;
   closeAllCustomDropdowns();
 };
+
+// Watcher untuk mereset stasiun saat domisili berubah (Logika yang diminta)
+watch(() => formState.value.domicile, (newDomicile, oldDomicile) => {
+    if (newDomicile !== oldDomicile) {
+        formState.value.station = ''; // Reset stasiun
+        isStationOpen.value = false; // Tutup dropdown stasiun
+    }
+});
 
 // --- DATE & TIME PICKER LOGIC ---
 const today = new Date();
@@ -252,14 +284,12 @@ onBeforeUnmount(() => {
           </div>
         </div>
 
-        <!-- Search Form -->
         <div class="static mt-8 lg:absolute lg:left-1/2 lg:bottom-0 lg:transform lg:-translate-x-1/2 lg:translate-y-1/2 w-full max-w-6xl px-4 sm:px-6 lg:px-8 z-20">
           <form @submit.prevent="searchStations" class="bg-white p-6 md:p-8 rounded-2xl shadow-2xl border border-gray-100">
             <h3 class="text-xl font-semibold text-gray-800 mb-6">Cari EV Charge Station</h3>
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               
-              <!-- BRAND: custom dropdown -->
               <div class="relative">
                 <label for="brand" class="block text-sm font-medium text-gray-700 mb-2">Merk Mobil</label>
                 <div id="brand-trigger"
@@ -283,7 +313,6 @@ onBeforeUnmount(() => {
                 </div>
               </div>
               
-              <!-- TYPE: custom dropdown -->
               <div class="relative">
                 <label for="type" class="block text-sm font-medium text-gray-700 mb-2">Tipe Mobil</label>
                 <div id="type-trigger"
@@ -307,10 +336,6 @@ onBeforeUnmount(() => {
                 </div>
               </div>
               
-              <!-- DATE picker (leave unchanged) -->
-              
-
-              <!-- DOMICILE: custom dropdown -->
               <div class="relative">
                 <label for="domicile" class="block text-sm font-medium text-gray-700 mb-2">Domisili</label>
                 <div id="domicile-trigger"
@@ -334,7 +359,6 @@ onBeforeUnmount(() => {
                 </div>
               </div>
 
-              <!-- STATION: custom dropdown -->
               <div class="relative">
                 <label for="station" class="block text-sm font-medium text-gray-700 mb-2">Stasiun Charger</label>
                 <div id="station-trigger"
@@ -348,7 +372,7 @@ onBeforeUnmount(() => {
 
                 <div v-if="isStationOpen" @click.stop class="station-dropdown-content absolute top-full mt-2 w-full bg-white rounded-xl shadow-2xl border border-gray-100 z-30 left-0 max-h-48 overflow-y-auto">
                   <div class="py-2">
-                    <div v-for="opt in stationOptions" :key="opt"
+                    <div v-for="opt in filteredStationOptions" :key="opt"
                          @click="selectOption('station', opt)"
                          class="px-4 py-2 hover:bg-lime-50 cursor-pointer transition-colors duration-150"
                          :class="{'bg-lime-50 font-semibold text-lime-800': formState.station === opt}">
