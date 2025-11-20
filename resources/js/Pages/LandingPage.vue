@@ -42,7 +42,6 @@ onBeforeUnmount(() => {
     <main class="flex-grow relative z-10"> 
       
       <!-- HERO SECTION -->
-      <!-- Mobile: Padding lebih compact, Layout vertikal. Desktop: Tetap seperti asli -->
       <section class="bg-[#CCFF00] pt-10 pb-12 sm:pt-16 sm:pb-16 lg:pt-20 lg:pb-20 relative overflow-hidden rounded-b-[2.5rem] lg:rounded-none shadow-sm lg:shadow-none z-20">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div class="flex flex-col lg:flex-row items-center justify-between gap-8 md:gap-10 lg:gap-12">
@@ -55,7 +54,6 @@ onBeforeUnmount(() => {
                 Temukan, reservasi, dan isi daya dengan mudah di mana saja tanpa ribet.
               </p>
               
-              <!-- Tombol di mobile dibuat full width agar mudah di tap jempol -->
               <div class="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start w-full">
                 <Link
                   :href="route('register')"
@@ -73,12 +71,11 @@ onBeforeUnmount(() => {
               </div>
             </div>
 
-            <!-- Gambar di mobile diberi background/shape agar lebih menyatu -->
+            <!-- Gambar Hero (KEMBALI KE ORIGINAL) -->
             <div class="w-full lg:w-1/2 flex justify-center order-2 lg:order-2 mt-2 lg:mt-0">
               <div class="relative">
-                 <!-- Decorative blob for mobile only to make it pop -->
-                 <div class="absolute inset-0 bg-white/30 blur-2xl rounded-full transform scale-90 lg:hidden"></div>
-                 <img 
+                  <div class="absolute inset-0 bg-white/30 blur-2xl rounded-full transform scale-90 lg:hidden"></div>
+                  <img 
                     src="images/mobil.png" 
                     alt="EV Car" 
                     class="relative z-10 w-full max-w-[280px] sm:max-w-sm md:max-w-md lg:max-w-full drop-shadow-xl lg:drop-shadow-none transform hover:scale-105 transition duration-500"
@@ -90,7 +87,7 @@ onBeforeUnmount(() => {
       </section>
       
 
-      <!-- STEP 1 -->
+      <!-- STEP 1: Pencarian Stasiun -->
       <section class="py-12 lg:py-20 bg-white lg:bg-gray-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div class="flex flex-col lg:flex-row items-center gap-8 lg:gap-12">
@@ -104,20 +101,19 @@ onBeforeUnmount(() => {
                 Aplikasi menampilkan peta geolokasi dengan semua SPKLU terdaftar. Data <span class="font-semibold text-gray-800">Real-Time</span> memastikan Anda hanya melihat slot yang siap pakai.
               </p>
             </div>
-            <!-- Image -->
+            <!-- Image: Map Navigation Aesthetic (BARU) -->
             <div class="w-full lg:w-1/2 flex justify-center mt-4 lg:mt-0">
               <div class="bg-lime-50 p-4 rounded-[2rem] lg:bg-transparent lg:p-0 w-full flex justify-center">
-                 <img src="https://placehold.co/400x500/f0f9ff/000?text=App+Map" alt="Mobile App Map" class="w-full max-w-[260px] sm:max-w-xs md:max-w-sm rounded-2xl shadow-lg lg:shadow-2xl transform rotate-0 lg:rotate-2 transition hover:rotate-0 duration-300" loading="lazy">
+                 <img src="https://i.pinimg.com/736x/28/8b/44/288b44c8e76a00feed1853b351057876.jpg" alt="Aesthetic Map Navigation UI" class="w-full max-w-[260px] sm:max-w-xs md:max-w-sm rounded-2xl shadow-lg lg:shadow-2xl transform rotate-0 lg:rotate-2 transition hover:rotate-0 duration-300 object-cover" loading="lazy">
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      <!-- STEP 2 -->
+      <!-- STEP 2: Reservasi Slot -->
       <section class="py-12 lg:py-20 bg-gray-50 lg:bg-gray-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <!-- Flex reverse on Desktop, but Standard Flex Col on Mobile for natural reading order (Text first usually better for UX or Image first for visual. I keep Text first for consistency) -->
           <div class="flex flex-col lg:flex-row-reverse items-center gap-8 lg:gap-12">
             
             <div class="w-full lg:w-1/2 text-center lg:text-left">
@@ -130,16 +126,17 @@ onBeforeUnmount(() => {
               </p>
             </div>
 
+            <!-- Image: Booking UI Clean (BARU) -->
             <div class="w-full lg:w-1/2 flex justify-center mt-4 lg:mt-0">
               <div class="bg-white p-4 rounded-[2rem] shadow-sm lg:bg-transparent lg:shadow-none lg:p-0 w-full flex justify-center">
-                <img src="https://placehold.co/500x350/ffffff/333?text=Booking+Slot" alt="Booking Slot UI" class="w-full max-w-xs sm:max-w-sm md:max-w-md rounded-2xl shadow-lg lg:shadow-xl" loading="lazy">
+                <img src="images/uibooking.png" alt="Clean Booking Slot UI" class="w-full max-w-xs sm:max-w-sm md:max-w-md rounded-2xl shadow-lg lg:shadow-xl object-cover" loading="lazy">
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      <!-- STEP 3 -->
+      <!-- STEP 3: Otomasi & Audit -->
       <section class="py-12 lg:py-20 bg-white">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div class="flex flex-col lg:flex-row items-center gap-8 lg:gap-12">
@@ -154,9 +151,10 @@ onBeforeUnmount(() => {
               </p>
             </div>
 
+            <!-- Image: Dashboard/Analytics Isometric (BARU) -->
             <div class="w-full lg:w-1/2 flex justify-center mt-4 lg:mt-0">
                <div class="bg-gray-50 p-4 rounded-[2rem] lg:bg-transparent lg:p-0 w-full flex justify-center">
-                  <img src="https://placehold.co/500x350/a7f3d0/000?text=Automated+System" alt="Automation System" class="w-full max-w-xs sm:max-w-sm md:max-w-md rounded-2xl shadow-lg lg:shadow-xl" loading="lazy">
+                  <img src="images/admin.png" alt="Automation Dashboard Isometric" class="w-full max-w-xs sm:max-w-sm md:max-w-md rounded-2xl shadow-lg lg:shadow-xl object-contain" loading="lazy">
                </div>
             </div>
           </div>
@@ -166,25 +164,7 @@ onBeforeUnmount(() => {
       <!-- CTA & TESTIMONIAL -->
       <section class="py-12 lg:py-20 bg-gray-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
-            
-            <!-- Testimonial Card -->
-            <div class="bg-white p-6 sm:p-8 rounded-3xl shadow-lg border border-gray-100 flex flex-col justify-between h-full transform hover:-translate-y-1 transition duration-300">
-              <div>
-                <div class="flex text-yellow-400 mb-3">
-                  ★★★★★
-                </div>
-                <h3 class="text-xl sm:text-2xl font-bold text-gray-900 mb-3">
-                  "Sangat membantu saat roadtrip!"
-                </h3>
-                <p class="text-gray-600 text-sm sm:text-base leading-relaxed mb-6">
-                  Aplikasi ini memudahkan saya mencari SPKLU yang benar-benar berfungsi. Tidak perlu khawatir baterai habis di tengah jalan.
-                </p>
-              </div>
-               <button class="bg-gray-100 text-gray-800 font-semibold px-6 py-3 rounded-xl hover:bg-gray-200 transition duration-300 w-full sm:w-auto text-sm sm:text-base">
-                 Baca Semua Review
-               </button>
-            </div>
+          <div class="flex justify-center">
 
             <!-- Sign Up CTA Card -->
             <div class="bg-[#00C853] p-6 sm:p-8 rounded-3xl shadow-xl text-white relative overflow-hidden flex flex-col justify-center h-full">
