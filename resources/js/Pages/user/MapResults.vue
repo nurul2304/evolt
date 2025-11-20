@@ -55,12 +55,115 @@ const onTouchEnd = () => {
 // ------------------------------------------
 
 const selectedPort = ref('');
-const selectedDuration = ref('60'); 
+const selectedDuration = ref('30');
+// selected start time on same day (HH:MM)
+const selectedStartTime = ref(new Date().toISOString().split('T')[1].slice(0,5));
+
+// Helper: parse power string like '80 kW' -> number 80
+const parsePowerValue = (powerStr) => {
+    if (!powerStr) return 50; // default kW
+    const m = powerStr.match(/([0-9]+(?:\.[0-9]+)?)/);
+    return m ? Number(m[1]) : 50;
+};
+
+// Convert selected energy (kWh) to approximate minutes based on station power
+const durationMinutesForEnergy = (station, energyKwh) => {
+    const powerKw = parsePowerValue(station.power);
+    // Faktor rugi daya (loss factor) 1.1x ditambahkan untuk estimasi
+    if (!powerKw || powerKw <= 0) return Math.round((Number(energyKwh) / 50) * 60 * 1.1);
+    const minutes = Math.round((Number(energyKwh) / powerKw) * 60 * 1.1);
+    return Math.max(15, minutes); // Minimum 15 minutes duration
+};
+
+const parseTimeToMinutes = (timeStr) => {
+    const [h,m] = (timeStr || '00:00').split(':').map(Number);
+    return h*60 + m;
+};
+
+const minutesToTime = (mins) => {
+    const totalMinutes = mins >= 0 ? mins : 24*60 + mins; // Handle negative minutes (shouldn't happen with proper logic)
+    const h = Math.floor(totalMinutes/60)%24;
+    const m = totalMinutes%60;
+    return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+};
+
+// Check overlap helper
+const rangesOverlap = (aStart, aEnd, bStart, bEnd) => (aStart < bEnd && bStart < aEnd);
+
+// Check if a given port is available for desired start & duration
+const isPortAvailable = (station, portId, desiredStartMinutes, durationMinutes) => {
+    const bookings = station.bookings || [];
+    const portBookings = bookings.filter(b => b.portId === portId);
+    const desiredEnd = desiredStartMinutes + durationMinutes;
+    
+    // Check if desired end time exceeds 23:00 (close of operation/timeline)
+    if (desiredEnd > 23*60 + 30) return false; // Hardcoded timeline end (23:30)
+
+    for (const b of portBookings) {
+        const bStart = parseTimeToMinutes(b.start);
+        const bEnd = bStart + (b.durationMinutes || 0);
+        if (rangesOverlap(desiredStartMinutes, desiredEnd, bStart, bEnd)) return false;
+    }
+    return true;
+};
+
+// Build timeline slots (30-min buckets) for visualization between 06:00 and 23:00
+const timelineSlots = (() => {
+    const slots = [];
+    for (let t = 6*60; t <= 23*60; t += 30) slots.push(t);
+    return slots;
+})();
+
+const buildPortTimeline = (station, portId) => {
+    const bookings = station.bookings || [];
+    const portBookings = bookings.filter(b => b.portId === portId).map(b => ({ start: parseTimeToMinutes(b.start), end: parseTimeToMinutes(b.start) + (b.durationMinutes||0) }));
+    return timelineSlots.map(slotStart => {
+        const slotEnd = slotStart + 30;
+        const occupied = portBookings.some(pb => rangesOverlap(slotStart, slotEnd, pb.start, pb.end));
+        return { start: slotStart, end: slotEnd, occupied };
+    });
+};
+
+// --- NEW COMPUTED PROPERTIES FOR BOOKING LOGIC ---
+
+// Estimated Duration based on selected kWh and station power
+const estimatedDurationMinutes = computed(() => {
+    if (!selectedStation.value || !selectedDuration.value) return 0;
+    // Target Energi (kWh)
+    const energyKwh = Number(selectedDuration.value); 
+    return durationMinutesForEnergy(selectedStation.value, energyKwh);
+});
+
+// Estimated End Time based on selected Start Time and Duration
+const estimatedEndTime = computed(() => {
+    const startMins = parseTimeToMinutes(selectedStartTime.value);
+    const endMins = startMins + estimatedDurationMinutes.value;
+    return minutesToTime(endMins);
+});
+
+// Validation for selected start time
+const isStartTimeValid = computed(() => {
+    if (!selectedStation.value || !selectedPort.value || estimatedDurationMinutes.value === 0) return true;
+
+    const now = new Date();
+    const currentMins = now.getHours()*60 + now.getMinutes();
+    const selectedMins = parseTimeToMinutes(selectedStartTime.value);
+
+    // 1. Check if the selected time is in the past (allow 5 minute buffer for immediate booking)
+    if (selectedMins < currentMins - 5) return false;
+
+    // 2. Check if the time slot is available for the calculated duration
+    return isPortAvailable(selectedStation.value, selectedPort.value, selectedMins, estimatedDurationMinutes.value);
+});
+
+
+// Energi dalam kWh, mulai 30kWh, kelipatan 5 sampai 50kWh
 const durationOptions = [
-    { label: '30 menit', value: '30', multiplier: 0.5 },
-    { label: '1 jam', value: '60', multiplier: 1 },
-    { label: '1.5 jam', value: '90', multiplier: 1.5 },
-    { label: '2 jam', value: '120', multiplier: 2 }
+    { label: '30 kWh', value: '30', multiplier: 1 },
+    { label: '35 kWh', value: '35', multiplier: 35/30 },
+    { label: '40 kWh', value: '40', multiplier: 40/30 },
+    { label: '45 kWh', value: '45', multiplier: 45/30 },
+    { label: '50 kWh', value: '50', multiplier: 50/30 },
 ];
 
 const portOptions = computed(() => {
@@ -76,7 +179,6 @@ const availablePorts = computed(() => {
         id: `port-${index + 1}`,
         type: charger,
         power: selectedStation.value.power,
-        status: selectedStation.value.status
     }));
 });
 
@@ -137,7 +239,7 @@ const openOnly = (which) => {
     } else if (which === 'duration') {
         isDurationOpen.value = !isDurationOpen.value;
         isBrandOpen.value = false; isTypeOpen.value = false; isDomicileOpen.value = false; isStationOpen.value = false; isPortOpen.value = false;
-    }
+    } 
     isDateDropdownOpen.value = false;
     isTimeDropdownOpen.value = false;
 };
@@ -152,6 +254,7 @@ const selectOption = (field, value) => {
     }
     closeAllCustomDropdowns();
 };
+
 
 const openModal = () => {
     showSearchModal.value = true;
@@ -170,26 +273,28 @@ const submitSearch = () => {
 };
 
 const stations = ref([
-    { id: 1, name: 'SPKLU Nagoya Hill', location: 'Nagoya Hill, Batam', distance: '2.5km', chargers: ['Fast'], power: '80 kW', status: 'Tersedia', bookingTime: '2025-10-22 12:00', duration: '60 menit', price: 50000, serviceFee: 10000, isBookable: true, bookingNumber: 'BK1001', lat: 1.1324, lng: 104.0383 },
-    { id: 2, name: 'SPKLU Mega Mall Batam', location: 'Mega Mall, Batam Center', distance: '1.2km', chargers: ['Regular'], power: '22 kW', status: 'Tersedia', bookingTime: '2025-10-22 12:30', duration: '60 menit', price: 40000, serviceFee: 8000, isBookable: true, bookingNumber: 'BK1002', lat: 1.1225, lng: 104.0417 },
-    { id: 3, name: 'SPKLU Harbour Bay', location: 'Harbour Bay, Batam', distance: '3.8km', chargers: ['Fast', 'Ultra Fast'], power: '100 kW', status: 'Penuh', bookingTime: '2025-10-22 14:00', duration: '30 menit', price: 120000, serviceFee: 15000, isBookable: false, bookingNumber: 'BK1003', lat: 1.1145, lng: 104.0522 },
-    { id: 4, name: 'SPKLU Batam Center', location: 'Batam Center', distance: '0.5km', chargers: ['Regular'], power: '50 kW', status: 'Tersedia', bookingTime: '2025-10-22 10:00', duration: '90 menit', price: 60000, serviceFee: 12000, isBookable: true, bookingNumber: 'BK1004', lat: 1.1278, lng: 104.0302 },
-    { id: 5, name: 'SPKLU Batam City Square', location: 'Batam City Square', distance: '1.8km', chargers: ['Regular'], power: '11 kW', status: 'Penuh', bookingTime: '2025-10-22 10:00', duration: '90 menit', price: 30000, serviceFee: 8000, isBookable: false, bookingNumber: 'BK1005', lat: 1.1210, lng: 104.0335 },
-    { id: 6, name: 'SPKLU Kepri Mall', location: 'Kepri Mall', distance: '2.1km', chargers: ['Regular'], power: '22 kW', status: 'Tersedia', bookingTime: '2025-10-22 11:00', duration: '60 menit', price: 45000, serviceFee: 9000, isBookable: true, bookingNumber: 'BK1006', lat: 1.1122, lng: 104.0450 },
-    { id: 7, name: 'SPKLU Batam View', location: 'Batam View', distance: '4.0km', chargers: ['Ultra Fast'], power: '150 kW', status: 'Tersedia', bookingTime: '2025-10-22 13:00', duration: '45 menit', price: 90000, serviceFee: 10000, isBookable: true, bookingNumber: 'BK1007', lat: 1.1390, lng: 104.0480 },
-    { id: 9, name: 'SPKLU Tiban', location: 'Tiban', distance: '5.5km', chargers: ['Fast'], power: '50 kW', status: 'Penuh', bookingTime: '2025-10-22 15:00', duration: '30 menit', price: 80000, serviceFee: 10000, isBookable: false, bookingNumber: 'BK1009', lat: 1.0956, lng: 104.0103 },
-    { id: 10, name: 'SPKLU Sekupang', location: 'Sekupang', distance: '7.2km', chargers: ['Regular'], power: '22 kW', status: 'Tersedia', bookingTime: '2025-10-22 08:00', duration: '60 menit', price: 35000, serviceFee: 7000, isBookable: true, bookingNumber: 'BK1010', lat: 1.0552, lng: 103.9824 },
-    { id: 11, name: 'SPKLU Batu Ampar', location: 'Batu Ampar', distance: '6.0km', chargers: ['Regular'], power: '11 kW', status: 'Tersedia', bookingTime: '2025-10-22 10:30', duration: '90 menit', price: 30000, serviceFee: 7000, isBookable: true, bookingNumber: 'BK1011', lat: 1.0873, lng: 104.0128 },
-    { id: 12, name: 'SPKLU Nagoya City', location: 'Nagoya City', distance: '2.8km', chargers: ['Fast'], power: '80 kW', status: 'Tersedia', bookingTime: '2025-10-22 12:45', duration: '60 menit', price: 100000, serviceFee: 12000, isBookable: true, bookingNumber: 'BK1012', lat: 1.1290, lng: 104.0405 },
-    { id: 13, name: 'SPKLU Batam Harbor', location: 'Batam Harbor', distance: '4.5km', chargers: ['Fast'], power: '100 kW', status: 'Penuh', bookingTime: '2025-10-22 14:30', duration: '30 menit', price: 150000, serviceFee: 15000, isBookable: false, bookingNumber: 'BK1013', lat: 1.1067, lng: 104.0622 },
-    { id: 14, name: 'SPKLU Gajah Mada', location: 'Gajah Mada, Batam', distance: '1.5km', chargers: ['Regular'], power: '22 kW', status: 'Tersedia', bookingTime: '2025-10-22 09:30', duration: '60 menit', price: 40000, serviceFee: 8000, isBookable: true, bookingNumber: 'BK1014', lat: 1.1255, lng: 104.0280 },
-    { id: 15, name: 'SPKLU Waterfront City', location: 'Waterfront City', distance: '3.2km', chargers: ['Regular'], power: '22 kW', status: 'Tersedia', bookingTime: '2025-10-22 11:15', duration: '60 menit', price: 45000, serviceFee: 9000, isBookable: true, bookingNumber: 'BK1015', lat: 1.1312, lng: 104.0588 },
+    { id: 1, name: 'SPKLU Nagoya Hill', location: 'Nagoya Hill, Batam', distance: '2.5km', chargers: ['Fast'], power: '80 kW', bookingTime: '2025-10-22 12:00', duration: '60 menit', price: 50000, serviceFee: 10000, isBookable: true, bookingNumber: 'BK1001', lat: 1.1324, lng: 104.0383,
+        bookings: [ { portId: 'port-1', start: '11:00', durationMinutes: 60 } ] },
+    { id: 2, name: 'SPKLU Mega Mall Batam', location: 'Mega Mall, Batam Center', distance: '1.2km', chargers: ['Regular'], power: '22 kW', bookingTime: '2025-10-22 12:30', duration: '60 menit', price: 40000, serviceFee: 8000, isBookable: true, bookingNumber: 'BK1002', lat: 1.1225, lng: 104.0417,
+        bookings: [ { portId: 'port-1', start: '12:30', durationMinutes: 90 }, { portId: 'port-2', start: '10:00', durationMinutes: 45 } ] },
+    { id: 3, name: 'SPKLU Harbour Bay', location: 'Harbour Bay, Batam', distance: '3.8km', chargers: ['Fast', 'Ultra Fast'], power: '100 kW', bookingTime: '2025-10-22 14:00', duration: '30 menit', price: 120000, serviceFee: 15000, isBookable: false, bookingNumber: 'BK1003', lat: 1.1145, lng: 104.0522, bookings: [] },
+    { id: 4, name: 'SPKLU Batam Center', location: 'Batam Center', distance: '0.5km', chargers: ['Regular'], power: '50 kW', bookingTime: '2025-10-22 10:00', duration: '90 menit', price: 60000, serviceFee: 12000, isBookable: true, bookingNumber: 'BK1004', lat: 1.1278, lng: 104.0302, bookings: [ { portId: 'port-1', start: '09:30', durationMinutes: 60 } ] },
+    { id: 5, name: 'SPKLU Batam City Square', location: 'Batam City Square', distance: '1.8km', chargers: ['Regular'], power: '11 kW', bookingTime: '2025-10-22 10:00', duration: '90 menit', price: 30000, serviceFee: 8000, isBookable: false, bookingNumber: 'BK1005', lat: 1.1210, lng: 104.0335, bookings: [] },
+    { id: 6, name: 'SPKLU Kepri Mall', location: 'Kepri Mall', distance: '2.1km', chargers: ['Regular'], power: '22 kW', bookingTime: '2025-10-22 11:00', duration: '60 menit', price: 45000, serviceFee: 9000, isBookable: true, bookingNumber: 'BK1006', lat: 1.1122, lng: 104.0450, bookings: [ { portId: 'port-1', start: '11:00', durationMinutes: 30 } ] },
+    { id: 7, name: 'SPKLU Batam View', location: 'Batam View', distance: '4.0km', chargers: ['Ultra Fast'], power: '150 kW', bookingTime: '2025-10-22 13:00', duration: '45 menit', price: 90000, serviceFee: 10000, isBookable: true, bookingNumber: 'BK1007', lat: 1.1390, lng: 104.0480, bookings: [] },
+    { id: 9, name: 'SPKLU Tiban', location: 'Tiban', distance: '5.5km', chargers: ['Fast'], power: '50 kW', bookingTime: '2025-10-22 15:00', duration: '30 menit', price: 80000, serviceFee: 10000, isBookable: false, bookingNumber: 'BK1009', lat: 1.0956, lng: 104.0103, bookings: [] },
+    { id: 10, name: 'SPKLU Sekupang', location: 'Sekupang', distance: '7.2km', chargers: ['Regular'], power: '22 kW', bookingTime: '2025-10-22 08:00', duration: '60 menit', price: 35000, serviceFee: 7000, isBookable: true, bookingNumber: 'BK1010', lat: 1.0552, lng: 103.9824, bookings: [] },
+    { id: 11, name: 'SPKLU Batu Ampar', location: 'Batu Ampar', distance: '6.0km', chargers: ['Regular'], power: '11 kW', bookingTime: '2025-10-22 10:30', duration: '90 menit', price: 30000, serviceFee: 7000, isBookable: true, bookingNumber: 'BK1011', lat: 1.0873, lng: 104.0128, bookings: [] },
+    { id: 12, name: 'SPKLU Nagoya City', location: 'Nagoya City', distance: '2.8km', chargers: ['Fast'], power: '80 kW', bookingTime: '2025-10-22 12:45', duration: '60 menit', price: 100000, serviceFee: 12000, isBookable: true, bookingNumber: 'BK1012', lat: 1.1290, lng: 104.0405, bookings: [] },
+    { id: 13, name: 'SPKLU Batam Harbor', location: 'Batam Harbor', distance: '4.5km', chargers: ['Fast'], power: '100 kW', bookingTime: '2025-10-22 14:30', duration: '30 menit', price: 150000, serviceFee: 15000, isBookable: false, bookingNumber: 'BK1013', lat: 1.1067, lng: 104.0622, bookings: [] },
+    { id: 14, name: 'SPKLU Gajah Mada', location: 'Gajah Mada, Batam', distance: '1.5km', chargers: ['Regular'], power: '22 kW', bookingTime: '2025-10-22 09:30', duration: '60 menit', price: 40000, serviceFee: 8000, isBookable: true, bookingNumber: 'BK1014', lat: 1.1255, lng: 104.0280, bookings: [] },
+    { id: 15, name: 'SPKLU Waterfront City', location: 'Waterfront City', distance: '3.2km', chargers: ['Regular'], power: '22 kW', bookingTime: '2025-10-22 11:15', duration: '60 menit', price: 45000, serviceFee: 9000, isBookable: true, bookingNumber: 'BK1015', lat: 1.1312, lng: 104.0588, bookings: [] },
 ]);
 
-const availableStations = computed(() => stations.value.filter(s => s.status === 'Tersedia'));
+const availableStations = computed(() => stations.value.filter(s => s.isBookable));
 
 const nearestStations = computed(() => {
-    return stations.value.filter(s => s.status === 'Tersedia').slice().sort((a, b) => {
+    return stations.value.filter(s => s.isBookable).slice().sort((a, b) => {
         const distA = parseFloat(a.distance.replace('km', ''));
         const distB = parseFloat(b.distance.replace('km', ''));
         return distA - distB;
@@ -253,10 +358,10 @@ onMounted(async () => {
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
-            attribution: '&copy; OpenStreetMap'
+            attribution: '© OpenStreetMap'
         }).addTo(map);
 
-        stations.value.filter(s => s.status === 'Tersedia' && s.lat && s.lng).forEach(s => {
+        stations.value.filter(s => s.isBookable && s.lat && s.lng).forEach(s => {
             const color = getMarkerColor(s.chargers);
             const pinSvg = createPinSvg(color);
             const iconUrl = `data:image/svg+xml;charset=UTF-8,${pinSvg}`;
@@ -315,20 +420,54 @@ window.openMapsLocation = (lat, lng) => {
 
 const formatRupiah = (amount) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0, }).format(amount);
 const calculateTotal = (price, fee) => price + fee;
+
+// Pricing helpers: compute price per kWh and service fee per kWh if not explicitly provided
+const computePricePerKwh = (station) => {
+    if (!station) return 0;
+    if (station.pricePerKwh) return station.pricePerKwh;
+    // Fallback: assume `station.price` is the base price for 30 kWh (legacy data); derive per-kWh
+    const base = station.price || 0;
+    return Math.max(1, Math.round(base / 30));
+};
+
+const computeServiceFeeForEnergy = (station, energyKwh) => {
+    if (!station) return 0;
+    if (station.serviceFeePerKwh) return Math.round(station.serviceFeePerKwh * Number(energyKwh));
+    const baseFee = station.serviceFee || 0;
+    return Math.round((baseFee / 30) * Number(energyKwh));
+};
+
+const computePriceForEnergy = (station, energyKwh) => {
+    const kwh = Number(energyKwh) || 0;
+    const ppk = computePricePerKwh(station);
+    const price = Math.round(ppk * kwh);
+    const service = computeServiceFeeForEnergy(station, kwh);
+    return { price, service, total: calculateTotal(price, service), pricePerKwh: ppk };
+};
+
+const priceBreakdown = computed(() => {
+    if (!selectedStation.value) return { price: 0, service: 0, total: 0, pricePerKwh: 0 };
+    const energy = Number(selectedDuration.value) || 0;
+    return computePriceForEnergy(selectedStation.value, energy);
+});
+
 const calculateTotalFormatted = computed(() => {
-    if (selectedStation.value) {
-        const durationMultiplier = durationOptions.find(d => d.value === selectedDuration.value)?.multiplier || 1;
-        const adjustedPrice = selectedStation.value.price * durationMultiplier;
-        const adjustedFee = selectedStation.value.serviceFee * durationMultiplier;
-        return formatRupiah(calculateTotal(adjustedPrice, adjustedFee));
-    }
-    return '';
+    if (!selectedStation.value) return '';
+    return formatRupiah(priceBreakdown.value.total);
 });
 
 const reserveStation = (stationId) => {
     const station = stations.value.find(s => s.id === stationId);
     if (station && station.isBookable) {
         selectedStation.value = station;
+        // set default selected port and start time when opening modal
+        const ports = station.chargers.map((c, i) => `port-${i+1}`);
+        selectedPort.value = ports.length ? ports[0] : '';
+        // default start time: next rounded 5-min slot
+        const now = new Date();
+        const mins = now.getHours()*60 + now.getMinutes();
+        const nextSlot = Math.ceil((mins + 5)/5)*5; // next 5-min slot
+        selectedStartTime.value = minutesToTime(nextSlot);
         showConfirmationModal.value = true;
         history.pushState({modal: 'confirmation'}, '', window.location.href);
     }
@@ -339,13 +478,41 @@ const cancelProcess = () => {
     showQrisPaymentModal.value = false;
     selectedStation.value = null;
     selectedPort.value = '';
-    selectedDuration.value = '60';
+    selectedDuration.value = '30'; // Reset to 30 kWh
     // Reset Drag offset
     dragOffset.value = 0;
     isDragging.value = false;
 };
 
 const proceedToPayment = () => {
+    if (!selectedStation.value || !selectedPort.value) {
+        alert('Port harus dipilih.');
+        return;
+    }
+    if (estimatedDurationMinutes.value === 0) {
+        alert('Target energi harus dipilih.');
+        return;
+    }
+    if (!isStartTimeValid.value) {
+        alert('Waktu mulai tidak valid. Periksa ketersediaan di Timeline atau pilih waktu yang akan datang.');
+        return;
+    }
+    
+    // Final validation check with the latest computed values
+    const desiredStart = parseTimeToMinutes(selectedStartTime.value);
+    const durationMinutes = estimatedDurationMinutes.value; 
+
+    const ok = isPortAvailable(selectedStation.value, selectedPort.value, desiredStart, durationMinutes);
+    if (!ok) {
+        alert('Port yang dipilih tidak tersedia untuk rentang waktu tersebut (Mulai: ' + selectedStartTime.value + ' - Selesai: ' + estimatedEndTime.value + '). Silakan pilih port lain atau ubah jam mulai.');
+        return;
+    }
+
+    // Reserve slot locally (simulate booking) by adding to station.bookings
+    selectedStation.value.bookings = selectedStation.value.bookings || [];
+    selectedStation.value.bookings.push({ portId: selectedPort.value, start: selectedStartTime.value, durationMinutes });
+    hasStartedBooking.value = true;
+
     showConfirmationModal.value = false;
     showQrisPaymentModal.value = true;
     history.pushState({modal: 'payment'}, '', window.location.href);
@@ -397,7 +564,6 @@ const createPinSvg = (color) => {
         <main class="flex-grow">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
 
-                <!-- SEARCH BAR -->
                 <div class="flex flex-col md:flex-row justify-end items-start md:items-center mb-6">
                     <div class="relative w-full md:w-72 group">
                         <input 
@@ -412,12 +578,10 @@ const createPinSvg = (color) => {
                     </div>
                 </div>
 
-                <!-- MAP CONTAINER -->
                 <div class="relative w-full mb-8 rounded-3xl shadow-xl overflow-hidden border border-white h-72 md:h-[450px] bg-[#e9f5ff] z-0">
                     <div class="absolute inset-0 bg-[url('/images/map-grid.png')] bg-cover bg-center opacity-40"></div>
                     <div class="absolute inset-0">
                         <div class="w-full h-full relative">
-                            <!-- Floating Label -->
                             <div class="absolute left-1/2 top-4 transform -translate-x-1/2 text-center bg-white/90 backdrop-blur-sm px-4 py-1.5 rounded-full shadow-sm z-[500]">
                                 <h3 class="text-xs md:text-sm font-semibold text-gray-700 flex items-center gap-1">
                                    <i class="fas fa-info-circle text-[#00C853]"></i> Area Batam
@@ -428,7 +592,6 @@ const createPinSvg = (color) => {
                     </div>
                 </div>
 
-                <!-- CARD LIST HEADER -->
                 <div class="flex items-center justify-between mb-6">
                     <h2 class="text-xl sm:text-2xl font-bold text-gray-800">
                         Stasiun <span class="text-[#00C853]">Terdekat</span>
@@ -438,13 +601,11 @@ const createPinSvg = (color) => {
                     </span>
                 </div>
                 
-                <!-- CARD GRID -->
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
                     <div v-for="station in nearestStations" :key="station.id"
                          class="bg-white p-5 sm:p-6 rounded-3xl shadow-md hover:shadow-xl border border-transparent transition-all duration-300 transform hover:-translate-y-1 flex flex-col relative group"
                          :class="{ 'ring-2 ring-[#00C853] ring-offset-2': selectedStation && selectedStation.id === station.id && (showQrisPaymentModal || showReceiptModal) }">
                         
-                        <!-- Header Card -->
                         <div class="flex justify-between items-start mb-3">
                             <div>
                                 <h2 class="text-lg sm:text-xl font-bold text-gray-900 leading-tight mb-1">{{ station.name }}</h2>
@@ -453,12 +614,8 @@ const createPinSvg = (color) => {
                                     {{ station.distance }}
                                 </div>
                             </div>
-                            <div class="bg-lime-50 text-lime-700 text-xs font-bold px-2.5 py-1 rounded-lg">
-                                {{ station.status }}
-                            </div>
                         </div>
 
-                        <!-- Info Details -->
                         <div class="space-y-3 mb-6 text-sm sm:text-base bg-gray-50 p-4 rounded-2xl">
                             <div class="flex items-center justify-between">
                                 <div class="flex items-center text-gray-600">
@@ -476,23 +633,14 @@ const createPinSvg = (color) => {
                             </div>
                         </div>
 
-                        <!-- Pricing & Action -->
                         <div class="mt-auto space-y-4">
-                            <div class="flex flex-col gap-1">
-                                <div class="flex justify-between items-center text-sm text-gray-500">
-                                    <span>Estimasi Total</span>
-                                    <span class="text-xs">(Inc. Service Fee)</span>
-                                </div>
-                                <div class="flex justify-between items-center">
-                                    <span class="text-xl sm:text-2xl font-bold text-[#00C853]">{{ formatRupiah(calculateTotal(station.price, station.serviceFee)) }}</span>
-                                </div>
-                            </div>
+                            
 
                             <button
                                 @click="reserveStation(station.id)"
                                 :disabled="!station.isBookable"
                                 :class="[
-                                    'w-full py-3.5 rounded-xl sm:rounded-2xl font-bold text-sm sm:text-base transition-all duration-200 flex items-center justify-center space-x-2 shadow-lg',
+                                    'w-full py-3.5 rounded-lg sm:rounded-2xl font-semibold text-sm sm:text-base transition-all duration-200 flex items-center justify-center space-x-2 shadow-lg',
                                     station.isBookable 
                                         ? 'bg-[#00C853] text-white hover:bg-[#00A142] active:scale-95 hover:shadow-[#00C853]/30' 
                                         : 'bg-gray-200 text-gray-400 cursor-not-allowed shadow-none'
@@ -510,15 +658,13 @@ const createPinSvg = (color) => {
 
         <Footer />
         
-        <!-- SEARCH MODAL (Slide Up on Mobile with Drag-to-Dismiss) -->
         <Transition name="slide-up">
             <div v-if="showSearchModal" class="fixed inset-0 bg-gray-900/80 backdrop-blur-sm flex items-end sm:items-center justify-center z-[99999] p-0 sm:p-4" @click.self="closeModal">
                 <div 
                     class="bg-white w-full h-[90vh] sm:h-auto sm:max-w-2xl rounded-t-[2rem] sm:rounded-3xl p-6 sm:p-8 shadow-2xl transform transition-transform duration-300 sm:duration-200 flex flex-col relative touch-none sm:touch-auto"
                     :style="{ transform: isDragging ? `translateY(${dragOffset}px)` : '' }"
                 >
-                    <!-- Handle bar for mobile (Draggable Area) -->
-                     <div 
+                    <div 
                         class="w-full h-8 absolute top-0 left-0 z-50 flex justify-center items-center sm:hidden cursor-grab active:cursor-grabbing"
                         @touchstart="onTouchStart"
                         @touchmove="onTouchMove"
@@ -527,8 +673,7 @@ const createPinSvg = (color) => {
                         <div class="w-14 h-1.5 bg-gray-300 rounded-full"></div>
                      </div>
 
-                    <div class="mt-4 sm:mt-0 h-full flex flex-col"> <!-- Wrapper -->
-                        <h3 class="text-2xl font-bold text-gray-900 mb-6">Cari Stasiun</h3>
+                    <div class="mt-4 sm:mt-0 h-full flex flex-col"> <h3 class="text-2xl font-bold text-gray-900 mb-6">Cari Stasiun</h3>
                         
                         <form @submit.prevent="submitSearch" class="space-y-5 overflow-y-auto flex-grow custom-scrollbar px-1">
                              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -591,83 +736,135 @@ const createPinSvg = (color) => {
             </div>
         </Transition>
 
-        <!-- CONFIRMATION MODAL (Slide Up on Mobile with Drag-to-Dismiss) -->
-        <Transition name="slide-up">
-            <div v-if="showConfirmationModal && selectedStation" class="fixed inset-0 bg-gray-900/80 backdrop-blur-sm flex items-end sm:items-center justify-center z-[99999] p-0 sm:p-4" @click.self="cancelProcess">
-                <div 
-                    class="bg-white w-full rounded-t-[2rem] sm:rounded-3xl p-6 sm:p-8 shadow-2xl max-w-lg transform transition-transform duration-300 sm:duration-200 pb-8 sm:pb-8 relative touch-none sm:touch-auto"
-                    :style="{ transform: isDragging ? `translateY(${dragOffset}px)` : '' }"
-                >
-                    
-                     <!-- Handle bar for mobile (Draggable Area) -->
-                     <div 
-                        class="w-full h-8 absolute top-0 left-0 z-50 flex justify-center items-center sm:hidden cursor-grab active:cursor-grabbing"
-                        @touchstart="onTouchStart"
-                        @touchmove="onTouchMove"
-                        @touchend="onTouchEnd"
-                     >
-                        <div class="w-14 h-1.5 bg-gray-300 rounded-full"></div>
-                     </div>
+       <Transition name="slide-up">
+    <div v-if="showConfirmationModal && selectedStation" class="fixed inset-0 bg-gray-900/80 backdrop-blur-sm flex items-end sm:items-center justify-center z-[99999] p-0 md:p-8" @click.self="cancelProcess">
+        <div 
+            class="bg-white w-full rounded-t-[2rem] sm:rounded-3xl p-6 sm:p-8 shadow-2xl md:max-w-4xl transform transition-transform duration-300 sm:duration-200 pb-8 sm:pb-8 relative touch-none sm:touch-auto"
+            :style="{ transform: isDragging ? `translateY(${dragOffset}px)` : '' }"
+        >
+            
+             <div 
+                class="w-full h-8 absolute top-0 left-0 z-50 flex justify-center items-center sm:hidden cursor-grab active:cursor-grabbing"
+                @touchstart="onTouchStart"
+                @touchmove="onTouchMove"
+                @touchend="onTouchEnd"
+             >
+                <div class="w-14 h-1.5 bg-gray-300 rounded-full"></div>
+             </div>
 
-                    <div class="mt-4 sm:mt-0"> <!-- Spacer for handle -->
-                        <h3 class="text-xl font-bold text-gray-900 mb-6 text-center">Konfirmasi Pesanan</h3>
-
-                        <!-- Selection Inputs -->
-                        <div class="space-y-4 mb-6">
-                            <div class="relative">
-                                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Port Charging</label>
-                                <div @click.stop="openOnly('port')" class="dropdown-trigger" :class="{'active': isPortOpen}">
-                                    <span class="text-gray-800">{{ selectedPort ? portOptions.find(p => p.value === selectedPort)?.label : 'Pilih Port' }}</span>
-                                    <i class="fas fa-chevron-down text-gray-400 text-xs transition-transform" :class="{'rotate-180': isPortOpen}"></i>
-                                </div>
-                                <div v-if="isPortOpen" class="dropdown-menu">
-                                    <div v-for="port in portOptions" :key="port.value" @click="selectOption('port', port.value)" class="dropdown-item" :class="{'selected': selectedPort === port.value}">{{ port.label }}</div>
-                                </div>
-                            </div>
-
-                            <div class="relative">
-                                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Durasi</label>
-                                <div @click.stop="openOnly('duration')" class="dropdown-trigger" :class="{'active': isDurationOpen}">
-                                    <span class="text-gray-800">{{ durationOptions.find(d => d.value === selectedDuration)?.label || 'Pilih Durasi' }}</span>
-                                    <i class="fas fa-chevron-down text-gray-400 text-xs transition-transform" :class="{'rotate-180': isDurationOpen}"></i>
-                                </div>
-                                <div v-if="isDurationOpen" class="dropdown-menu">
-                                    <div v-for="duration in durationOptions" :key="duration.value" @click="selectOption('duration', duration.value)" class="dropdown-item" :class="{'selected': selectedDuration === duration.value}">{{ duration.label }}</div>
-                                </div>
+            <div class="mt-4 sm:mt-0"> 
+                <h3 class="text-xl font-bold text-gray-900 mb-6 text-center">Konfirmasi Pesanan</h3>
+                
+                <div class="space-y-4 mb-6"> 
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                        
+                        <div class="relative">
+                            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Waktu Mulai</label>
+                            <div class="dropdown-trigger !py-0 !px-0 border border-gray-300 hover:border-green-500 focus-within:border-[#00C853] focus-within:ring-2 focus-within:ring-[#00C853]/20 transition-all duration-200">
+                                <input 
+                                    type="time" 
+                                    v-model="selectedStartTime" 
+                                    class="w-full p-3.5 bg-transparent border-none focus:ring-0 focus:outline-none text-gray-800"
+                                />
                             </div>
                         </div>
 
-                        <!-- Summary Card -->
-                        <div class="bg-gray-50 rounded-2xl p-4 space-y-3 mb-6 border border-gray-100">
+                        <div class="relative">
+                            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Port Charging</label>
+                            <div id="port-trigger" @click.stop="openOnly('port')" class="dropdown-trigger" :class="{'active': isPortOpen}">
+                                <span class="text-gray-800 truncate">{{ selectedPort ? portOptions.find(p => p.value === selectedPort)?.label : 'Pilih Port' }}</span>
+                                <i class="fas fa-chevron-down text-gray-400 text-xs transition-transform" :class="{'rotate-180': isPortOpen}"></i>
+                            </div>
+                            <div v-if="isPortOpen" class="dropdown-menu">
+                                <div v-for="port in portOptions" :key="port.value" @click="selectOption('port', port.value)" class="dropdown-item" :class="{'selected': selectedPort === port.value}">{{ port.label }}</div>
+                            </div>
+                        </div>
+
+                        <div class="relative">
+                            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Target Energi (kWh)</label>
+                            <div id="duration-trigger" @click.stop="openOnly('duration')" class="dropdown-trigger" :class="{'active': isDurationOpen}">
+                                <span class="text-gray-800 truncate">{{ durationOptions.find(d => d.value === selectedDuration)?.label || 'Pilih Energi' }}</span>
+                                <i class="fas fa-chevron-down text-gray-400 text-xs transition-transform" :class="{'rotate-180': isDurationOpen}"></i>
+                            </div>
+                            <div v-if="isDurationOpen" class="dropdown-menu">
+                                <div v-for="duration in durationOptions" :key="duration.value" @click="selectOption('duration', duration.value)" class="dropdown-item" :class="{'selected': selectedDuration === duration.value}">{{ duration.label }}</div>
+                            </div>
+                        </div>
+
+                        
+                    </div>
+                    
+                    <p class="text-xs text-gray-400 mt-1">
+                        *Waktu mulai fleksibel (Hari Ini); sistem akan mengecek ketersediaan port setelah booking lain selesai.
+                    </p>
+
+                    <div v-if="estimatedDurationMinutes > 0" class="flex flex-col justify-end h-full md:mt-0 mt-4">
+                            <div class="p-3 bg-green-50 rounded-xl flex justify-between text-sm border border-green-200 w-full">
+                                <div class="flex flex-col">
+                                    <span class="text-gray-500 flex items-center gap-1">
+                                        <i class="fas fa-hourglass-half text-green-600"></i> Est. Durasi
+                                    </span>
+                                    <span class="font-bold text-green-700 text-lg">{{ estimatedDurationMinutes }} menit</span>
+                                </div>
+                                <div class="flex flex-col text-right">
+                                    <span class="text-gray-500 flex items-center gap-1 justify-end">
+                                        <i class="fas fa-clock text-green-600"></i> Est. Selesai
+                                    </span>
+                                    <span class="font-bold text-green-700 text-lg">{{ estimatedEndTime }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div v-else class="text-sm text-gray-400 p-3 flex items-center justify-center border border-dashed border-gray-300 rounded-xl h-full md:mt-0 mt-4">
+                            Pilih Target Energi untuk estimasi durasi.
+                        </div>
+                        
+                    <div class="bg-gray-50 rounded-2xl p-4 space-y-3 mb-6 border border-gray-100">
+                        <div class="flex justify-between items-center text-sm">
+                            <span class="text-gray-500">Lokasi</span>
+                            <span class="font-semibold text-gray-800 text-right">{{ selectedStation.name }}</span>
+                        </div>
+                        <div class="flex justify-between items-center text-sm">
+                            <span class="text-gray-500">Waktu Booking</span>
+                            <span class="font-bold text-gray-800">
+                                {{ selectedStartTime }} - {{ estimatedEndTime }}
+                            </span>
+                        </div>
+
+                        <div class="border-t border-gray-200 pt-3 space-y-2">
                             <div class="flex justify-between items-center text-sm">
-                                <span class="text-gray-500">Lokasi</span>
-                                <span class="font-semibold text-gray-800 text-right">{{ selectedStation.name }}</span>
+                                <span class="text-gray-500">Harga per kWh</span>
+                                <span class="font-medium text-gray-800">{{ formatRupiah(priceBreakdown.pricePerKwh) }}</span>
                             </div>
                             <div class="flex justify-between items-center text-sm">
-                                <span class="text-gray-500">Waktu</span>
-                                <span class="font-medium text-gray-800">{{ formatBookingDate(selectedStation.bookingTime) }}</span>
+                                <span class="text-gray-500">Biaya Energi</span>
+                                <span class="font-medium text-gray-800">{{ formatRupiah(priceBreakdown.price) }}</span>
                             </div>
-                            <div class="border-t border-gray-200 pt-3 flex justify-between items-center">
+                            <div class="flex justify-between items-center text-sm">
+                                <span class="text-gray-500">Biaya Layanan</span>
+                                <span class="font-medium text-gray-800">{{ formatRupiah(priceBreakdown.service) }}</span>
+                            </div>
+                            <div class="flex justify-between items-center pt-2 border-t border-gray-100">
                                 <span class="font-bold text-gray-900">Total</span>
                                 <span class="font-bold text-xl text-[#00C853]">{{ calculateTotalFormatted }}</span>
                             </div>
                         </div>
-
-                        <div class="flex flex-col-reverse sm:flex-row gap-3">
-                            <button type="button" @click="cancelProcess" class="w-full py-3.5 rounded-xl font-bold text-gray-500 bg-gray-100 hover:bg-gray-200 transition">
-                                Batal
-                            </button>
-                            <button type="button" @click="proceedToPayment" :disabled="!selectedPort"
-                                class="w-full py-3.5 rounded-xl font-bold text-white bg-[#00C853] hover:bg-[#00A142] shadow-lg shadow-[#00C853]/20 active:scale-95 transition disabled:bg-gray-300 disabled:shadow-none">
-                                Lanjut Bayar
-                            </button>
-                        </div>
                     </div>
                 </div>
-            </div>
-        </Transition>
 
-        <!-- QRIS MODAL -->
+                <div class="flex flex-col-reverse sm:flex-row gap-3">
+                    <button type="button" @click="cancelProcess" class="w-full py-3.5 rounded-xl font-bold text-gray-500 bg-gray-100 hover:bg-gray-200 transition">
+                        Batal
+                    </button>
+                    <button type="button" @click="proceedToPayment" :disabled="!selectedPort || !isStartTimeValid || estimatedDurationMinutes === 0"
+                        class="w-full py-3.5 rounded-xl font-bold text-white bg-[#00C853] hover:bg-[#00A142] shadow-lg shadow-[#00C853]/20 active:scale-95 transition disabled:bg-gray-300 disabled:shadow-none">
+                        Lanjut Bayar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</Transition>
+
         <Transition name="fade">
             <div v-if="showQrisPaymentModal && selectedStation" class="fixed inset-0 bg-gray-900/90 backdrop-blur-sm flex items-center justify-center z-[99999] p-4" @click.self="cancelProcess">
                 <div class="bg-white rounded-3xl p-6 shadow-2xl w-full max-w-md relative overflow-hidden">
@@ -699,7 +896,6 @@ const createPinSvg = (color) => {
             </div>
         </Transition>
 
-        <!-- RECEIPT MODAL -->
         <Transition name="fade">
             <div v-if="showReceiptModal && selectedStation" class="fixed inset-0 bg-[#00C853] flex flex-col items-center justify-center z-[99999] p-4">
                 <div class="bg-white rounded-3xl w-full max-w-sm shadow-2xl overflow-hidden relative">
@@ -798,6 +994,7 @@ const createPinSvg = (color) => {
     from { opacity: 0; transform: translateY(-10px); }
     to { opacity: 1; transform: translateY(0); }
 }
+
 
 /* Custom Scrollbar */
 .custom-scrollbar::-webkit-scrollbar { width: 6px; }
