@@ -1,2 +1,4 @@
--   [x] Remove the testimonial card "Sangat membantu saat roadtrip!" from LandingPage.vue
--   [x] Adjust the grid layout to center the remaining sign-up card
+# TODO: Update Login Page Background
+
+-   [x] Edit resources/js/Pages/Auth/Login.vue to change .login-page background to #CCFF00
+-   [x] Test the login page visually to ensure background displays correctly

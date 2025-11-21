@@ -10,7 +10,7 @@ const showSearchModal = ref(false);
 const showConfirmationModal = ref(false);
 const showQrisPaymentModal = ref(false); 
 const showReceiptModal = ref(false);    
-const showPrintModal = ref(false);     
+const showPrintModal = ref(false);      
 const selectedStation = ref(null);
 const hasStartedBooking = ref(false); 
 
@@ -769,24 +769,28 @@ const createPinSvg = (color) => {
 
        <Transition name="slide-up">
     <div v-if="showConfirmationModal && selectedStation" class="fixed inset-0 bg-gray-900/80 backdrop-blur-sm flex items-end sm:items-center justify-center z-[99999] p-0 md:p-8" @click.self="cancelProcess">
+        <!-- Added max-h-[85vh] and flex flex-col -->
         <div 
-            class="bg-white w-full rounded-t-[2rem] sm:rounded-3xl p-6 sm:p-8 shadow-2xl md:max-w-4xl transform transition-transform duration-300 sm:duration-200 pb-8 sm:pb-8 relative touch-none sm:touch-auto"
+            class="bg-white w-full max-h-[85vh] flex flex-col rounded-t-[2rem] sm:rounded-3xl shadow-2xl md:max-w-4xl transform transition-transform duration-300 sm:duration-200 relative touch-none sm:touch-auto"
             :style="{ transform: isDragging ? `translateY(${dragOffset}px)` : '' }"
         >
             
-             <div 
-                class="w-full h-8 absolute top-0 left-0 z-50 flex justify-center items-center sm:hidden cursor-grab active:cursor-grabbing"
-                @touchstart="onTouchStart"
-                @touchmove="onTouchMove"
-                @touchend="onTouchEnd"
-             >
-                <div class="w-14 h-1.5 bg-gray-300 rounded-full"></div>
+             <!-- Header Section (Fixed) -->
+             <div class="flex-none px-6 pt-6 pb-2 sm:px-8 sm:pt-8">
+                 <div 
+                    class="w-full h-8 absolute top-0 left-0 z-50 flex justify-center items-center sm:hidden cursor-grab active:cursor-grabbing"
+                    @touchstart="onTouchStart"
+                    @touchmove="onTouchMove"
+                    @touchend="onTouchEnd"
+                 >
+                    <div class="w-14 h-1.5 bg-gray-300 rounded-full"></div>
+                 </div>
+                 <h3 class="text-xl font-bold text-gray-900 text-center mt-4 sm:mt-0">Konfirmasi Pesanan</h3>
              </div>
 
-            <div class="mt-4 sm:mt-0"> 
-                <h3 class="text-xl font-bold text-gray-900 mb-6 text-center">Konfirmasi Pesanan</h3>
-                
-                <div class="space-y-4 mb-6"> 
+            <!-- Body Section (Scrollable) -->
+            <div class="flex-1 overflow-y-auto px-6 sm:px-8 custom-scrollbar pb-4">
+                <div class="space-y-4 mt-4"> 
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
                         
                         <div class="relative">
@@ -832,7 +836,7 @@ const createPinSvg = (color) => {
                         *Waktu mulai fleksibel (Hari Ini); sistem akan mengecek ketersediaan port setelah booking lain selesai.
                     </p>
 
-                    <div v-if="estimatedDurationMinutes > 0" class="flex flex-col justify-end h-full md:mt-0 mt-4">
+                    <div v-if="estimatedDurationMinutes > 0" class="flex flex-col justify-end md:mt-0 mt-2">
                             <div class="p-3 bg-green-50 rounded-xl flex justify-between text-sm border border-green-200 w-full">
                                 <div class="flex flex-col">
                                     <span class="text-gray-500 flex items-center gap-1">
@@ -848,11 +852,11 @@ const createPinSvg = (color) => {
                                 </div>
                             </div>
                         </div>
-                        <div v-else class="text-sm text-gray-400 p-3 flex items-center justify-center border border-dashed border-gray-300 rounded-xl h-full md:mt-0 mt-4">
+                        <div v-else class="text-sm text-gray-400 p-3 flex items-center justify-center border border-dashed border-gray-300 rounded-xl md:mt-0 mt-2">
                             Pilih Target Energi untuk estimasi durasi.
                         </div>
                         
-                    <div class="bg-gray-50 rounded-2xl p-4 space-y-3 mb-6 border border-gray-100">
+                    <div class="bg-gray-50 rounded-2xl p-4 space-y-3 border border-gray-100">
                         <div class="flex justify-between items-center text-sm">
                             <span class="text-gray-500">Lokasi</span>
                             <span class="font-semibold text-gray-800 text-right">{{ selectedStation.name }}</span>
@@ -884,7 +888,10 @@ const createPinSvg = (color) => {
                         </div>
                     </div>
                 </div>
+            </div>
 
+            <!-- Footer Section (Fixed Bottom) -->
+            <div class="flex-none px-6 pb-6 sm:px-8 sm:pb-8 pt-4 bg-white rounded-b-[2rem] sm:rounded-b-3xl z-10">
                 <div class="flex flex-col-reverse sm:flex-row gap-3">
                     <button type="button" @click="cancelProcess" class="w-full py-3.5 rounded-xl font-bold text-gray-500 bg-gray-100 hover:bg-gray-200 transition">
                         Batal
@@ -895,6 +902,7 @@ const createPinSvg = (color) => {
                     </button>
                 </div>
             </div>
+
         </div>
     </div>
 </Transition>
