@@ -386,7 +386,7 @@ onBeforeUnmount(() => {
             </div>
             
             <div class="text-end mt-6">
-                <Link href="/map-results" class="inline-block bg-[#00C853] text-white font-semibold px-8 py-3 rounded-lg shadow-lg hover:bg-[#00A142] transition duration-300 focus:outline-none focus:ring-4 focus:ring-lime-300">
+                <Link href="/map-results" class="inline-block bg-[#00C853] text-white font-semibold px-6 py-3.5 rounded-xl shadow-lg hover:bg-[#00A142] active:scale-95 transition duration-200 focus:outline-none focus:ring-4 focus:ring-lime-300/50 text-base text-center">
                   Cari Jadwal
                 </Link>
             </div>
