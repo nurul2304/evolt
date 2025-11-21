@@ -42,7 +42,7 @@ Route::get('/about', function () {
 
 Route::get('/contact', function () {
     return Inertia::render('ContactUs');
-})->name('contact');
+    })->name('contact');
 
 
 /*
@@ -84,10 +84,16 @@ Route::get('/admin-dashboard', function () {
     return Inertia::render('admin/AdminDashboard');
     })->name('admin.dashboard');
 
+
 // Halaman Operator
 Route::get('/operator', function () {
-    return Inertia::render('Operator');
+    return Inertia::render('operator/Operator');
     })->name('operator');
+
+// Halaman Verifikasi Operator
+Route::get('/opverify', function () {
+    return Inertia::render('operator/Opverify');
+    })->name('opverify');
 
 // Route untuk halaman cetak struk
 Route::get('/print-struk', function () {
