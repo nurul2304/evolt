@@ -166,6 +166,30 @@ const durationOptions = [
     { label: '50 kWh', value: '50', multiplier: 50/30 },
 ];
 
+// Time options for start time dropdown (from current time onwards in 30-min intervals)
+const timeOptions = computed(() => {
+    const options = [];
+    const now = new Date();
+    const currentMins = now.getHours() * 60 + now.getMinutes();
+
+    // Start from next 30-min slot after current time
+    const startMins = Math.ceil(currentMins / 30) * 30;
+
+    for (let mins = startMins; mins <= 23 * 60; mins += 30) {
+        const h = Math.floor(mins / 60);
+        const m = mins % 60;
+        const timeStr = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+        options.push({ label: timeStr, value: timeStr });
+    }
+    return options;
+});
+
+// Default start time: first available time option
+const defaultStartTime = computed(() => {
+    const options = timeOptions.value;
+    return options.length > 0 ? options[0].value : '12:00';
+});
+
 const portOptions = computed(() => {
     return availablePorts.value.map(port => ({
         label: `Port ${port.id.split('-')[1]} - ${port.type} (${port.power})`,
@@ -210,6 +234,7 @@ const isDomicileOpen = ref(false);
 const isStationOpen = ref(false);
 const isPortOpen = ref(false);
 const isDurationOpen = ref(false);
+const isTimeOpen = ref(false);
 
 const closeAllCustomDropdowns = () => {
     isBrandOpen.value = false;
@@ -218,28 +243,32 @@ const closeAllCustomDropdowns = () => {
     isStationOpen.value = false;
     isPortOpen.value = false;
     isDurationOpen.value = false;
+    isTimeOpen.value = false;
 };
 
 const openOnly = (which) => {
     if (which === 'brand') {
         isBrandOpen.value = !isBrandOpen.value;
-        isTypeOpen.value = false; isDomicileOpen.value = false; isStationOpen.value = false; isPortOpen.value = false; isDurationOpen.value = false;
+        isTypeOpen.value = false; isDomicileOpen.value = false; isStationOpen.value = false; isPortOpen.value = false; isDurationOpen.value = false; isTimeOpen.value = false;
     } else if (which === 'type') {
         isTypeOpen.value = !isTypeOpen.value;
-        isBrandOpen.value = false; isDomicileOpen.value = false; isStationOpen.value = false; isPortOpen.value = false; isDurationOpen.value = false;
+        isBrandOpen.value = false; isDomicileOpen.value = false; isStationOpen.value = false; isPortOpen.value = false; isDurationOpen.value = false; isTimeOpen.value = false;
     } else if (which === 'domicile') {
         isDomicileOpen.value = !isDomicileOpen.value;
-        isBrandOpen.value = false; isTypeOpen.value = false; isStationOpen.value = false; isPortOpen.value = false; isDurationOpen.value = false;
+        isBrandOpen.value = false; isTypeOpen.value = false; isStationOpen.value = false; isPortOpen.value = false; isDurationOpen.value = false; isTimeOpen.value = false;
     } else if (which === 'station') {
         isStationOpen.value = !isStationOpen.value;
-        isBrandOpen.value = false; isTypeOpen.value = false; isDomicileOpen.value = false; isPortOpen.value = false; isDurationOpen.value = false;
+        isBrandOpen.value = false; isTypeOpen.value = false; isDomicileOpen.value = false; isPortOpen.value = false; isDurationOpen.value = false; isTimeOpen.value = false;
     } else if (which === 'port') {
         isPortOpen.value = !isPortOpen.value;
-        isBrandOpen.value = false; isTypeOpen.value = false; isDomicileOpen.value = false; isStationOpen.value = false; isDurationOpen.value = false;
+        isBrandOpen.value = false; isTypeOpen.value = false; isDomicileOpen.value = false; isStationOpen.value = false; isDurationOpen.value = false; isTimeOpen.value = false;
     } else if (which === 'duration') {
         isDurationOpen.value = !isDurationOpen.value;
-        isBrandOpen.value = false; isTypeOpen.value = false; isDomicileOpen.value = false; isStationOpen.value = false; isPortOpen.value = false;
-    } 
+        isBrandOpen.value = false; isTypeOpen.value = false; isDomicileOpen.value = false; isStationOpen.value = false; isPortOpen.value = false; isTimeOpen.value = false;
+    } else if (which === 'time') {
+        isTimeOpen.value = !isTimeOpen.value;
+        isBrandOpen.value = false; isTypeOpen.value = false; isDomicileOpen.value = false; isStationOpen.value = false; isPortOpen.value = false; isDurationOpen.value = false;
+    }
     isDateDropdownOpen.value = false;
     isTimeDropdownOpen.value = false;
 };
@@ -249,6 +278,8 @@ const selectOption = (field, value) => {
         selectedPort.value = value;
     } else if (field === 'duration') {
         selectedDuration.value = value;
+    } else if (field === 'time') {
+        selectedStartTime.value = value;
     } else {
         formState.value[field] = value;
     }
@@ -345,6 +376,7 @@ const closePickersOnOutsideClick = (event) => {
     if (isStationOpen.value && !event.target.closest('#station-trigger') && !event.target.closest('.station-dropdown-content')) isStationOpen.value = false;
     if (isPortOpen.value && !event.target.closest('#port-trigger') && !event.target.closest('.port-dropdown-content')) isPortOpen.value = false;
     if (isDurationOpen.value && !event.target.closest('#duration-trigger') && !event.target.closest('.duration-dropdown-content')) isDurationOpen.value = false;
+    if (isTimeOpen.value && !event.target.closest('#time-trigger') && !event.target.closest('.time-dropdown-content')) isTimeOpen.value = false;
 };
 
 onMounted(async () => {
@@ -463,11 +495,10 @@ const reserveStation = (stationId) => {
         // set default selected port and start time when opening modal
         const ports = station.chargers.map((c, i) => `port-${i+1}`);
         selectedPort.value = ports.length ? ports[0] : '';
-        // default start time: next rounded 5-min slot
+        // set start time to current local device time immediately
         const now = new Date();
-        const mins = now.getHours()*60 + now.getMinutes();
-        const nextSlot = Math.ceil((mins + 5)/5)*5; // next 5-min slot
-        selectedStartTime.value = minutesToTime(nextSlot);
+        const localTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+        selectedStartTime.value = localTime;
         showConfirmationModal.value = true;
         history.pushState({modal: 'confirmation'}, '', window.location.href);
     }
@@ -760,12 +791,15 @@ const createPinSvg = (color) => {
                         
                         <div class="relative">
                             <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">Waktu Mulai</label>
-                            <div class="dropdown-trigger !py-0 !px-0 border border-gray-300 hover:border-green-500 focus-within:border-[#00C853] focus-within:ring-2 focus-within:ring-[#00C853]/20 transition-all duration-200">
-                                <input 
-                                    type="time" 
-                                    v-model="selectedStartTime" 
-                                    class="w-full p-3.5 bg-transparent border-none focus:ring-0 focus:outline-none text-gray-800"
-                                />
+                            <div id="time-trigger" @click.stop="openOnly('time')" class="dropdown-trigger" :class="{'active': isTimeOpen}">
+                                <span class="text-gray-800 truncate flex items-center gap-2">
+                                    <i class="fas fa-clock text-gray-400"></i>
+                                    {{ selectedStartTime || 'Pilih Waktu' }}
+                                </span>
+                                <i class="fas fa-chevron-down text-gray-400 text-xs transition-transform" :class="{'rotate-180': isTimeOpen}"></i>
+                            </div>
+                            <div v-if="isTimeOpen" class="dropdown-menu">
+                                <div v-for="time in timeOptions" :key="time.value" @click="selectOption('time', time.value)" class="dropdown-item" :class="{'selected': selectedStartTime === time.value}">{{ time.label }}</div>
                             </div>
                         </div>
 
