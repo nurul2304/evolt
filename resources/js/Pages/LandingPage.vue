@@ -57,14 +57,14 @@ onBeforeUnmount(() => {
               <div class="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start w-full">
                 <Link
                   :href="route('register')"
-                  class="w-full sm:w-auto bg-[#00C853] text-white font-bold px-6 py-3.5 rounded-xl shadow-lg hover:bg-[#00A142] active:scale-95 transition duration-200 focus:outline-none focus:ring-4 focus:ring-lime-300/50 text-base text-center"
+                  class="w-full sm:w-auto bg-[#00C853] text-white font-semibold px-6 py-3.5 rounded-xl shadow-lg hover:bg-[#00A142] active:scale-95 transition duration-200 focus:outline-none focus:ring-4 focus:ring-lime-300/50 text-base text-center"
                 >
                   Mulai Sekarang
                 </Link>
 
                 <Link
                   href="#"
-                  class="w-full sm:w-auto bg-white/80 backdrop-blur-sm border-2 border-[#00C853] text-[#00C853] font-bold px-6 py-3.5 rounded-xl hover:bg-white active:scale-95 transition duration-200 focus:outline-none focus:ring-4 focus:ring-lime-300/50 text-base text-center"
+                  class="w-full sm:w-auto bg-white/80 backdrop-blur-sm border-2 border-[#00C853] text-[#00C853] font-semibold px-6 py-3.5 rounded-xl hover:bg-white active:scale-95 transition duration-200 focus:outline-none focus:ring-4 focus:ring-lime-300/50 text-base text-center"
                 >
                   Pelajari Lebih Lanjut
                 </Link>
