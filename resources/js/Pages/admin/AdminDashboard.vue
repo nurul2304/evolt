@@ -4,133 +4,43 @@ import Navbar from '@/Components/NavbarAdmin.vue';
 import Footer from '@/Components/Footer.vue';
 import Modal from '@/Components/Modal.vue';
 
-// Data statis untuk tabel "Daftar Stasiun" (Tidak ada perubahan substantif)
+// Data statis untuk tabel "Daftar Stasiun" (MODIFIED: Menambahkan city dan email/brand untuk keperluan laporan)
 const stations = ref([
-  {
-    id: 1,
-    name: 'EV Station Batam Centre',
-    coords: '1.0833, 104.0333',
-    chargers: ['Fast', 'Regular'],
-    hours: '24/7',
-    lat: 1.0833,
-    lng: 104.0333,
-    city: 'Batam',
-  },
-  {
-    id: 2,
-    name: 'EV Station Nagoya',
-    coords: '1.1200, 104.0500',
-    chargers: ['Ultra Fast', 'Fast'],
-    hours: '06:00-22:00',
-    lat: 1.1200,
-    lng: 104.0500,
-    city: 'Batam',
-  },
-  {
-    id: 3,
-    name: 'EV Station Sekupang',
-    coords: '1.1000, 103.9500',
-    chargers: ['Regular'],
-    hours: '08:00-20:00',
-    lat: 1.1000,
-    lng: 103.9500,
-    city: 'Batam',
-  },
-  {
-    id: 4,
-    name: 'EV Station Tanjung Uncang',
-    coords: '1.1300, 104.0600',
-    chargers: ['Fast'],
-    hours: '24/7',
-    lat: 1.1300,
-    lng: 104.0600,
-    city: 'Batam',
-  },
-  {
-    id: 5,
-    name: 'EV Station Batu Aji',
-    coords: '1.0500, 104.0200',
-    chargers: ['Ultra Fast'],
-    hours: '06:00-22:00',
-    lat: 1.0500,
-    lng: 104.0200,
-    city: 'Batam',
-  },
-  {
-    id: 6,
-    name: 'EV Station Lubuk Baja',
-    coords: '1.0900, 104.0400',
-    chargers: ['Regular', 'Fast'],
-    hours: '08:00-20:00',
-    lat: 1.0900,
-    lng: 104.0400,
-    city: 'Batam',
-  },
-  {
-    id: 7,
-    name: 'EV Station Baloi',
-    coords: '1.1100, 104.0300',
-    chargers: ['Fast'],
-    hours: '24/7',
-    lat: 1.1100,
-    lng: 104.0300,
-    city: 'Batam',
-  },
-  {
-    id: 8,
-    name: 'EV Station Kabil',
-    coords: '1.0700, 104.0100',
-    chargers: ['Ultra Fast', 'Regular'],
-    hours: '06:00-22:00',
-    lat: 1.0700,
-    lng: 104.0100,
-    city: 'Batam',
-  },
-  {
-    id: 9,
-    name: 'EV Station Sagulung',
-    coords: '1.1400, 104.0700',
-    chargers: ['Regular'],
-    hours: '08:00-20:00',
-    lat: 1.1400,
-    lng: 104.0700,
-    city: 'Batam',
-  },
-  {
-    id: 10,
-    name: 'EV Station Nongsa',
-    coords: '1.1600, 104.0800',
-    chargers: ['Fast', 'Ultra Fast'],
-    hours: '24/7',
-    lat: 1.1600,
-    lng: 104.0800,
-    city: 'Batam',
-  },
+  { id: 1, name: 'EV Station Batam Centre', coords: '1.0833, 104.0333', chargers: ['Fast', 'Regular'], hours: '24/7', lat: 1.0833, lng: 104.0333, city: 'Batam Center', email: 'owner.a@brand.com', brand: 'Brand Alpha' },
+  { id: 2, name: 'EV Station Nagoya', coords: '1.1200, 104.0500', chargers: ['Ultra Fast', 'Fast'], hours: '06:00-22:00', lat: 1.1200, lng: 104.0500, city: 'Nagoya', email: 'owner.b@brand.com', brand: 'Brand Beta' },
+  { id: 3, name: 'EV Station Sekupang', coords: '1.1000, 103.9500', chargers: ['Regular'], hours: '08:00-20:00', lat: 1.1000, lng: 103.9500, city: 'Sekupang', email: 'owner.a@brand.com', brand: 'Brand Alpha' },
+  { id: 4, name: 'EV Station Tanjung Uncang', coords: '1.1300, 104.0600', chargers: ['Fast'], hours: '24/7', lat: 1.1300, lng: 104.0600, city: 'Tanjung Uncang', email: 'owner.c@brand.com', brand: 'Brand Gamma' },
+  { id: 5, name: 'EV Station Batu Aji', coords: '1.0500, 104.0200', chargers: ['Ultra Fast'], hours: '06:00-22:00', lat: 1.0500, lng: 104.0200, city: 'Batu Aji', email: 'owner.a@brand.com', brand: 'Brand Alpha' },
+  { id: 6, name: 'EV Station Lubuk Baja', coords: '1.0900, 104.0400', chargers: ['Regular', 'Fast'], hours: '08:00-20:00', lat: 1.0900, lng: 104.0400, city: 'Lubuk Baja', email: 'owner.b@brand.com', brand: 'Brand Beta' },
+  { id: 7, name: 'EV Station Baloi', coords: '1.1100, 104.0300', chargers: ['Fast'], hours: '24/7', lat: 1.1100, lng: 104.0300, city: 'Baloi', email: 'owner.c@brand.com', brand: 'Brand Gamma' },
+  { id: 8, name: 'EV Station Kabil', coords: '1.0700, 104.0100', chargers: ['Ultra Fast', 'Regular'], hours: '06:00-22:00', lat: 1.0700, lng: 104.0100, city: 'Kabil', email: 'owner.a@brand.com', brand: 'Brand Alpha' },
+  { id: 9, name: 'EV Station Sagulung', coords: '1.1400, 104.0700', chargers: ['Regular'], hours: '08:00-20:00', lat: 1.1400, lng: 104.0700, city: 'Sagulung', email: 'owner.b@brand.com', brand: 'Brand Beta' },
+  { id: 10, name: 'EV Station Nongsa', coords: '1.1600, 104.0800', chargers: ['Fast', 'Ultra Fast'], hours: '24/7', lat: 1.1600, lng: 104.0800, city: 'Nongsa', email: 'owner.c@brand.com', brand: 'Brand Gamma' },
 ]);
 
-// Dummy data for operator reports (DIMODIFIKASI untuk menyertakan Bulan/Tahun untuk Filtering)
+// Dummy data for operator reports
 const operatorReports = ref([
   // Januari 2024
-  { id: 1, stationName: 'EV Station Batam Centre', week: 'Minggu 1 (Januari)', totalSessions: 150, revenue: 'Rp 2,500,000', status: 'Terkirim', month: 'Januari', year: '2024' },
-  { id: 2, stationName: 'EV Station Nagoya', week: 'Minggu 1 (Januari)', totalSessions: 120, revenue: 'Rp 1,800,000', status: 'Terkirim', month: 'Januari', year: '2024' },
-  { id: 3, stationName: 'EV Station Sekupang', week: 'Minggu 1 (Januari)', totalSessions: 80, revenue: 'Rp 1,200,000', status: 'Tertunda', month: 'Januari', year: '2024' },
-  { id: 4, stationName: 'EV Station Tanjung Uncang', week: 'Minggu 1 (Januari)', totalSessions: 95, revenue: 'Rp 1,500,000', status: 'Terkirim', month: 'Januari', year: '2024' },
-  { id: 5, stationName: 'EV Station Batu Aji', week: 'Minggu 1 (Januari)', totalSessions: 110, revenue: 'Rp 1,700,000', status: 'Terkirim', month: 'Januari', year: '2024' },
-  { id: 6, stationName: 'EV Station Lubuk Baja', week: 'Minggu 1 (Januari)', totalSessions: 90, revenue: 'Rp 1,350,000', status: 'Terkirim', month: 'Januari', year: '2024' },
-  { id: 7, stationName: 'EV Station Baloi', week: 'Minggu 1 (Januari)', totalSessions: 75, revenue: 'Rp 1,125,000', status: 'Tertunda', month: 'Januari', year: '2024' },
-  { id: 8, stationName: 'EV Station Kabil', week: 'Minggu 1 (Januari)', totalSessions: 85, revenue: 'Rp 1,275,000', status: 'Terkirim', month: 'Januari', year: '2024' },
-  { id: 9, stationName: 'EV Station Sagulung', week: 'Minggu 1 (Januari)', totalSessions: 65, revenue: 'Rp 975,000', status: 'Terkirim', month: 'Januari', year: '2024' },
-  { id: 10, stationName: 'EV Station Nongsa', week: 'Minggu 1 (Januari)', totalSessions: 100, revenue: 'Rp 1,500,000', status: 'Tertunda', month: 'Januari', year: '2024' },
-  { id: 11, stationName: 'EV Station Batam Centre', week: 'Minggu 2 (Januari)', totalSessions: 160, revenue: 'Rp 2,400,000', status: 'Terkirim', month: 'Januari', year: '2024' },
-  { id: 12, stationName: 'EV Station Nagoya', week: 'Minggu 2 (Januari)', totalSessions: 130, revenue: 'Rp 1,950,000', status: 'Terkirim', month: 'Januari', year: '2024' },
-  { id: 13, stationName: 'EV Station Sekupang', week: 'Minggu 2 (Januari)', totalSessions: 85, revenue: 'Rp 1,275,000', status: 'Tertunda', month: 'Januari', year: '2024' },
-  { id: 14, stationName: 'EV Station Tanjung Uncang', week: 'Minggu 2 (Januari)', totalSessions: 105, revenue: 'Rp 1,575,000', status: 'Terkirim', month: 'Januari', year: '2024' },
-  { id: 15, stationName: 'EV Station Batu Aji', week: 'Minggu 2 (Januari)', totalSessions: 115, revenue: 'Rp 1,725,000', status: 'Terkirim', month: 'Januari', year: '2024' },
+  { id: 1, stationName: 'EV Station Batam Centre', week: 'Minggu 1', totalSessions: 150, revenue: 'Rp 2,500,000', status: 'Terkirim', month: 'Januari', year: '2024' },
+  { id: 2, stationName: 'EV Station Nagoya', week: 'Minggu 1', totalSessions: 120, revenue: 'Rp 1,800,000', status: 'Terkirim', month: 'Januari', year: '2024' },
+  { id: 3, stationName: 'EV Station Sekupang', week: 'Minggu 1', totalSessions: 80, revenue: 'Rp 1,200,000', status: 'Tertunda', month: 'Januari', year: '2024' },
+  { id: 4, stationName: 'EV Station Tanjung Uncang', week: 'Minggu 1', totalSessions: 95, revenue: 'Rp 1,500,000', status: 'Terkirim', month: 'Januari', year: '2024' },
+  { id: 5, stationName: 'EV Station Batu Aji', week: 'Minggu 1', totalSessions: 110, revenue: 'Rp 1,700,000', status: 'Terkirim', month: 'Januari', year: '2024' },
+  { id: 6, stationName: 'EV Station Lubuk Baja', week: 'Minggu 1', totalSessions: 90, revenue: 'Rp 1,350,000', status: 'Terkirim', month: 'Januari', year: '2024' },
+  { id: 7, stationName: 'EV Station Baloi', week: 'Minggu 1', totalSessions: 75, revenue: 'Rp 1,125,000', status: 'Tertunda', month: 'Januari', year: '2024' },
+  { id: 8, stationName: 'EV Station Kabil', week: 'Minggu 1', totalSessions: 85, revenue: 'Rp 1,275,000', status: 'Terkirim', month: 'Januari', year: '2024' },
+  { id: 9, stationName: 'EV Station Sagulung', week: 'Minggu 1', totalSessions: 65, revenue: 'Rp 975,000', status: 'Terkirim', month: 'Januari', year: '2024' },
+  { id: 10, stationName: 'EV Station Nongsa', week: 'Minggu 1', totalSessions: 100, revenue: 'Rp 1,500,000', status: 'Tertunda', month: 'Januari', year: '2024' },
+  { id: 11, stationName: 'EV Station Batam Centre', week: 'Minggu 2', totalSessions: 160, revenue: 'Rp 2,400,000', status: 'Terkirim', month: 'Januari', year: '2024' },
+  { id: 12, stationName: 'EV Station Nagoya', week: 'Minggu 2', totalSessions: 130, revenue: 'Rp 1,950,000', status: 'Terkirim', month: 'Januari', year: '2024' },
+  { id: 13, stationName: 'EV Station Sekupang', week: 'Minggu 2', totalSessions: 85, revenue: 'Rp 1,275,000', status: 'Tertunda', month: 'Januari', year: '2024' },
+  { id: 14, stationName: 'EV Station Tanjung Uncang', week: 'Minggu 2', totalSessions: 105, revenue: 'Rp 1,575,000', status: 'Terkirim', month: 'Januari', year: '2024' },
+  { id: 15, stationName: 'EV Station Batu Aji', week: 'Minggu 2', totalSessions: 115, revenue: 'Rp 1,725,000', status: 'Terkirim', month: 'Januari', year: '2024' },
   // Data tambahan Februari 2024
-  { id: 16, stationName: 'EV Station Batam Centre', week: 'Minggu 1 (Februari)', totalSessions: 170, revenue: 'Rp 2,550,000', status: 'Terkirim', month: 'Februari', year: '2024' },
-  { id: 17, stationName: 'EV Station Baloi', week: 'Minggu 1 (Februari)', totalSessions: 80, revenue: 'Rp 1,200,000', status: 'Tertunda', month: 'Februari', year: '2024' },
+  { id: 16, stationName: 'EV Station Batam Centre', week: 'Minggu 1', totalSessions: 170, revenue: 'Rp 2,550,000', status: 'Terkirim', month: 'Februari', year: '2024' },
+  { id: 17, stationName: 'EV Station Baloi', week: 'Minggu 1', totalSessions: 80, revenue: 'Rp 1,200,000', status: 'Tertunda', month: 'Februari', year: '2024' },
   // Data tambahan Desember 2023
-  { id: 18, stationName: 'EV Station Nagoya', week: 'Minggu 4 (Desember)', totalSessions: 140, revenue: 'Rp 2,100,000', status: 'Terkirim', month: 'Desember', year: '2023' },
+  { id: 18, stationName: 'EV Station Nagoya', week: 'Minggu 4', totalSessions: 140, revenue: 'Rp 2,100,000', status: 'Terkirim', month: 'Desember', year: '2023' },
 ]);
 
 // Dummy data for user reports (Tidak ada perubahan)
@@ -257,16 +167,16 @@ const createPinSvg = (color) => {
 const showModal = ref(false);
 const isEditing = ref(false);
 
-// Form data for new station (MODIFIED: Menambahkan operationalHours dan chargers detail)
+// Form data for new station (FIXED: Menghapus kwh, Menambahkan price, email sebagai FK)
 const newStation = ref({
   name: '',
   operationalHours: '24/7',
   latitude: '',
   longitude: '',
-  city: '',
-  email: '',
+  city: '', // Domisili
+  email: '', // Email Pemilik/Brand (FK)
   chargers: [
-    { port: 1, type: 'Regular', power: '7.4', kwh: '22', connector: 'Type 2' } // Default value agar mudah diisi
+    { port: 1, type: 'Regular', power: '7.4', connector: 'Type 2', price: 800 } 
   ],
 });
 
@@ -276,7 +186,7 @@ const openAddStationModal = () => {
   showModal.value = true;
 };
 
-// Function to close modal (MODIFIED: Reset state)
+// Function to close modal (FIXED: Reset state dengan struktur baru)
 const closeModal = () => {
   showModal.value = false;
   isEditing.value = false;
@@ -289,26 +199,26 @@ const closeModal = () => {
     city: '',
     email: '',
     chargers: [
-      { port: 1, type: 'Regular', power: '7.4', kwh: '22', connector: 'Type 2' }
+      { port: 1, type: 'Regular', power: '7.4', connector: 'Type 2', price: 800 }
     ],
   };
 };
 
-// Function to add a new charger block (NEW)
+// Function to add a new charger block (FIXED: Menambahkan price)
 const addChargerBlock = () => {
   const newPortNumber = newStation.value.chargers.length + 1;
   newStation.value.chargers.push({
     port: newPortNumber,
     type: '',
     power: '',
-    kwh: '',
-    connector: ''
+    connector: '',
+    price: null 
   });
 };
 
-// Function to remove a charger block (NEW)
+// Function to remove a charger block (no change)
 const removeChargerBlock = (index) => {
-  newStation.value.chargers.splice(index, 1);
+  newStation.value.chargers.splice(index, index + 1);
   // Re-index port numbers after removal
   newStation.value.chargers.forEach((charger, i) => {
     charger.port = i + 1;
@@ -323,6 +233,10 @@ const addStation = () => {
   // Extract unique charger types (Fast, Ultra Fast, Regular) for the main table display
   const stationChargerTypes = [...new Set(newStation.value.chargers.map(c => c.type).filter(Boolean))];
 
+  // For now, find dummy brand/owner based on email input
+  const foundOwner = stations.value.find(s => s.email === newStation.value.email);
+  const brandName = foundOwner ? foundOwner.brand : 'New Brand';
+
   // For now, just add to local array
   const id = stations.value.length + 1;
   const newStationData = {
@@ -334,6 +248,8 @@ const addStation = () => {
     lat: parseFloat(newStation.value.latitude),
     lng: parseFloat(newStation.value.longitude),
     city: newStation.value.city,
+    email: newStation.value.email, // Simpan email sebagai FK
+    brand: brandName,
   };
   stations.value.push(newStationData);
 
@@ -379,6 +295,7 @@ const updateStation = () => {
       lat: parseFloat(newStation.value.latitude),
       lng: parseFloat(newStation.value.longitude),
       city: newStation.value.city,
+      email: newStation.value.email,
     };
   }
 
@@ -397,13 +314,14 @@ const editStation = (station) => {
     latitude: station.lat.toString(),
     longitude: station.lng.toString(),
     city: station.city,
-    email: '', // Assuming email is not stored in station data, or add it if available
+    email: station.email || '', 
+    // Chargers array filled with default/dummy values for editing 
     chargers: station.chargers.map(type => ({
-      port: 1, // Default port, adjust if needed
+      port: 1, 
       type: type,
-      power: '', // Default empty, adjust if needed
-      kwh: '',
-      connector: ''
+      power: '', 
+      connector: '',
+      price: null
     }))
   };
   showModal.value = true;
@@ -417,7 +335,7 @@ const deleteStation = (id) => {
   }
 };
 
-// --- LOGIKA FILTER LAPORAN OPERATOR BARU ---
+// --- LOGIKA FILTER LAPORAN OPERATOR ---
 
 // Filter state
 const selectedStation = ref('');
@@ -467,31 +385,30 @@ const yearOptions = computed(() => {
     return [...new Set(years)].sort((a, b) => b - a); // Urutkan dari yang terbaru
 });
 
-// Computed property untuk memfilter laporan
-const filteredOperatorReports = computed(() => {
-  return operatorReports.value.filter(report => {
-    let stationMatch = true;
-    let monthMatch = true;
-    let yearMatch = true;
+// Computed property untuk memfilter laporan DAN MENGGABUNGKAN DATA STASIUN
+const enrichedOperatorReports = computed(() => {
+    // 1. Filter reports based on user selections
+    const filteredReports = operatorReports.value.filter(report => {
+        let stationMatch = !selectedStation.value || report.stationName === selectedStation.value;
+        let monthMatch = !selectedMonth.value || report.month === selectedMonth.value;
+        let yearMatch = !selectedYear.value || report.year === selectedYear.value;
+        return stationMatch && monthMatch && yearMatch;
+    });
 
-    // Filter Nama Stasiun
-    if (selectedStation.value) {
-      stationMatch = report.stationName === selectedStation.value;
-    }
-
-    // Filter Bulan
-    if (selectedMonth.value) {
-      monthMatch = report.month === selectedMonth.value;
-    }
-
-    // Filter Tahun
-    if (selectedYear.value) {
-      yearMatch = report.year === selectedYear.value;
-    }
-
-    return stationMatch && monthMatch && yearMatch;
-  });
+    // 2. Enrich filtered reports with station metadata
+    return filteredReports.map(report => {
+        // Find the station details by name (assuming stationName is unique for this dummy data)
+        const station = stations.value.find(s => s.name === report.stationName);
+        
+        return {
+            ...report,
+            stationId: station ? station.id : 'N/A',
+            brand: station ? station.brand : 'N/A', // Pemilik/Brand
+            city: station ? station.city : 'N/A',   // Domisili
+        };
+    });
 });
+
 
 // Search functionality for stations table
 const searchQuery = ref('');
@@ -547,14 +464,13 @@ const filteredStations = computed(() => {
             <h3 class="text-lg font-semibold text-gray-900">Daftar Stasiun</h3>
             <p class="text-sm text-gray-500 mt-1">Status dan detail semua stasiun yang terdaftar</p>
 
-            <!-- Search Input and Button Row -->
             <div class="flex justify-between items-center mt-4 mb-5">
               <div class="relative">
                 <input
                   v-model="searchQuery"
                   type="text"
                   placeholder="Cari stasiun..."
-                  class="w-64 pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00C853] focus:border-[#00C853] transition duration-150"
+                  class="w-64 pl-10 pr-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#00C853] focus:border-[#00C853] transition duration-150"
                 />
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -562,7 +478,7 @@ const filteredStations = computed(() => {
               </div>
               <button
                 @click="openAddStationModal"
-                class="inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-[#00C853] hover:bg-[#00A142] transition duration-150"
+                class="inline-flex justify-center items-center px-6 py-3.5 border border-transparent font-medium rounded-xl shadow-sm text-white bg-[#00C853] hover:bg-[#00A142] active:scale-95 transition duration-200 focus:outline-none focus:ring-4 focus:ring-lime-300/50 text-base text-center"
               >
                 + Tambah Stasiun Baru
               </button>
@@ -623,7 +539,6 @@ const filteredStations = computed(() => {
             </div>
 
             <div class="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <!-- STATION FILTER: custom dropdown -->
               <div class="relative">
                 <label for="filter-station" class="block text-sm font-medium text-gray-700">Nama Stasiun</label>
                 <div @click.stop="openFilterDropdown('station')"
@@ -648,7 +563,6 @@ const filteredStations = computed(() => {
                 </div>
               </div>
 
-              <!-- MONTH FILTER: custom dropdown -->
               <div class="relative">
                 <label for="filter-month" class="block text-sm font-medium text-gray-700">Bulan</label>
                 <div @click.stop="openFilterDropdown('month')"
@@ -673,7 +587,6 @@ const filteredStations = computed(() => {
                 </div>
               </div>
 
-              <!-- YEAR FILTER: custom dropdown -->
               <div class="relative">
                 <label for="filter-year" class="block text-sm font-medium text-gray-700">Tahun</label>
                 <div @click.stop="openFilterDropdown('year')"
@@ -704,32 +617,32 @@ const filteredStations = computed(() => {
             <table class="min-w-full divide-y divide-gray-200">
               <thead class="bg-gray-50 sticky top-0">
                 <tr>
-                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stasiun</th>
-                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Minggu/Bulan</th>
-                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sesi Total</th>
-                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pendapatan</th>
-                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID/Nama SPKLU</th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pemilik/Brand</th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Domisili</th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Periode</th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sesi (Total)</th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pendapatan Bersih</th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status Pengiriman</th>
                 </tr>
               </thead>
               <tbody class="bg-white divide-y divide-gray-200">
-                <tr v-for="report in filteredOperatorReports" :key="report.id" class="hover:bg-gray-50 transition-colors duration-150">
-                  <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ report.stationName }}</td>
+                <tr v-for="report in enrichedOperatorReports" :key="report.id" class="hover:bg-gray-50 transition-colors duration-150">
+                  <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">[{{ report.stationId }}] {{ report.stationName }}</td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ report.brand }}</td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ report.city }}</td>
                   <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ report.week }} ({{ report.month }} {{ report.year }})</td>
                   <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ report.totalSessions }}</td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ report.revenue }}</td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ report.revenue }}</td>
                   <td class="px-6 py-4 whitespace-nowrap">
                     <span :class="{'px-2 inline-flex text-xs leading-5 font-semibold rounded-full': true, 'bg-green-100 text-green-800': report.status === 'Terkirim', 'bg-yellow-100 text-yellow-800': report.status === 'Tertunda'}">
                       {{ report.status }}
                     </span>
                   </td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <a href="#" class="text-[#00C853] hover:text-[#00A142]">Lihat Detail</a>
-                  </td>
                 </tr>
               </tbody>
             </table>
-            <div v-if="filteredOperatorReports.length === 0" class="text-center py-8 text-gray-500 text-sm">
+            <div v-if="enrichedOperatorReports.length === 0" class="text-center py-8 text-gray-500 text-sm">
               Tidak ada laporan operator yang sesuai dengan filter yang dipilih.
             </div>
           </div>
@@ -741,6 +654,32 @@ const filteredStations = computed(() => {
       <div class="p-6">
         <h3 class="text-lg font-medium text-gray-900 mb-4">{{ isEditing ? 'Edit Stasiun' : 'Tambah Stasiun Baru' }}</h3>
         <form @submit.prevent="isEditing ? updateStation() : addStation()" class="space-y-4">
+          
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label for="city" class="block text-sm font-medium text-gray-700">Domisili (Kota)</label>
+              <input
+                v-model="newStation.city"
+                type="text"
+                id="city"
+                class="mt-1 block w-full border-gray-300 rounded-xl shadow-sm focus:ring-lime-500 focus:border-lime-500"
+                placeholder="Contoh: Batam Center"
+                required
+              />
+            </div>
+            <div>
+              <label for="email" class="block text-sm font-medium text-gray-700">Email Pemilik (Brand)</label>
+              <input
+                v-model="newStation.email"
+                type="email"
+                id="email"
+                class="mt-1 block w-full border-gray-300 rounded-xl shadow-sm focus:ring-lime-500 focus:border-lime-500"
+                placeholder="Contoh: pemilik@brand.com"
+                required
+              />
+            </div>
+          </div>
+
           <div class="grid grid-cols-2 gap-4">
             <div>
             <label for="name" class="block text-sm font-medium text-gray-700">Nama Stasiun</label>
@@ -748,7 +687,7 @@ const filteredStations = computed(() => {
               v-model="newStation.name"
               type="text"
               id="name"
-              class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-lime-500 focus:border-lime-500"
+              class="mt-1 block w-full border-gray-300 rounded-xl shadow-sm focus:ring-lime-500 focus:border-lime-500"
               required
             />
             </div>
@@ -759,7 +698,7 @@ const filteredStations = computed(() => {
               v-model="newStation.operationalHours"
               type="text"
               id="operationalHours"
-              class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-lime-500 focus:border-lime-500"
+              class="mt-1 block w-full border-gray-300 rounded-xl shadow-sm focus:ring-lime-500 focus:border-lime-500"
               placeholder="Contoh: 24/7 atau 08:00-20:00"
               required
             />
@@ -774,7 +713,7 @@ const filteredStations = computed(() => {
                 type="number"
                 step="0.0001"
                 id="latitude"
-                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-lime-500 focus:border-lime-500"
+                class="mt-1 block w-full border-gray-300 rounded-xl shadow-sm focus:ring-lime-500 focus:border-lime-500"
                 required
               />
             </div>
@@ -785,17 +724,17 @@ const filteredStations = computed(() => {
                 type="number"
                 step="0.0001"
                 id="longitude"
-                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-lime-500 focus:border-lime-500"
+                class="mt-1 block w-full border-gray-300 rounded-xl shadow-sm focus:ring-lime-500 focus:border-lime-500"
                 required
               />
             </div>
           </div>
-
+          
           
 
           <div class="space-y-4 pt-4 border-t border-gray-200">
             <h4 class="text-base font-medium text-gray-900">Detail Charger</h4>
-            <div v-for="(charger, index) in newStation.chargers" :key="index" class="p-4 border border-gray-200 rounded-lg bg-gray-50 space-y-3">
+            <div v-for="(charger, index) in newStation.chargers" :key="index" class="p-4 border border-gray-200 rounded-xl bg-gray-50 space-y-3">
               <div class="flex justify-between items-center">
                 <p class="text-sm font-semibold text-gray-700">Port {{ charger.port }}</p>
                 <button v-if="newStation.chargers.length > 1" type="button" @click="removeChargerBlock(index)" class="text-red-500 hover:text-red-700 text-sm">Hapus Port</button>
@@ -807,7 +746,7 @@ const filteredStations = computed(() => {
                   <select
                     v-model="charger.type"
                     :id="'chargerType-' + index"
-                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-lime-500 focus:border-lime-500"
+                    class="mt-1 block w-full border-gray-300 rounded-xl shadow-sm text-sm focus:ring-lime-500 focus:border-lime-500"
                     required
                   >
                     <option value="">Pilih Tipe</option>
@@ -817,14 +756,14 @@ const filteredStations = computed(() => {
                   </select>
                 </div>
                 <div>
-                  <label :for="'power-' + index" class="block text-xs font-medium text-gray-700">Kecepatan Daya (kW)</label>
+                  <label :for="'power-' + index" class="block text-xs font-medium text-gray-700">Daya (kW)</label>
                   <input
                     v-model="charger.power"
                     type="number"
                     step="0.1"
                     :id="'power-' + index"
-                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-lime-500 focus:border-lime-500"
-                    placeholder="Contoh: 7.4"
+                    class="mt-1 block w-full border-gray-300 rounded-xl shadow-sm text-sm focus:ring-lime-500 focus:border-lime-500"
+                    placeholder="Contoh: 7.4 atau 50"
                     required
                   />
                 </div>
@@ -832,25 +771,24 @@ const filteredStations = computed(() => {
 
               <div class="grid grid-cols-2 gap-3">
                 <div>
-                  <label :for="'kwh-' + index" class="block text-xs font-medium text-gray-700">Kapasitas (kWh)</label>
-                  <input
-                    v-model="charger.kwh"
-                    type="number"
-                    step="0.1"
-                    :id="'kwh-' + index"
-                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-lime-500 focus:border-lime-500"
-                    placeholder="Contoh: 22"
-                    required
-                  />
-                </div>
-                <div>
                   <label :for="'connector-' + index" class="block text-xs font-medium text-gray-700">Jenis Konektor Fisik</label>
                   <input
                     v-model="charger.connector"
                     type="text"
                     :id="'connector-' + index"
-                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm text-sm focus:ring-lime-500 focus:border-lime-500"
+                    class="mt-1 block w-full border-gray-300 rounded-xl shadow-sm text-sm focus:ring-lime-500 focus:border-lime-500"
                     placeholder="Contoh: Type 2, CCS"
+                    required
+                  />
+                </div>
+                <div>
+                  <label :for="'price-' + index" class="block text-xs font-medium text-gray-700">Harga/kWh</label>
+                  <input
+                    v-model="charger.price"
+                    type="number"
+                    :id="'price-' + index"
+                    class="mt-1 block w-full border-gray-300 rounded-xl shadow-sm text-sm focus:ring-lime-500 focus:border-lime-500"
+                    placeholder="Contoh: 800"
                     required
                   />
                 </div>
@@ -871,27 +809,6 @@ const filteredStations = computed(() => {
             </div>
           </div>
           
-          <div>
-            <label for="city" class="block text-sm font-medium text-gray-700">Kota</label>
-            <input
-              v-model="newStation.city"
-              type="text"
-              id="city"
-              class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-lime-500 focus:border-lime-500"
-              required
-            />
-          </div>
-          <div>
-            <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
-            <input
-              v-model="newStation.email"
-              type="email"
-              id="email"
-              class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-lime-500 focus:border-lime-500"
-              required
-            />
-          </div>
-
           <div class="flex justify-end space-x-3 pt-4 border-t border-gray-200">
             <button
               type="button"
