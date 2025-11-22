@@ -166,12 +166,16 @@ const durationOptions = [
     { label: '50 kWh', value: '50', multiplier: 50/30 },
 ];
 
-// Time options for start time dropdown: 30-minute slots between 06:00 and 22:00
+// Time options for start time dropdown (from current time onwards in 30-min intervals)
 const timeOptions = computed(() => {
     const options = [];
-    const dayStart = 6 * 60; // 06:00
-    const dayEnd = 22 * 60;  // 22:00
-    for (let mins = dayStart; mins <= dayEnd; mins += 30) {
+    const now = new Date();
+    const currentMins = now.getHours() * 60 + now.getMinutes();
+
+    // Start from next 30-min slot after current time
+    const startMins = Math.ceil(currentMins / 30) * 30;
+
+    for (let mins = startMins; mins <= 23 * 60; mins += 30) {
         const h = Math.floor(mins / 60);
         const m = mins % 60;
         const timeStr = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
@@ -188,26 +192,16 @@ const defaultStartTime = computed(() => {
 
 const portOptions = computed(() => {
     return availablePorts.value.map(port => ({
-        label: `Port ${port.id.split('-')[1]} - ${port.connector} ${port.type} (${port.power})`,
+        label: `Port ${port.id.split('-')[1]} - ${port.type} (${port.power})`,
         value: port.id
     }));
 });
 
 const availablePorts = computed(() => {
     if (!selectedStation.value) return [];
-    const connectorForCharger = (chargerType) => {
-        if (!chargerType) return 'Tipe 2';
-        const t = String(chargerType).toLowerCase();
-        if (t.includes('regular')) return 'Tipe 2';
-        if (t.includes('fast')) return 'CCS';
-        if (t.includes('ultra')) return 'CHAdeMO';
-        return 'Tipe 2';
-    };
-
     return selectedStation.value.chargers.map((charger, index) => ({
         id: `port-${index + 1}`,
         type: charger,
-        connector: connectorForCharger(charger),
         power: selectedStation.value.power,
     }));
 });
@@ -764,7 +758,7 @@ const createPinSvg = (color) => {
                              <button type="button" @click="closeModal" class="w-full sm:w-auto px-6 py-3.5 rounded-xl text-gray-600 font-semibold hover:bg-gray-100 transition">
                                 Batal
                             </button>
-                            <button type="button" @click="submitSearch" class="w-full sm:w-auto bg-[#00C853] text-white font-semibold px-8 py-3.5 rounded-xl hover:bg-[#00A142] active:scale-95 transition shadow-lg shadow-[#00C853]/20">
+                            <button type="button" @click="submitSearch" class="w-full sm:w-auto bg-[#00C853] text-white font-bold px-8 py-3.5 rounded-xl hover:bg-[#00A142] active:scale-95 transition shadow-lg shadow-[#00C853]/20">
                                 Terapkan Filter
                             </button>
                         </div>
@@ -804,7 +798,7 @@ const createPinSvg = (color) => {
                             <div id="time-trigger" @click.stop="openOnly('time')" class="dropdown-trigger" :class="{'active': isTimeOpen}">
                                 <span class="text-gray-800 truncate flex items-center gap-2">
                                     <i class="fas fa-clock text-gray-400"></i>
-                                    {{ selectedStartTime || (timeOptions.length ? timeOptions[0].label : 'Pilih Waktu') }}
+                                    {{ selectedStartTime || 'Pilih Waktu' }}
                                 </span>
                                 <i class="fas fa-chevron-down text-gray-400 text-xs transition-transform" :class="{'rotate-180': isTimeOpen}"></i>
                             </div>
@@ -899,11 +893,11 @@ const createPinSvg = (color) => {
             <!-- Footer Section (Fixed Bottom) -->
             <div class="flex-none px-6 pb-6 sm:px-8 sm:pb-8 pt-4 bg-white rounded-b-[2rem] sm:rounded-b-3xl z-10">
                 <div class="flex flex-col-reverse sm:flex-row gap-3">
-                    <button type="button" @click="cancelProcess" class="w-full py-3.5 rounded-xl font-semibold text-gray-500 bg-gray-100 hover:bg-gray-200 transition">
+                    <button type="button" @click="cancelProcess" class="w-full py-3.5 rounded-xl font-bold text-gray-500 bg-gray-100 hover:bg-gray-200 transition">
                         Batal
                     </button>
                     <button type="button" @click="proceedToPayment" :disabled="!selectedPort || !isStartTimeValid || estimatedDurationMinutes === 0"
-                        class="w-full py-3.5 rounded-xl font-semibold text-white bg-[#00C853] hover:bg-[#00A142] shadow-lg shadow-[#00C853]/20 active:scale-95 transition disabled:bg-gray-300 disabled:shadow-none">
+                        class="w-full py-3.5 rounded-xl font-bold text-white bg-[#00C853] hover:bg-[#00A142] shadow-lg shadow-[#00C853]/20 active:scale-95 transition disabled:bg-gray-300 disabled:shadow-none">
                         Lanjut Bayar
                     </button>
                 </div>
@@ -936,7 +930,7 @@ const createPinSvg = (color) => {
                     </div>
 
                     <button @click="confirmPayment" 
-                        class="w-full py-3.5 bg-[#00C853] text-white font-semibold rounded-xl hover:bg-[#00A142] shadow-lg shadow-[#00C853]/30 active:scale-95 transition flex items-center justify-center gap-2">
+                        class="w-full py-3.5 bg-[#00C853] text-white font-bold rounded-xl hover:bg-[#00A142] shadow-lg shadow-[#00C853]/30 active:scale-95 transition flex items-center justify-center gap-2">
                         <span>Cek Status Bayar</span>
                         <i class="fas fa-arrow-right"></i>
                     </button>
@@ -968,7 +962,7 @@ const createPinSvg = (color) => {
                     </div>
 
                     <div class="p-4 bg-gray-50 border-t border-gray-100">
-                         <button @click="openPrintStruk" class="w-full py-3.5 bg-gray-900 text-white font-semibold rounded-xl hover:bg-gray-800 shadow-lg active:scale-95 transition mb-3">
+                         <button @click="openPrintStruk" class="w-full py-3.5 bg-gray-900 text-white font-bold rounded-xl hover:bg-gray-800 shadow-lg active:scale-95 transition mb-3">
                             <i class="fas fa-download mr-2"></i> Simpan Struk
                         </button>
                          <button @click="closeReceiptModal" class="w-full py-3.5 text-gray-500 font-bold hover:text-gray-800 transition">
