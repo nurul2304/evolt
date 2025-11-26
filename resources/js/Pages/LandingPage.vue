@@ -47,11 +47,11 @@ onBeforeUnmount(() => {
           <div class="flex flex-col lg:flex-row items-center justify-between gap-8 md:gap-10 lg:gap-12">
             
             <div class="w-full lg:w-1/2 text-center lg:text-left order-1 lg:order-1">
-              <h2 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-[#333] leading-tight mb-4 lg:mb-6 tracking-tight">
-                Menghubungkan Pengendara Dengan <span class="text-lime-700 lg:text-[#333]">Stasiun Cerdas</span>
+              <h2 class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold text-[#333] leading-tight mb-4 lg:mb-6 tracking-tight">
+                Cari Charger<br>Tanpa Ribet.
               </h2>
-              <p class="text-base sm:text-lg lg:text-xl text-gray-800 font-medium mb-8 lg:mb-8 max-w-md mx-auto lg:mx-0 leading-relaxed opacity-90">
-                Temukan, reservasi, dan isi daya dengan mudah di mana saja tanpa ribet.
+              <p class="text-lg sm:text-xl lg:text-2xl text-gray-800 font-medium mb-10 max-w-md mx-auto lg:mx-0 leading-relaxed opacity-90">
+                Hemat waktu perjalanan keluarga Anda. Temukan lokasi SPKLU terdekat dan tersedia hanya dalam hitungan detik.
               </p>
               
               <div class="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start w-full">
