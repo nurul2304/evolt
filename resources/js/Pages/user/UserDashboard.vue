@@ -110,7 +110,7 @@ onBeforeUnmount(() => document.body.removeEventListener('click', closePickersOnO
     <div class="min-h-screen flex flex-col bg-gray-50 font-sans">
         <Navbar />
 
-        <main class="flex-grow">
+        <main class="flex-grow pt-20">
             <!-- HERO SECTION -->
             <!-- Background Full Color #CCFF00 sesuai request -->
             <section
@@ -284,7 +284,7 @@ onBeforeUnmount(() => document.body.removeEventListener('click', closePickersOnO
         <!-- ============================================== -->
         <!-- === POPUP MODAL FIRST TIME LOGIN (MODERN) === -->
         <!-- ============================================== -->
-        <div v-if="showFirstTimePopup" class="fixed inset-0 z-[100] flex items-center justify-center p-4">
+        <div v-if="showFirstTimePopup" class="fixed inset-0 z-[1200] flex items-center justify-center p-4">
             <div class="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity"></div>
 
             <div

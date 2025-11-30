@@ -63,97 +63,97 @@ const userReports = ref([
 let map = null;
 
 const loadLeaflet = () => {
-    return new Promise((resolve, reject) => {
-        if (window.L) return resolve(window.L);
+  return new Promise((resolve, reject) => {
+    if (window.L) return resolve(window.L);
 
-        // load CSS
-        if (!document.querySelector('link[data-leaflet]')) {
-            const link = document.createElement('link');
-            link.rel = 'stylesheet';
-            link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
-            link.setAttribute('data-leaflet', '1');
-            document.head.appendChild(link);
-        }
+    // load CSS
+    if (!document.querySelector('link[data-leaflet]')) {
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+      link.setAttribute('data-leaflet', '1');
+      document.head.appendChild(link);
+    }
 
-        // load script
-        if (!document.querySelector('script[data-leaflet]')) {
-            const script = document.createElement('script');
-            script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
-            script.async = true;
-            script.setAttribute('data-leaflet', '1');
-            script.onload = () => resolve(window.L);
-            script.onerror = reject;
-            document.body.appendChild(script);
-        } else {
-            // script already present but window.L may not be ready yet
-            const check = () => {
-                if (window.L) resolve(window.L);
-                else setTimeout(check, 50);
-            };
-            check();
-        }
-    });
+    // load script
+    if (!document.querySelector('script[data-leaflet]')) {
+      const script = document.createElement('script');
+      script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+      script.async = true;
+      script.setAttribute('data-leaflet', '1');
+      script.onload = () => resolve(window.L);
+      script.onerror = reject;
+      document.body.appendChild(script);
+    } else {
+      // script already present but window.L may not be ready yet
+      const check = () => {
+        if (window.L) resolve(window.L);
+        else setTimeout(check, 50);
+      };
+      check();
+    }
+  });
 };
 
 onMounted(async () => {
-    try {
-        const L = await loadLeaflet();
+  try {
+    const L = await loadLeaflet();
 
-        // initialize map centered on Batam
-        map = L.map('map').setView([1.126, 104.030], 12);
+    // initialize map centered on Batam
+    map = L.map('map').setView([1.126, 104.030], 12);
 
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '&copy; OpenStreetMap contributors'
-        }).addTo(map);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
 
-        // add markers for all stations with coordinates using dynamic colored icons
-        stations.value.filter(s => s.lat && s.lng).forEach(s => {
-            const color = getMarkerColor(s.chargers);
-            const pinSvg = createPinSvg(color);
-            const iconUrl = `data:image/svg+xml;charset=UTF-8,${pinSvg}`;
+    // add markers for all stations with coordinates using dynamic colored icons
+    stations.value.filter(s => s.lat && s.lng).forEach(s => {
+      const color = getMarkerColor(s.chargers);
+      const pinSvg = createPinSvg(color);
+      const iconUrl = `data:image/svg+xml;charset=UTF-8,${pinSvg}`;
 
-            const customIcon = L.icon({
-                iconUrl,
-                iconSize: [28, 42],
-                iconAnchor: [14, 42],
-                popupAnchor: [0, -38]
-            });
+      const customIcon = L.icon({
+        iconUrl,
+        iconSize: [28, 42],
+        iconAnchor: [14, 42],
+        popupAnchor: [0, -38]
+      });
 
-            const marker = L.marker([s.lat, s.lng], { icon: customIcon }).addTo(map);
-            marker.bindPopup(`<div class="font-medium">${s.name}</div><div class="text-sm text-gray-600">${s.coords}</div><div class="text-sm text-gray-500">Status: Aktif</div><div class="text-sm" style="color: ${getMarkerColor(s.chargers)};">Charger: ${s.chargers.join(', ')}</div>`);
-        });
-    } catch (err) {
-        console.error('Failed to load Leaflet:', err);
-    }
+      const marker = L.marker([s.lat, s.lng], { icon: customIcon }).addTo(map);
+      marker.bindPopup(`<div class="font-medium">${s.name}</div><div class="text-sm text-gray-600">${s.coords}</div><div class="text-sm text-gray-500">Status: Aktif</div><div class="text-sm" style="color: ${getMarkerColor(s.chargers)};">Charger: ${s.chargers.join(', ')}</div>`);
+    });
+  } catch (err) {
+    console.error('Failed to load Leaflet:', err);
+  }
 });
 
 onBeforeUnmount(() => {
-    if (map) {
-        map.remove();
-        map = null;
-    }
+  if (map) {
+    map.remove();
+    map = null;
+  }
 });
 
 // Helper functions
 const getChargerClass = (type) => {
-    if (type === 'Ultra Fast') return 'inline-block bg-purple-100 text-purple-800 px-2 py-1 rounded-full text-xs font-medium';
-    if (type === 'Fast') return 'inline-block bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium';
-    if (type === 'Regular') return 'inline-block bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-medium';
-    return 'inline-block bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-xs font-medium';
+  if (type === 'Ultra Fast') return 'inline-block bg-purple-100 text-purple-800 px-2 py-1 rounded-full text-xs font-medium';
+  if (type === 'Fast') return 'inline-block bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium';
+  if (type === 'Regular') return 'inline-block bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-medium';
+  return 'inline-block bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-xs font-medium';
 };
 
 // Helper function untuk mendapatkan warna marker berdasarkan jenis charger tertinggi
 const getMarkerColor = (chargers) => {
-    if (chargers.includes('Ultra Fast')) return '#9333ea'; // purple-600
-    if (chargers.includes('Fast')) return '#3b82f6'; // blue-500
-    if (chargers.includes('Regular')) return '#22c55e'; // green-500
-    return '#00C853'; // default green
+  if (chargers.includes('Ultra Fast')) return '#9333ea'; // purple-600
+  if (chargers.includes('Fast')) return '#3b82f6'; // blue-500
+  if (chargers.includes('Regular')) return '#22c55e'; // green-500
+  return '#00C853'; // default green
 };
 
 // Helper function untuk membuat SVG pin dengan warna dinamis
 const createPinSvg = (color) => {
-    return encodeURIComponent(`
+  return encodeURIComponent(`
         <svg width="32" height="48" viewBox="0 0 24 36" xmlns="http://www.w3.org/2000/svg">
             <path d="M12 0C7 0 3.5 3.5 3.5 8.5 3.5 15.5 12 25.5 12 25.5s8.5-10 8.5-17C20.5 3.5 17 0 12 0z" fill="${color}"/>
             <circle cx="12" cy="8.5" r="3.5" fill="white"/>
@@ -176,7 +176,7 @@ const newStation = ref({
   city: '', // Domisili
   email: '', // Email Pemilik/Brand (FK)
   chargers: [
-    { port: 1, type: 'Regular', power: '7.4', connector: 'Type 2', price: 800 } 
+    { port: 1, type: 'Regular', power: '7.4', connector: 'Type 2', price: 800 }
   ],
 });
 
@@ -212,7 +212,7 @@ const addChargerBlock = () => {
     type: '',
     power: '',
     connector: '',
-    price: null 
+    price: null
   });
 };
 
@@ -314,12 +314,12 @@ const editStation = (station) => {
     latitude: station.lat.toString(),
     longitude: station.lng.toString(),
     city: station.city,
-    email: station.email || '', 
+    email: station.email || '',
     // Chargers array filled with default/dummy values for editing 
     chargers: station.chargers.map(type => ({
-      port: 1, 
+      port: 1,
       type: type,
-      power: '', 
+      power: '',
       connector: '',
       price: null
     }))
@@ -381,32 +381,32 @@ const selectFilterOption = (field, value) => {
 const stationOptions = computed(() => [...new Set(stations.value.map(s => s.name))]);
 const monthOptions = ref(['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember']);
 const yearOptions = computed(() => {
-    const years = operatorReports.value.map(r => r.year);
-    return [...new Set(years)].sort((a, b) => b - a); // Urutkan dari yang terbaru
+  const years = operatorReports.value.map(r => r.year);
+  return [...new Set(years)].sort((a, b) => b - a); // Urutkan dari yang terbaru
 });
 
 // Computed property untuk memfilter laporan DAN MENGGABUNGKAN DATA STASIUN
 const enrichedOperatorReports = computed(() => {
-    // 1. Filter reports based on user selections
-    const filteredReports = operatorReports.value.filter(report => {
-        let stationMatch = !selectedStation.value || report.stationName === selectedStation.value;
-        let monthMatch = !selectedMonth.value || report.month === selectedMonth.value;
-        let yearMatch = !selectedYear.value || report.year === selectedYear.value;
-        return stationMatch && monthMatch && yearMatch;
-    });
+  // 1. Filter reports based on user selections
+  const filteredReports = operatorReports.value.filter(report => {
+    let stationMatch = !selectedStation.value || report.stationName === selectedStation.value;
+    let monthMatch = !selectedMonth.value || report.month === selectedMonth.value;
+    let yearMatch = !selectedYear.value || report.year === selectedYear.value;
+    return stationMatch && monthMatch && yearMatch;
+  });
 
-    // 2. Enrich filtered reports with station metadata
-    return filteredReports.map(report => {
-        // Find the station details by name (assuming stationName is unique for this dummy data)
-        const station = stations.value.find(s => s.name === report.stationName);
-        
-        return {
-            ...report,
-            stationId: station ? station.id : 'N/A',
-            brand: station ? station.brand : 'N/A', // Pemilik/Brand
-            city: station ? station.city : 'N/A',   // Domisili
-        };
-    });
+  // 2. Enrich filtered reports with station metadata
+  return filteredReports.map(report => {
+    // Find the station details by name (assuming stationName is unique for this dummy data)
+    const station = stations.value.find(s => s.name === report.stationName);
+
+    return {
+      ...report,
+      stationId: station ? station.id : 'N/A',
+      brand: station ? station.brand : 'N/A', // Pemilik/Brand
+      city: station ? station.city : 'N/A',   // Domisili
+    };
+  });
 });
 
 
@@ -429,7 +429,7 @@ const filteredStations = computed(() => {
   <div class="min-h-screen bg-gray-100">
     <Navbar />
 
-    <main class="py-12 px-4 sm:px-6 lg:px-8">
+    <main class="py-12 px-4 sm:px-6 lg:px-8 pt-24">
       <div class="max-w-7xl mx-auto">
         <h1 class="text-3xl font-bold text-gray-900 mb-6">Dashboard Admin</h1>
 
@@ -445,7 +445,7 @@ const filteredStations = computed(() => {
             <div class="bg-white rounded-xl shadow-lg border border-gray-100 p-6">
               <p class="text-sm font-medium text-gray-500">Total Stasiun Aktif</p>
               <p class="text-4xl font-bold text-gray-900 mt-1">{{ stations.length }}</p>
-              
+
             </div>
 
             <div class="bg-white rounded-xl shadow-lg border border-gray-100 p-6">
@@ -466,20 +466,17 @@ const filteredStations = computed(() => {
 
             <div class="flex justify-between items-center mt-4 mb-5">
               <div class="relative">
-                <input
-                  v-model="searchQuery"
-                  type="text"
-                  placeholder="Cari stasiun..."
-                  class="w-64 pl-10 pr-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#00C853] focus:border-[#00C853] transition duration-150"
-                />
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                <input v-model="searchQuery" type="text" placeholder="Cari stasiun..."
+                  class="w-64 pl-10 pr-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#00C853] focus:border-[#00C853] transition duration-150" />
+                <svg xmlns="http://www.w3.org/2000/svg"
+                  class="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" fill="none"
+                  viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
               </div>
-              <button
-                @click="openAddStationModal"
-                class="inline-flex justify-center items-center px-6 py-3.5 border border-transparent font-medium rounded-xl shadow-sm text-white bg-[#00C853] hover:bg-[#00A142] active:scale-95 transition duration-200 focus:outline-none focus:ring-4 focus:ring-lime-300/50 text-base text-center"
-              >
+              <button @click="openAddStationModal"
+                class="inline-flex justify-center items-center px-6 py-3.5 border border-transparent font-medium rounded-xl shadow-sm text-white bg-[#00C853] hover:bg-[#00A142] active:scale-95 transition duration-200 focus:outline-none focus:ring-4 focus:ring-lime-300/50 text-base text-center">
                 + Tambah Stasiun Baru
               </button>
             </div>
@@ -488,36 +485,46 @@ const filteredStations = computed(() => {
             <table class="min-w-full divide-y divide-gray-200">
               <thead class="bg-gray-50 sticky top-0">
                 <tr>
-                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Stasiun</th>
-                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Koordinat</th>
-                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipe Charger</th>
-                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jam Operasional</th>
-                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+                  <th scope="col"
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Stasiun
+                  </th>
+                  <th scope="col"
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Koordinat
+                  </th>
+                  <th scope="col"
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipe Charger
+                  </th>
+                  <th scope="col"
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jam
+                    Operasional</th>
+                  <th scope="col"
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
                 </tr>
               </thead>
               <tbody class="bg-white divide-y divide-gray-200">
-                <tr v-for="station in filteredStations" :key="station.id" class="hover:bg-gray-50 transition-colors duration-150">
+                <tr v-for="station in filteredStations" :key="station.id"
+                  class="hover:bg-gray-50 transition-colors duration-150">
                   <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ station.name }}</td>
                   <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ station.coords }}</td>
                   <td class="px-6 py-4 whitespace-nowrap text-sm space-x-2">
-                    <span
-                      v-for="type in station.chargers"
-                      :key="type"
-                      :class="getChargerClass(type)"
-                    >
+                    <span v-for="type in station.chargers" :key="type" :class="getChargerClass(type)">
                       {{ type }}
                     </span>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ station.hours }}</td>
                   <td class="px-6 py-4 whitespace-nowrap text-sm font-medium flex space-x-2">
                     <button @click="editStation(station)" class="text-blue-600 hover:text-blue-800">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                       </svg>
                     </button>
                     <button @click="deleteStation(station.id)" class="text-red-600 hover:text-red-800">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                       </svg>
                     </button>
                   </td>
@@ -542,21 +549,24 @@ const filteredStations = computed(() => {
               <div class="relative">
                 <label for="filter-station" class="block text-sm font-medium text-gray-700">Nama Stasiun</label>
                 <div @click.stop="openFilterDropdown('station')"
-                     class="mt-1 w-full p-3 border border-gray-300 rounded-xl cursor-pointer flex justify-between items-center bg-white transition duration-150"
-                     :class="{'ring-2 ring-lime-500 border-lime-500 shadow-md': isStationFilterOpen}"
-                >
+                  class="mt-1 w-full p-3 border border-gray-300 rounded-xl cursor-pointer flex justify-between items-center bg-white transition duration-150"
+                  :class="{ 'ring-2 ring-lime-500 border-lime-500 shadow-md': isStationFilterOpen }">
                   <span class="text-gray-800">{{ selectedStation || 'Semua Stasiun' }}</span>
-                  <svg class="w-5 h-5 text-gray-500 transform" :class="{'rotate-180': isStationFilterOpen}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                  <svg class="w-5 h-5 text-gray-500 transform" :class="{ 'rotate-180': isStationFilterOpen }" fill="none"
+                    stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                  </svg>
                 </div>
-                <div v-if="isStationFilterOpen" @click.stop class="absolute top-full mt-2 w-full bg-white rounded-xl shadow-2xl border border-gray-100 z-30 left-0 max-h-48 overflow-y-auto">
+                <div v-if="isStationFilterOpen" @click.stop
+                  class="absolute top-full mt-2 w-full bg-white rounded-xl shadow-2xl border border-gray-100 z-30 left-0 max-h-48 overflow-y-auto">
                   <div class="py-2">
-                    <div @click="selectFilterOption('station', '')" class="px-4 py-2 hover:bg-lime-50 cursor-pointer transition-colors duration-150 text-gray-800">
+                    <div @click="selectFilterOption('station', '')"
+                      class="px-4 py-2 hover:bg-lime-50 cursor-pointer transition-colors duration-150 text-gray-800">
                       Semua Stasiun
                     </div>
-                    <div v-for="name in stationOptions" :key="name"
-                         @click="selectFilterOption('station', name)"
-                         class="px-4 py-2 hover:bg-lime-50 cursor-pointer transition-colors duration-150"
-                         :class="{'bg-lime-50 font-semibold text-lime-800': selectedStation === name}">
+                    <div v-for="name in stationOptions" :key="name" @click="selectFilterOption('station', name)"
+                      class="px-4 py-2 hover:bg-lime-50 cursor-pointer transition-colors duration-150"
+                      :class="{ 'bg-lime-50 font-semibold text-lime-800': selectedStation === name }">
                       {{ name }}
                     </div>
                   </div>
@@ -566,21 +576,24 @@ const filteredStations = computed(() => {
               <div class="relative">
                 <label for="filter-month" class="block text-sm font-medium text-gray-700">Bulan</label>
                 <div @click.stop="openFilterDropdown('month')"
-                     class="mt-1 w-full p-3 border border-gray-300 rounded-xl cursor-pointer flex justify-between items-center bg-white transition duration-150"
-                     :class="{'ring-2 ring-lime-500 border-lime-500 shadow-md': isMonthFilterOpen}"
-                >
+                  class="mt-1 w-full p-3 border border-gray-300 rounded-xl cursor-pointer flex justify-between items-center bg-white transition duration-150"
+                  :class="{ 'ring-2 ring-lime-500 border-lime-500 shadow-md': isMonthFilterOpen }">
                   <span class="text-gray-800">{{ selectedMonth || 'Semua Bulan' }}</span>
-                  <svg class="w-5 h-5 text-gray-500 transform" :class="{'rotate-180': isMonthFilterOpen}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                  <svg class="w-5 h-5 text-gray-500 transform" :class="{ 'rotate-180': isMonthFilterOpen }" fill="none"
+                    stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                  </svg>
                 </div>
-                <div v-if="isMonthFilterOpen" @click.stop class="absolute top-full mt-2 w-full bg-white rounded-xl shadow-2xl border border-gray-100 z-30 left-0 max-h-48 overflow-y-auto">
+                <div v-if="isMonthFilterOpen" @click.stop
+                  class="absolute top-full mt-2 w-full bg-white rounded-xl shadow-2xl border border-gray-100 z-30 left-0 max-h-48 overflow-y-auto">
                   <div class="py-2">
-                    <div @click="selectFilterOption('month', '')" class="px-4 py-2 hover:bg-lime-50 cursor-pointer transition-colors duration-150 text-gray-800">
+                    <div @click="selectFilterOption('month', '')"
+                      class="px-4 py-2 hover:bg-lime-50 cursor-pointer transition-colors duration-150 text-gray-800">
                       Semua Bulan
                     </div>
-                    <div v-for="month in monthOptions" :key="month"
-                         @click="selectFilterOption('month', month)"
-                         class="px-4 py-2 hover:bg-lime-50 cursor-pointer transition-colors duration-150"
-                         :class="{'bg-lime-50 font-semibold text-lime-800': selectedMonth === month}">
+                    <div v-for="month in monthOptions" :key="month" @click="selectFilterOption('month', month)"
+                      class="px-4 py-2 hover:bg-lime-50 cursor-pointer transition-colors duration-150"
+                      :class="{ 'bg-lime-50 font-semibold text-lime-800': selectedMonth === month }">
                       {{ month }}
                     </div>
                   </div>
@@ -590,52 +603,71 @@ const filteredStations = computed(() => {
               <div class="relative">
                 <label for="filter-year" class="block text-sm font-medium text-gray-700">Tahun</label>
                 <div @click.stop="openFilterDropdown('year')"
-                     class="mt-1 w-full p-3 border border-gray-300 rounded-xl cursor-pointer flex justify-between items-center bg-white transition duration-150"
-                     :class="{'ring-2 ring-lime-500 border-lime-500 shadow-md': isYearFilterOpen}"
-                >
+                  class="mt-1 w-full p-3 border border-gray-300 rounded-xl cursor-pointer flex justify-between items-center bg-white transition duration-150"
+                  :class="{ 'ring-2 ring-lime-500 border-lime-500 shadow-md': isYearFilterOpen }">
                   <span class="text-gray-800">{{ selectedYear || 'Semua Tahun' }}</span>
-                  <svg class="w-5 h-5 text-gray-500 transform" :class="{'rotate-180': isYearFilterOpen}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                  <svg class="w-5 h-5 text-gray-500 transform" :class="{ 'rotate-180': isYearFilterOpen }" fill="none"
+                    stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                  </svg>
                 </div>
-                <div v-if="isYearFilterOpen" @click.stop class="absolute top-full mt-2 w-full bg-white rounded-xl shadow-2xl border border-gray-100 z-30 left-0 max-h-48 overflow-y-auto">
+                <div v-if="isYearFilterOpen" @click.stop
+                  class="absolute top-full mt-2 w-full bg-white rounded-xl shadow-2xl border border-gray-100 z-30 left-0 max-h-48 overflow-y-auto">
                   <div class="py-2">
-                    <div @click="selectFilterOption('year', '')" class="px-4 py-2 hover:bg-lime-50 cursor-pointer transition-colors duration-150 text-gray-800">
+                    <div @click="selectFilterOption('year', '')"
+                      class="px-4 py-2 hover:bg-lime-50 cursor-pointer transition-colors duration-150 text-gray-800">
                       Semua Tahun
                     </div>
-                    <div v-for="year in yearOptions" :key="year"
-                         @click="selectFilterOption('year', year)"
-                         class="px-4 py-2 hover:bg-lime-50 cursor-pointer transition-colors duration-150"
-                         :class="{'bg-lime-50 font-semibold text-lime-800': selectedYear === year}">
+                    <div v-for="year in yearOptions" :key="year" @click="selectFilterOption('year', year)"
+                      class="px-4 py-2 hover:bg-lime-50 cursor-pointer transition-colors duration-150"
+                      :class="{ 'bg-lime-50 font-semibold text-lime-800': selectedYear === year }">
                       {{ year }}
                     </div>
                   </div>
                 </div>
               </div>
             </div>
-            </div>
+          </div>
 
           <div class="overflow-x-auto max-h-96 overflow-y-auto">
             <table class="min-w-full divide-y divide-gray-200">
               <thead class="bg-gray-50 sticky top-0">
                 <tr>
-                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID/Nama SPKLU</th>
-                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pemilik/Brand</th>
-                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Domisili</th>
-                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Periode</th>
-                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sesi (Total)</th>
-                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pendapatan Bersih</th>
-                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status Pengiriman</th>
+                  <th scope="col"
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID/Nama SPKLU
+                  </th>
+                  <th scope="col"
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pemilik/Brand
+                  </th>
+                  <th scope="col"
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Domisili</th>
+                  <th scope="col"
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Periode</th>
+                  <th scope="col"
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sesi (Total)
+                  </th>
+                  <th scope="col"
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pendapatan
+                    Bersih</th>
+                  <th scope="col"
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status
+                    Pengiriman</th>
                 </tr>
               </thead>
               <tbody class="bg-white divide-y divide-gray-200">
-                <tr v-for="report in enrichedOperatorReports" :key="report.id" class="hover:bg-gray-50 transition-colors duration-150">
-                  <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">[{{ report.stationId }}] {{ report.stationName }}</td>
+                <tr v-for="report in enrichedOperatorReports" :key="report.id"
+                  class="hover:bg-gray-50 transition-colors duration-150">
+                  <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">[{{ report.stationId }}] {{
+                    report.stationName }}</td>
                   <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ report.brand }}</td>
                   <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ report.city }}</td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ report.week }} ({{ report.month }} {{ report.year }})</td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ report.week }} ({{ report.month }} {{
+                    report.year }})</td>
                   <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ report.totalSessions }}</td>
                   <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ report.revenue }}</td>
                   <td class="px-6 py-4 whitespace-nowrap">
-                    <span :class="{'px-2 inline-flex text-xs leading-5 font-semibold rounded-full': true, 'bg-green-100 text-green-800': report.status === 'Terkirim', 'bg-yellow-100 text-yellow-800': report.status === 'Tertunda'}">
+                    <span
+                      :class="{ 'px-2 inline-flex text-xs leading-5 font-semibold rounded-full': true, 'bg-green-100 text-green-800': report.status === 'Terkirim', 'bg-yellow-100 text-yellow-800': report.status === 'Tertunda' }">
                       {{ report.status }}
                     </span>
                   </td>
@@ -654,101 +686,72 @@ const filteredStations = computed(() => {
       <div class="p-6">
         <h3 class="text-lg font-medium text-gray-900 mb-4">{{ isEditing ? 'Edit Stasiun' : 'Tambah Stasiun Baru' }}</h3>
         <form @submit.prevent="isEditing ? updateStation() : addStation()" class="space-y-4">
-          
+
           <div class="grid grid-cols-2 gap-4">
             <div>
               <label for="city" class="block text-sm font-medium text-gray-700">Domisili (Kota)</label>
-              <input
-                v-model="newStation.city"
-                type="text"
-                id="city"
+              <input v-model="newStation.city" type="text" id="city"
                 class="mt-1 block w-full border-gray-300 rounded-xl shadow-sm focus:ring-lime-500 focus:border-lime-500"
-                placeholder="Contoh: Batam Center"
-                required
-              />
+                placeholder="Contoh: Batam Center" required />
             </div>
             <div>
               <label for="email" class="block text-sm font-medium text-gray-700">Email Pemilik (Brand)</label>
-              <input
-                v-model="newStation.email"
-                type="email"
-                id="email"
+              <input v-model="newStation.email" type="email" id="email"
                 class="mt-1 block w-full border-gray-300 rounded-xl shadow-sm focus:ring-lime-500 focus:border-lime-500"
-                placeholder="Contoh: pemilik@brand.com"
-                required
-              />
+                placeholder="Contoh: pemilik@brand.com" required />
             </div>
           </div>
 
           <div class="grid grid-cols-2 gap-4">
             <div>
-            <label for="name" class="block text-sm font-medium text-gray-700">Nama Stasiun</label>
-            <input
-              v-model="newStation.name"
-              type="text"
-              id="name"
-              class="mt-1 block w-full border-gray-300 rounded-xl shadow-sm focus:ring-lime-500 focus:border-lime-500"
-              required
-            />
+              <label for="name" class="block text-sm font-medium text-gray-700">Nama Stasiun</label>
+              <input v-model="newStation.name" type="text" id="name"
+                class="mt-1 block w-full border-gray-300 rounded-xl shadow-sm focus:ring-lime-500 focus:border-lime-500"
+                required />
             </div>
 
             <div>
-            <label for="operationalHours" class="block text-sm font-medium text-gray-700">Jam Operasional</label>
-            <input
-              v-model="newStation.operationalHours"
-              type="text"
-              id="operationalHours"
-              class="mt-1 block w-full border-gray-300 rounded-xl shadow-sm focus:ring-lime-500 focus:border-lime-500"
-              placeholder="Contoh: 24/7 atau 08:00-20:00"
-              required
-            />
+              <label for="operationalHours" class="block text-sm font-medium text-gray-700">Jam Operasional</label>
+              <input v-model="newStation.operationalHours" type="text" id="operationalHours"
+                class="mt-1 block w-full border-gray-300 rounded-xl shadow-sm focus:ring-lime-500 focus:border-lime-500"
+                placeholder="Contoh: 24/7 atau 08:00-20:00" required />
             </div>
           </div>
 
           <div class="grid grid-cols-2 gap-4">
             <div>
               <label for="latitude" class="block text-sm font-medium text-gray-700">Latitude</label>
-              <input
-                v-model="newStation.latitude"
-                type="number"
-                step="0.0001"
-                id="latitude"
+              <input v-model="newStation.latitude" type="number" step="0.0001" id="latitude"
                 class="mt-1 block w-full border-gray-300 rounded-xl shadow-sm focus:ring-lime-500 focus:border-lime-500"
-                required
-              />
+                required />
             </div>
             <div>
               <label for="longitude" class="block text-sm font-medium text-gray-700">Longitude</label>
-              <input
-                v-model="newStation.longitude"
-                type="number"
-                step="0.0001"
-                id="longitude"
+              <input v-model="newStation.longitude" type="number" step="0.0001" id="longitude"
                 class="mt-1 block w-full border-gray-300 rounded-xl shadow-sm focus:ring-lime-500 focus:border-lime-500"
-                required
-              />
+                required />
             </div>
           </div>
-          
-          
+
+
 
           <div class="space-y-4 pt-4 border-t border-gray-200">
             <h4 class="text-base font-medium text-gray-900">Detail Charger</h4>
-            <div v-for="(charger, index) in newStation.chargers" :key="index" class="p-4 border border-gray-200 rounded-xl bg-gray-50 space-y-3">
+            <div v-for="(charger, index) in newStation.chargers" :key="index"
+              class="p-4 border border-gray-200 rounded-xl bg-gray-50 space-y-3">
               <div class="flex justify-between items-center">
                 <p class="text-sm font-semibold text-gray-700">Port {{ charger.port }}</p>
-                <button v-if="newStation.chargers.length > 1" type="button" @click="removeChargerBlock(index)" class="text-red-500 hover:text-red-700 text-sm">Hapus Port</button>
+                <button v-if="newStation.chargers.length > 1" type="button" @click="removeChargerBlock(index)"
+                  class="text-red-500 hover:text-red-700 text-sm">Hapus Port</button>
               </div>
 
               <div class="grid grid-cols-2 gap-3">
                 <div>
-                  <label :for="'chargerType-' + index" class="block text-xs font-medium text-gray-700">Jenis Charger (Tipe)</label>
-                  <select
-                    v-model="charger.type"
-                    :id="'chargerType-' + index"
+                  <label :for="'chargerType-' + index" class="block text-xs font-medium text-gray-700">Jenis Charger
+                    (Tipe)</label>
+                  <select v-model="charger.type" :id="'chargerType-' + index"
                     class="mt-1 block w-full border-gray-300 rounded-xl shadow-sm text-sm focus:ring-lime-500 focus:border-lime-500"
-                    required
-                  >
+                    required>
                     <option value="">Pilih Tipe</option>
                     <option value="Regular">Regular</option>
                     <option value="Fast">Fast</option>
@@ -757,70 +760,49 @@ const filteredStations = computed(() => {
                 </div>
                 <div>
                   <label :for="'power-' + index" class="block text-xs font-medium text-gray-700">Daya (kW)</label>
-                  <input
-                    v-model="charger.power"
-                    type="number"
-                    step="0.1"
-                    :id="'power-' + index"
+                  <input v-model="charger.power" type="number" step="0.1" :id="'power-' + index"
                     class="mt-1 block w-full border-gray-300 rounded-xl shadow-sm text-sm focus:ring-lime-500 focus:border-lime-500"
-                    placeholder="Contoh: 7.4 atau 50"
-                    required
-                  />
+                    placeholder="Contoh: 7.4 atau 50" required />
                 </div>
               </div>
 
               <div class="grid grid-cols-2 gap-3">
                 <div>
-                  <label :for="'connector-' + index" class="block text-xs font-medium text-gray-700">Jenis Konektor Fisik</label>
-                  <input
-                    v-model="charger.connector"
-                    type="text"
-                    :id="'connector-' + index"
+                  <label :for="'connector-' + index" class="block text-xs font-medium text-gray-700">Jenis Konektor
+                    Fisik</label>
+                  <input v-model="charger.connector" type="text" :id="'connector-' + index"
                     class="mt-1 block w-full border-gray-300 rounded-xl shadow-sm text-sm focus:ring-lime-500 focus:border-lime-500"
-                    placeholder="Contoh: Type 2, CCS"
-                    required
-                  />
+                    placeholder="Contoh: Type 2, CCS" required />
                 </div>
                 <div>
                   <label :for="'price-' + index" class="block text-xs font-medium text-gray-700">Harga/kWh</label>
-                  <input
-                    v-model="charger.price"
-                    type="number"
-                    :id="'price-' + index"
+                  <input v-model="charger.price" type="number" :id="'price-' + index"
                     class="mt-1 block w-full border-gray-300 rounded-xl shadow-sm text-sm focus:ring-lime-500 focus:border-lime-500"
-                    placeholder="Contoh: 800"
-                    required
-                  />
+                    placeholder="Contoh: 800" required />
                 </div>
               </div>
             </div>
 
             <div class="text-right">
-              <button
-              type="button"
-              @click="addChargerBlock"
-              class="inline-flex items-right text-[#00C853] font-semibold text-sm hover:text-[#00A142] transition duration-300"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
-              </svg>
-               Tambah Port Charger
-            </button>
+              <button type="button" @click="addChargerBlock"
+                class="inline-flex items-right text-[#00C853] font-semibold text-sm hover:text-[#00A142] transition duration-300">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd"
+                    d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+                    clip-rule="evenodd" />
+                </svg>
+                Tambah Port Charger
+              </button>
             </div>
           </div>
-          
+
           <div class="flex justify-end space-x-3 pt-4 border-t border-gray-200">
-            <button
-              type="button"
-              @click="closeModal"
-              class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
-            >
+            <button type="button" @click="closeModal"
+              class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
               Batal
             </button>
-            <button
-              type="submit"
-              class="px-4 py-2 bg-[#00C853] text-white rounded-md text-sm font-medium hover:bg-[#00A142]"
-            >
+            <button type="submit"
+              class="px-4 py-2 bg-[#00C853] text-white rounded-md text-sm font-medium hover:bg-[#00A142]">
               {{ isEditing ? 'Update Stasiun' : 'Tambah Stasiun' }}
             </button>
           </div>

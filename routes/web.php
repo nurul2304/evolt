@@ -68,6 +68,16 @@ Route::get('/map-results', function () {
     return Inertia::render('user/MapResults');
     })->name('map.results');
 
+Route::get('/status-charging', function (\Illuminate\Http\Request $request) {
+    return Inertia::render('user/Statuscharging', [
+        'stationName' => $request->query('stationName', 'Unknown Station'),
+        'location' => $request->query('location', 'Unknown Location'),
+        'duration' => $request->query('duration', 0),
+        'power' => $request->query('power', '-'),
+        'type' => $request->query('type', '-'),
+    ]);
+    })->name('status.charging');
+
 
 
 // Halaman Admin

@@ -110,18 +110,15 @@ const cancellations = ref([
 </script>
 
 <template>
-<div class="min-h-screen bg-gray-50 font-inter flex flex-col text-gray-700">
+  <div class="min-h-screen bg-gray-50 font-inter flex flex-col text-gray-700">
 
     <!-- Navbar -->
     <Navbar />
 
     <main
-      class="flex-1 max-w-7xl mx-auto w-full p-6 flex flex-col md:flex-row md:space-x-8 space-y-6 md:space-y-0"
-    >
+      class="flex-1 max-w-7xl mx-auto w-full p-6 flex flex-col md:flex-row md:space-x-8 space-y-6 md:space-y-0 pt-24">
       <!-- SIDEBAR -->
-      <aside
-        class="w-full md:w-64 bg-white shadow-lg rounded-xl p-5 flex flex-col h-fit md:sticky md:top-6"
-      >
+      <aside class="w-full md:w-64 bg-white shadow-lg rounded-xl p-5 flex flex-col h-fit md:sticky md:top-6">
         <div class="mb-6">
           <div class="text-lg font-bold">{{ user.name }}</div>
           <div class="text-sm text-gray-500">{{ user.email }}</div>
@@ -129,20 +126,17 @@ const cancellations = ref([
 
         <nav class="flex flex-col space-y-1">
           <template v-for="item in menuItems" :key="item.id">
-            <button
-              @click="
-                item.id === 'logout'
-                  ? handleLogout()
-                  : (activeMenu = item.id)
-              "
-              :class="[
+            <button @click="
+              item.id === 'logout'
+                ? handleLogout()
+                : (activeMenu = item.id)
+              " :class="[
                 'flex items-center gap-2 px-3 py-2 rounded-lg text-left transition-all duration-150',
                 item.id === activeMenu
                   ? 'bg-[#DAE200] text-dark font-semibold'
                   : 'text-gray-700 hover:bg-gray-100',
                 item.id === 'logout' ? 'text-red-500 hover:bg-red-50' : '',
-              ]"
-            >
+              ]">
               <span>{{ item.icon }}</span>
               <span>{{ item.label }}</span>
             </button>
@@ -158,26 +152,20 @@ const cancellations = ref([
 
           <!-- Tabs -->
           <div class="flex flex-wrap gap-3 mb-6 border-b pb-4">
-            <button
-              @click="activeTab = 'informasi_akun'"
-              :class="[
-                'px-4 py-2 rounded-lg font-semibold transition',
-                activeTab === 'informasi_akun'
-                  ? getColorClass('accent')
-                  : 'hover:bg-gray-100',
-              ]"
-            >
+            <button @click="activeTab = 'informasi_akun'" :class="[
+              'px-4 py-2 rounded-lg font-semibold transition',
+              activeTab === 'informasi_akun'
+                ? getColorClass('accent')
+                : 'hover:bg-gray-100',
+            ]">
               Informasi Akun
             </button>
-            <button
-              @click="activeTab = 'informasi_personal'"
-              :class="[
-                'px-4 py-2 rounded-lg font-semibold transition',
-                activeTab === 'informasi_personal'
-                  ? getColorClass('accent')
-                  : 'hover:bg-gray-100',
-              ]"
-            >
+            <button @click="activeTab = 'informasi_personal'" :class="[
+              'px-4 py-2 rounded-lg font-semibold transition',
+              activeTab === 'informasi_personal'
+                ? getColorClass('accent')
+                : 'hover:bg-gray-100',
+            ]">
               Informasi Personal
             </button>
           </div>
@@ -188,36 +176,23 @@ const cancellations = ref([
               <div class="grid sm:grid-cols-2 gap-4">
                 <div>
                   <label class="text-sm font-medium">Nama Lengkap</label>
-                  <input
-                    v-model="accountForm.name"
-                    type="text"
-                    class="w-full border rounded-lg p-3"
-                  />
+                  <input v-model="accountForm.name" type="text" class="w-full border rounded-lg p-3" />
                 </div>
                 <div>
                   <label class="text-sm font-medium">Jenis Kelamin</label>
-                  <select
-                    v-model="accountForm.gender"
-                    class="w-full border rounded-lg p-3"
-                  >
+                  <select v-model="accountForm.gender" class="w-full border rounded-lg p-3">
                     <option>Laki-laki</option>
                     <option>Perempuan</option>
                   </select>
                 </div>
                 <div>
                   <label class="text-sm font-medium">Tanggal Lahir</label>
-                  <input
-                    v-model="accountForm.birthDate"
-                    placeholder="DD/MM/YYYY"
-                    class="w-full border rounded-lg p-3"
-                  />
+                  <input v-model="accountForm.birthDate" placeholder="DD/MM/YYYY"
+                    class="w-full border rounded-lg p-3" />
                 </div>
                 <div>
                   <label class="text-sm font-medium">Jenis ID</label>
-                  <select
-                    v-model="accountForm.idType"
-                    class="w-full border rounded-lg p-3"
-                  >
+                  <select v-model="accountForm.idType" class="w-full border rounded-lg p-3">
                     <option>KTP</option>
                     <option>SIM</option>
                     <option>Paspor</option>
@@ -225,18 +200,11 @@ const cancellations = ref([
                 </div>
                 <div>
                   <label class="text-sm font-medium">Nomor ID</label>
-                  <input
-                    v-model="accountForm.idNumber"
-                    type="text"
-                    class="w-full border rounded-lg p-3"
-                  />
+                  <input v-model="accountForm.idNumber" type="text" class="w-full border rounded-lg p-3" />
                 </div>
                 <div>
                   <label class="text-sm font-medium">Kota Asal</label>
-                  <select
-                    v-model="accountForm.city"
-                    class="w-full border rounded-lg p-3"
-                  >
+                  <select v-model="accountForm.city" class="w-full border rounded-lg p-3">
                     <option>Kota Batam</option>
                     <option>Jakarta</option>
                     <option>Surabaya</option>
@@ -244,13 +212,10 @@ const cancellations = ref([
                 </div>
               </div>
 
-              <button
-                type="submit"
-                :class="[
-                  'mt-6 px-6 py-2.5 font-bold rounded-lg shadow-md',
-                  getColorClass('accent'),
-                ]"
-              >
+              <button type="submit" :class="[
+                'mt-6 px-6 py-2.5 font-bold rounded-lg shadow-md',
+                getColorClass('accent'),
+              ]">
                 Simpan Perubahan
               </button>
             </div>
@@ -258,29 +223,17 @@ const cancellations = ref([
             <div v-else-if="activeTab === 'informasi_personal'" class="space-y-4">
               <div>
                 <label class="text-sm font-medium">Email</label>
-                <input
-                  v-model="personalForm.email"
-                  type="email"
-                  class="w-full border rounded-lg p-3"
-                  disabled
-                />
+                <input v-model="personalForm.email" type="email" class="w-full border rounded-lg p-3" disabled />
               </div>
               <div>
                 <label class="text-sm font-medium">Nomor HP</label>
-                <input
-                  v-model="personalForm.phone"
-                  type="text"
-                  class="w-full border rounded-lg p-3"
-                />
+                <input v-model="personalForm.phone" type="text" class="w-full border rounded-lg p-3" />
               </div>
 
-              <button
-                type="submit"
-                :class="[
-                  'mt-4 px-6 py-2.5 font-bold rounded-lg shadow-md',
-                  getColorClass('accent'),
-                ]"
-              >
+              <button type="submit" :class="[
+                'mt-4 px-6 py-2.5 font-bold rounded-lg shadow-md',
+                getColorClass('accent'),
+              ]">
                 Simpan
               </button>
             </div>
@@ -331,32 +284,17 @@ const cancellations = ref([
           <form @submit.prevent="changePassword" class="space-y-3 max-w-md">
             <div>
               <label class="text-sm font-medium">Kata Sandi Saat Ini</label>
-              <input
-                type="password"
-                v-model="passwordForm.current"
-                class="w-full border p-3 rounded mt-1"
-              />
+              <input type="password" v-model="passwordForm.current" class="w-full border p-3 rounded mt-1" />
             </div>
             <div>
               <label class="text-sm font-medium">Kata Sandi Baru</label>
-              <input
-                type="password"
-                v-model="passwordForm.password"
-                class="w-full border p-3 rounded mt-1"
-              />
+              <input type="password" v-model="passwordForm.password" class="w-full border p-3 rounded mt-1" />
             </div>
             <div>
               <label class="text-sm font-medium">Konfirmasi Kata Sandi</label>
-              <input
-                type="password"
-                v-model="passwordForm.confirm"
-                class="w-full border p-3 rounded mt-1"
-              />
+              <input type="password" v-model="passwordForm.confirm" class="w-full border p-3 rounded mt-1" />
             </div>
-            <button
-              type="submit"
-              class="px-4 py-2 rounded bg-[#00C853] text-white font-semibold"
-            >
+            <button type="submit" class="px-4 py-2 rounded bg-[#00C853] text-white font-semibold">
               Simpan
             </button>
           </form>
@@ -366,11 +304,12 @@ const cancellations = ref([
 
     <!-- Footer -->
     <Footer />
-</div>
+  </div>
 </template>
 
 <style>
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap");
+
 .font-inter {
   font-family: "Inter", sans-serif;
 }

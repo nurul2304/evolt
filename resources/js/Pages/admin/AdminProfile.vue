@@ -122,46 +122,46 @@ const partners = ref([
 
 // Dummy data for operator reports
 const operatorReports = ref([
-  {
-    id: 1,
-    stationName: 'EV Station Batam Centre',
-    week: 'Minggu 1 (Januari)',
-    totalSessions: 150,
-    revenue: 'Rp 2,500,000',
-    status: 'Dikirim',
-  },
-  {
-    id: 2,
-    stationName: 'EV Station Nagoya',
-    week: 'Minggu 1 (Januari)',
-    totalSessions: 120,
-    revenue: 'Rp 1,800,000',
-    status: 'Dikirim',
-  },
-  {
-    id: 3,
-    stationName: 'EV Station Sekupang',
-    week: 'Minggu 1 (Januari)',
-    totalSessions: 80,
-    revenue: 'Rp 1,200,000',
-    status: 'Pending',
-  },
-  {
-    id: 4,
-    stationName: 'EV Station Tanjung Uncang',
-    week: 'Minggu 1 (Januari)',
-    totalSessions: 95,
-    revenue: 'Rp 1,500,000',
-    status: 'Dikirim',
-  },
-  {
-    id: 5,
-    stationName: 'EV Station Batu Aji',
-    week: 'Minggu 1 (Januari)',
-    totalSessions: 110,
-    revenue: 'Rp 1,700,000',
-    status: 'Dikirim',
-  },
+    {
+        id: 1,
+        stationName: 'EV Station Batam Centre',
+        week: 'Minggu 1 (Januari)',
+        totalSessions: 150,
+        revenue: 'Rp 2,500,000',
+        status: 'Dikirim',
+    },
+    {
+        id: 2,
+        stationName: 'EV Station Nagoya',
+        week: 'Minggu 1 (Januari)',
+        totalSessions: 120,
+        revenue: 'Rp 1,800,000',
+        status: 'Dikirim',
+    },
+    {
+        id: 3,
+        stationName: 'EV Station Sekupang',
+        week: 'Minggu 1 (Januari)',
+        totalSessions: 80,
+        revenue: 'Rp 1,200,000',
+        status: 'Pending',
+    },
+    {
+        id: 4,
+        stationName: 'EV Station Tanjung Uncang',
+        week: 'Minggu 1 (Januari)',
+        totalSessions: 95,
+        revenue: 'Rp 1,500,000',
+        status: 'Dikirim',
+    },
+    {
+        id: 5,
+        stationName: 'EV Station Batu Aji',
+        week: 'Minggu 1 (Januari)',
+        totalSessions: 110,
+        revenue: 'Rp 1,700,000',
+        status: 'Dikirim',
+    },
 ]);
 
 // Data untuk line chart penghasilan mingguan operator
@@ -169,7 +169,7 @@ const lineChartData = reactive({
     labels: ['Minggu 1', 'Minggu 2', 'Minggu 3', 'Minggu 4'],
     datasets: [{
         label: 'Penghasilan Operator (Rp)',
-        data: [2500000, 1800000, 1200000, 1500000], 
+        data: [2500000, 1800000, 1200000, 1500000],
         borderColor: '#4CAF50',
         backgroundColor: 'rgba(76, 175, 80, 0.2)',
         tension: 0.1,
@@ -191,7 +191,7 @@ const chartOptions = reactive({
         },
         tooltip: {
             callbacks: {
-                label: function(context) {
+                label: function (context) {
                     const label = context.dataset.label || '';
                     const value = context.parsed.y;
                     return `${label}: Rp ${value.toLocaleString('id-ID')}`;
@@ -203,7 +203,7 @@ const chartOptions = reactive({
         y: {
             beginAtZero: true,
             ticks: {
-                callback: function(value) {
+                callback: function (value) {
                     return 'Rp ' + value.toLocaleString('id-ID');
                 }
             }
@@ -217,207 +217,228 @@ const chartOptions = reactive({
 </script>
 
 <template>
-<div class="min-h-screen bg-gray-50 font-inter flex flex-col text-gray-700">
+    <div class="min-h-screen bg-gray-50 font-inter flex flex-col text-gray-700">
 
-    <Navbar />
+        <Navbar />
 
-    <main class="flex-1 max-w-7xl mx-auto w-full p-6 flex flex-col md:flex-row md:space-x-8 space-y-6 md:space-y-0">
+        <main
+            class="flex-1 max-w-7xl mx-auto w-full p-6 flex flex-col md:flex-row md:space-x-8 space-y-6 md:space-y-0 pt-24">
 
-        <aside class="w-full md:w-64 bg-white shadow-lg rounded-xl p-5 flex flex-col h-fit md:sticky md:top-6">
-            <div class="mb-6 leading-tight">
-                <div class="text-lg font-bold text-gray-900">{{ user.name }}</div>
-                <div class="text-sm text-gray-500">{{ user.email }}</div>
-            </div>
-
-            <nav class="flex flex-col w-full space-y-1">
-                <template v-for="item in menuItems" :key="item.id">
-                    <button
-                        @click="item.id === 'logout' ? handleLogout() : activeMenu = item.id"
-                        class="flex items-center w-full px-3 py-2 rounded-lg text-left transition-all duration-150"
-                        :class="[
-                            item.id === activeMenu
-                                ? 'bg-[#DAE200] text-dark font-semibold'
-                                : 'text-gray-700 hover:bg-gray-100',
-                            // Menangani tombol keluar secara visual
-                            item.id === 'logout' ? 'text-red-500 hover:bg-red-50' : ''
-                        ]"
-                    >
-                        <component :is="item.icon" class="w-5 h-5 mr-3"
-                            :class="[item.id === activeMenu ? 'text-purple-600' : 'text-gray-500',
-                                    item.id === 'logout' ? 'text-red-500' : '']" />
-                        <span class="truncate">{{ item.label }}</span>
-                    </button>
-                </template>
-            </nav>
-        </aside>
-
-        <section class="flex-1 bg-white shadow-xl rounded-xl p-8">
-
-            <div v-if="activeMenu === 'account'">
-                <div class="mb-8">
-                    <h1 class="text-2xl font-bold text-gray-900">{{ activeTab === 'informasi_akun' ? 'Detail Akun' : 'Ubah Kata Sandi' }}</h1>
-                    <p class="text-gray-500 text-sm mt-1">
-                        {{ activeTab === 'informasi_akun' ? 'Kelola informasi akun dan data personal Anda.' : 'Perbarui kata sandi Anda untuk menjaga keamanan akun.' }}
-                    </p>
+            <aside class="w-full md:w-64 bg-white shadow-lg rounded-xl p-5 flex flex-col h-fit md:sticky md:top-24">
+                <div class="mb-6 leading-tight">
+                    <div class="text-lg font-bold text-gray-900">{{ user.name }}</div>
+                    <div class="text-sm text-gray-500">{{ user.email }}</div>
                 </div>
 
-                <div class="flex flex-col md:flex-row md:justify-between md:items-center pb-4 mb-6 border-b border-gray-200">
-                    <div class="flex flex-wrap gap-4 items-center">
-                        <button
-                            @click="activeTab = 'informasi_akun'"
-                            :class="['flex items-center justify-center w-full md:w-auto gap-2 py-2 px-4 font-semibold rounded-lg transition duration-150',
-                                    activeTab === 'informasi_akun' ? getColorClass('accent') : 'text-gray-500 hover:bg-gray-100']">
-                            Informasi Akun
+                <nav class="flex flex-col w-full space-y-1">
+                    <template v-for="item in menuItems" :key="item.id">
+                        <button @click="item.id === 'logout' ? handleLogout() : activeMenu = item.id"
+                            class="flex items-center w-full px-3 py-2 rounded-lg text-left transition-all duration-150"
+                            :class="[
+                                item.id === activeMenu
+                                    ? 'bg-[#DAE200] text-dark font-semibold'
+                                    : 'text-gray-700 hover:bg-gray-100',
+                                // Menangani tombol keluar secara visual
+                                item.id === 'logout' ? 'text-red-500 hover:bg-red-50' : ''
+                            ]">
+                            <component :is="item.icon" class="w-5 h-5 mr-3" :class="[item.id === activeMenu ? 'text-purple-600' : 'text-gray-500',
+                            item.id === 'logout' ? 'text-red-500' : '']" />
+                            <span class="truncate">{{ item.label }}</span>
                         </button>
-                        <button
-                            @click="activeTab = 'ubah_kata_sandi'"
-                            :class="['flex items-center justify-center w-full md:w-auto gap-2 py-2 px-4 font-semibold rounded-lg transition duration-150',
+                    </template>
+                </nav>
+            </aside>
+
+            <section class="flex-1 bg-white shadow-xl rounded-xl p-8">
+
+                <div v-if="activeMenu === 'account'">
+                    <div class="mb-8">
+                        <h1 class="text-2xl font-bold text-gray-900">{{ activeTab === 'informasi_akun' ? 'Detail Akun' : 'Ubah Kata Sandi' }}</h1>
+                        <p class="text-gray-500 text-sm mt-1">{{ activeTab === 'informasi_akun' ? 'Kelola informasi akun dan data personal Anda.' : 'Perbarui kata sandi Anda untuk menjaga keamanan akun.' }}</p>
+                    </div>
+
+                    <div
+                        class="flex flex-col md:flex-row md:justify-between md:items-center pb-4 mb-6 border-b border-gray-200">
+                        <div class="flex flex-wrap gap-4 items-center">
+                            <button @click="activeTab = 'informasi_akun'"
+                                :class="['flex items-center justify-center w-full md:w-auto gap-2 py-2 px-4 font-semibold rounded-lg transition duration-150',
+                                    activeTab === 'informasi_akun' ? getColorClass('accent') : 'text-gray-500 hover:bg-gray-100']">
+                                Informasi Akun
+                            </button>
+                            <button @click="activeTab = 'ubah_kata_sandi'"
+                                :class="['flex items-center justify-center w-full md:w-auto gap-2 py-2 px-4 font-semibold rounded-lg transition duration-150',
                                     activeTab === 'ubah_kata_sandi' ? getColorClass('accent') : 'text-gray-500 hover:bg-gray-100']">
-                            Ubah Kata Sandi
+                                Ubah Kata Sandi
+                            </button>
+                        </div>
+
+                        <button type="button"
+                            @click.prevent="activeTab === 'informasi_akun' ? submitProfile() : changePassword()"
+                            :class="['mt-4 md:mt-0 w-full md:w-auto px-6 py-2.5 text-sm font-bold rounded-lg transition duration-150 ease-in-out shadow-md', getColorClass('accent')]">
+                            {{ activeTab === 'informasi_akun' ? 'SIMPAN PERUBAHAN' : 'SIMPAN KATA SANDI' }}
                         </button>
                     </div>
 
-                    <button 
-                        type="button" 
-                        @click.prevent="activeTab === 'informasi_akun' ? submitProfile() : changePassword()"
-                        :class="['mt-4 md:mt-0 w-full md:w-auto px-6 py-2.5 text-sm font-bold rounded-lg transition duration-150 ease-in-out shadow-md', getColorClass('accent')]">
-                        {{ activeTab === 'informasi_akun' ? 'SIMPAN PERUBAHAN' : 'SIMPAN KATA SANDI' }}
-                    </button>
-                </div>
+                    <form @submit.prevent="activeTab === 'informasi_akun' ? submitProfile() : changePassword()"
+                        id="profile-form" class="space-y-6">
 
-                <form @submit.prevent="activeTab === 'informasi_akun' ? submitProfile() : changePassword()" id="profile-form" class="space-y-6">
+                        <div v-if="activeTab === 'informasi_akun'">
+                            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                <div class="col-span-1">
+                                    <label class="flex items-center text-sm font-medium text-gray-700 mb-1">
+                                        <IconUserSmall class="w-4 h-4 mr-1 text-green-600" /> Nama Lengkap
+                                    </label>
+                                    <input type="text" v-model="accountForm.name"
+                                        class="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-1  focus:ring-lime-500 focus:border-lime-500 transition duration-150" />
+                                </div>
 
-                    <div v-if="activeTab === 'informasi_akun'">
-                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                            <div class="col-span-1">
-                                <label class="flex items-center text-sm font-medium text-gray-700 mb-1">
-                                    <IconUserSmall class="w-4 h-4 mr-1 text-green-600" /> Nama Lengkap
-                                </label>
-                                <input type="text" v-model="accountForm.name" class="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-1  focus:ring-lime-500 focus:border-lime-500 transition duration-150" />
+                                <div class="col-span-1">
+                                    <label class="flex items-center text-sm font-medium text-gray-700 mb-1">
+                                        <IconCalendar class="w-4 h-4 mr-1 text-purple-600" /> Tanggal Lahir
+                                    </label>
+                                    <input type="text" v-model="accountForm.birthDate" placeholder="DD/MM/YYYY"
+                                        class="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-1  focus:ring-lime-500 focus:border-lime-500  transition duration-150" />
+                                </div>
+
+                                <div class="col-span-1">
+                                    <label class="flex items-center text-sm font-bold text-gray-700 mb-2">
+                                        <IconMail class="w-4 h-4 mr-1 text-green-600" /> Alamat Email
+                                    </label>
+                                    <input type="email" v-model="personalForm.email" disabled
+                                        class="w-full border border-gray-300 rounded-lg p-3 bg-gray-50 focus:outline-none focus:ring-1  focus:ring-lime-500 focus:border-lime-500  transition duration-150" />
+                                </div>
+
+                                <div class="col-span-1">
+                                    <label class="flex items-center text-sm font-bold text-gray-700 mb-2">
+                                        <IconPhone class="w-4 h-4 mr-1 text-green-600" /> Nomor Handphone
+                                    </label>
+                                    <input type="text" v-model="accountForm.phone"
+                                        class="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-1  focus:ring-lime-500 focus:border-lime-500  transition duration-150" />
+                                </div>
                             </div>
 
-                            <div class="col-span-1">
-                                <label class="flex items-center text-sm font-medium text-gray-700 mb-1">
-                                    <IconCalendar class="w-4 h-4 mr-1 text-purple-600" /> Tanggal Lahir
-                                </label>
-                                <input type="text" v-model="accountForm.birthDate" placeholder="DD/MM/YYYY" class="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-1  focus:ring-lime-500 focus:border-lime-500  transition duration-150" />
-                            </div>
-
-                            <div class="col-span-1">
-                                <label class="flex items-center text-sm font-bold text-gray-700 mb-2">
-                                    <IconMail class="w-4 h-4 mr-1 text-green-600" /> Alamat Email
-                                </label>
-                                <input type="email" v-model="personalForm.email" disabled class="w-full border border-gray-300 rounded-lg p-3 bg-gray-50 focus:outline-none focus:ring-1  focus:ring-lime-500 focus:border-lime-500  transition duration-150" />
-                            </div>
-
-                            <div class="col-span-1">
-                                <label class="flex items-center text-sm font-bold text-gray-700 mb-2">
-                                    <IconPhone class="w-4 h-4 mr-1 text-green-600" /> Nomor Handphone
-                                </label>
-                                <input type="text" v-model="accountForm.phone" class="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-1  focus:ring-lime-500 focus:border-lime-500  transition duration-150" />
+                            <div
+                                :class="['mt-8 p-6 rounded-lg shadow-inner', 'bg-yellow-50 border border-yellow-200 text-yellow-800']">
+                                <div class="flex items-start gap-3">
+                                    <IconLockOpen class="w-6 h-6 text-yellow-700 flex-shrink-0 mt-1" />
+                                    <div>
+                                        <h4 class="font-bold text-yellow-800">Privasi & Keamanan Data</h4>
+                                        <p class="text-sm text-yellow-700 mt-1">
+                                            Data personal Anda dienkripsi dan hanya digunakan untuk verifikasi identitas
+                                            serta
+                                            keperluan transaksi.
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
-                        <div :class="['mt-8 p-6 rounded-lg shadow-inner', 'bg-yellow-50 border border-yellow-200 text-yellow-800']">
-                            <div class="flex items-start gap-3">
-                                <IconLockOpen class="w-6 h-6 text-yellow-700 flex-shrink-0 mt-1"/>
+                        <div v-else-if="activeTab === 'ubah_kata_sandi'">
+                            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+
+                                <div class="col-span-1">
+                                    <label for="current_password"
+                                        class="text-sm font-bold text-gray-700 mb-1 block">Kata Sandi Saat
+                                        Ini</label>
+                                    <input type="password" id="current_password" v-model="passwordForm.current"
+                                        class="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-1 focus:ring-lime-500 focus:border-lime-500 transition duration-150" />
+                                </div>
+
+                                <div class="col-span-1">
+                                    <label for="new_password" class="text-sm font-bold text-gray-700 mb-1 block">Kata
+                                        Sandi
+                                        Baru</label>
+                                    <input type="password" id="new_password" v-model="passwordForm.password"
+                                        class="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-1 focus:ring-lime-500 focus:border-lime-500 transition duration-150" />
+                                </div>
+
+                                <div class="col-span-full">
+                                    <label for="new_password_confirmation"
+                                        class="text-sm font-bold text-gray-700 mb-1 block">Konfirmasi Kata Sandi
+                                        Baru</label>
+                                    <input type="password" id="new_password_confirmation" v-model="passwordForm.confirm"
+                                        class="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-1 focus:ring-lime-500 focus:border-lime-500 transition duration-150" />
+                                </div>
+
+                            </div>
+
+                            <p class="text-sm text-gray-500 mt-4">
+                                Tips: Gunakan kombinasi huruf besar, huruf kecil, angka, dan simbol.
+                            </p>
+
+                            <div class="mt-6 bg-green-50 border border-green-200 rounded-xl p-5 flex items-start gap-4">
+                                <IconLockOpen class="w-6 h-6 text-green-700 flex-shrink-0 mt-1" />
                                 <div>
-                                    <h4 class="font-bold text-yellow-800">Privasi & Keamanan Data</h4>
-                                    <p class="text-sm text-yellow-700 mt-1">
-                                        Data personal Anda dienkripsi dan hanya digunakan untuk verifikasi identitas serta keperluan transaksi.
+                                    <h3 class="font-bold text-green-800">Akun Anda Terlindungi</h3>
+                                    <p class="text-sm text-green-700 mt-1">
+                                        Kedua metode verifikasi aktif. Kami merekomendasikan untuk mengubah kata sandi
+                                        secara
+                                        berkala
+                                        dan mengaktifkan autentikasi dua faktor untuk keamanan maksimal.
                                     </p>
                                 </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div v-else-if="activeTab === 'ubah_kata_sandi'">
-                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-
-                            <div class="col-span-1">
-                                <label for="current_password" class="text-sm font-bold text-gray-700 mb-1 block">Kata Sandi Saat Ini</label>
-                                <input type="password" id="current_password" v-model="passwordForm.current" class="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-1 focus:ring-lime-500 focus:border-lime-500 transition duration-150" />
-                            </div>
-
-                            <div class="col-span-1">
-                                <label for="new_password" class="text-sm font-bold text-gray-700 mb-1 block">Kata Sandi Baru</label>
-                                <input type="password" id="new_password" v-model="passwordForm.password" class="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-1 focus:ring-lime-500 focus:border-lime-500 transition duration-150" />
-                            </div>
-
-                            <div class="col-span-full"> 
-                                <label for="new_password_confirmation" class="text-sm font-bold text-gray-700 mb-1 block">Konfirmasi Kata Sandi Baru</label>
-                                <input type="password" id="new_password_confirmation" v-model="passwordForm.confirm" class="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-1 focus:ring-lime-500 focus:border-lime-500 transition duration-150" />
-                            </div>
-                            
-                        </div>
-
-                        <p class="text-sm text-gray-500 mt-4">
-                            Tips: Gunakan kombinasi huruf besar, huruf kecil, angka, dan simbol.
-                        </p>
-
-                        <div class="mt-6 bg-green-50 border border-green-200 rounded-xl p-5 flex items-start gap-4">
-                            <IconLockOpen class="w-6 h-6 text-green-700 flex-shrink-0 mt-1"/>
-                            <div>
-                                <h3 class="font-bold text-green-800">Akun Anda Terlindungi</h3>
-                                <p class="text-sm text-green-700 mt-1">
-                                    Kedua metode verifikasi aktif. Kami merekomendasikan untuk mengubah kata sandi secara berkala
-                                    dan mengaktifkan autentikasi dua faktor untuk keamanan maksimal.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-
-                </form>
-            </div>
-            
-            <div v-else>
-                <div v-if="activeMenu === 'dashboard'">
-                    <h2 class="text-xl font-bold mb-6">Chart</h2>
-                    <div class="bg-white p-6 rounded-lg shadow-md border">
-                        <h4 class="text-lg font-semibold mb-4 text-center">Penghasilan Operator Mingguan</h4>
-                        <LineChart :chartData="lineChartData" :chartOptions="chartOptions" />
-                    </div>
+                    </form>
                 </div>
 
-                <div v-else-if="activeMenu === 'orders'">
-                    <h2 class="text-xl font-bold mb-6">Daftar Pesanan</h2>
-                    <div class="space-y-3">
-                        <div v-for="o in orders" :key="o.id" class="p-4 border rounded-lg flex justify-between items-center">
-                            <div>
-                                <div class="font-semibold">{{ o.title }}</div>
-                                <div class="text-xs text-gray-500">{{ o.date }} - {{ o.user }}</div>
+                <div v-else>
+                    <div v-if="activeMenu === 'dashboard'">
+                        <h2 class="text-xl font-bold mb-6">Chart</h2>
+                        <div class="bg-white p-6 rounded-lg shadow-md border">
+                            <h4 class="text-lg font-semibold mb-4 text-center">Penghasilan Operator Mingguan</h4>
+                            <LineChart :chartData="lineChartData" :chartOptions="chartOptions" />
+                        </div>
+                    </div>
+
+                    <div v-else-if="activeMenu === 'orders'">
+                        <h2 class="text-xl font-bold mb-6">Daftar Pesanan</h2>
+                        <div class="space-y-3">
+                            <div v-for="o in orders" :key="o.id"
+                                class="p-4 border rounded-lg flex justify-between items-center">
+                                <div>
+                                    <div class="font-semibold">{{ o.title }}</div>
+                                    <div class="text-xs text-gray-500">{{ o.date }} - {{ o.user }}</div>
+                                </div>
+                                <div class="text-sm font-semibold"
+                                    :class="o.status === 'Selesai' ? 'text-green-600' : 'text-yellow-600'">{{ o.status
+                                    }}</div>
                             </div>
-                            <div class="text-sm font-semibold" :class="o.status === 'Selesai' ? 'text-green-600' : 'text-yellow-600'">{{ o.status }}</div>
+                        </div>
+                    </div>
+
+                    <div v-else-if="activeMenu === 'partners'">
+                        <h2 class="text-xl font-bold mb-4">List Partner</h2>
+                        <div class="space-y-3">
+                            <div v-for="p in partners" :key="p.id"
+                                class="p-4 border rounded-lg flex justify-between items-center">
+                                <div>
+                                    <div class="font-semibold">{{ p.name }}</div>
+                                    <div class="text-sm text-gray-600">{{ p.location }}</div>
+                                </div>
+                                <div class="text-sm font-semibold"
+                                    :class="p.status === 'Active' ? 'text-green-600' : 'text-red-600'">{{ p.status }}
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
+            </section>
+        </main>
 
-                <div v-else-if="activeMenu === 'partners'">
-                    <h2 class="text-xl font-bold mb-4">List Partner</h2>
-                    <div class="space-y-3">
-                        <div v-for="p in partners" :key="p.id" class="p-4 border rounded-lg flex justify-between items-center">
-                            <div>
-                                <div class="font-semibold">{{ p.name }}</div>
-                                <div class="text-sm text-gray-600">{{ p.location }}</div>
-                            </div>
-                            <div class="text-sm font-semibold" :class="p.status === 'Active' ? 'text-green-600' : 'text-red-600'">{{ p.status }}</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <Footer />
-</div>
+        <Footer />
+    </div>
 </template>
 
 <style>
 /* Memuat font Inter untuk estetika yang lebih baik */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+
 .font-inter {
     font-family: 'Inter', sans-serif;
 }
+
 input[disabled] {
     background-color: #f9fafb !important;
     color: #4b5563 !important;
